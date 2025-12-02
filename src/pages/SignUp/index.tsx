@@ -1,7 +1,9 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-import styles from "./styles.module.css";
+import styles from "./SignUp.module.css";
 
+import AuthButton from "../../components/Button";
+import AuthInput from "../../components/AuthInput";
 import Logo from "../../assets/logo-if.png";
 
 export default function Cadastro() {
@@ -42,17 +44,15 @@ export default function Cadastro() {
           </p>
           <hr className={styles.divider} />
           <form className={styles.form} onSubmit={handleSubmit}>
-            <label>Matricula:</label>
-            <input name="matricula" onChange={handleChange} />
-            <label>Senha:</label>
-            <input type="password" name="senha" onChange={handleChange} />
-            <label>Repetir Senha:</label>
-            <input
-              type="password"
+            <AuthInput label="Matricula:" name="matricula" onChange={handleChange} />
+            <AuthInput label="Senha:" name="senha" type="password" onChange={handleChange} />
+            <AuthInput
+              label="Repetir Senha:"
               name="repetirSenha"
+              type="password"
               onChange={handleChange}
             />
-            <button type="submit">Cadastrar</button>
+            <AuthButton text="Cadastrar" />
           </form>
         </div>
       </div>
