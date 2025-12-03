@@ -1,0 +1,17 @@
+.button {
+  margin-top: 20px;
+  background: #359830;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: "Inter", sans-serif;
+  width: 100%;
+}
+
+.button:hover {
+  background: #2d7a28;
+}

@@ -1,0 +1,29 @@
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.group label {
+  font-size: 18px;
+  color: #333;
+  font-family: "Inter", sans-serif;
+}
+
+.group input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+  transition: 0.4s;
+}
+
+.group input:focus {
+  outline: none;
+  color: #000000;
+  border: 1px solid #359830;
+  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
