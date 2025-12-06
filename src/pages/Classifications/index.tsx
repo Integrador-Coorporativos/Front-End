@@ -8,6 +8,7 @@ import Performance from "../../assets/perfomance-icon.png";
 import Frequency from "../../assets/frequency-icon.png";
 import Uniform from "../../assets/uniform-icon.png";
 import Behavior from "../../assets/behavior-icon.png";
+import Footer from "../../components/Footer";
 
 export default function Classifications () {
     const cards = [
@@ -115,6 +116,7 @@ export default function Classifications () {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }
