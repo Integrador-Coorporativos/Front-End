@@ -1,0 +1,107 @@
+.footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #262627;
+    padding: 20px;
+    color: white;
+    margin-top: 50px;
+    padding-left: 8%;
+    padding-right: 8%;
+}
+
+.footer .left {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+}
+
+.footer .sadt {
+    font-size: 30px;
+    font-weight: 400;
+}
+
+.footer .subtitulo {
+    font-size: 18px;
+    line-height: 18px;
+    opacity: 0.85;
+    margin-top: -15px;
+}
+
+
+.footer .ifRow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer .ifText {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    opacity: 0.85;
+    margin-top: 15px;
+}
+
+.footer .logo {
+    width: 60px;
+    margin-left: -5px;
+}
+
+.footer .links {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.footer .links h4 {
+    margin-bottom: 10px;
+    font-size: 20px;
+    font-weight: 500;
+    margin-left: -10px;
+}
+
+.footer .linkItem_1 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.footer .linkItem_2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.footer .linkItem_1 img {
+    width: 30px;
+}
+.footer .linkItem_2 img {
+    width: 30px;
+    margin-left: 75px;
+}
+
+.Insta_p {
+    margin: 0 auto;
+    font-size: 16px;
+    opacity: 0.9;
+}
+
+a {
+    text-decoration: none;
+    color: #ffffff;
+}
+
+a:hover {
+    color: #e2e2e2;
+    text-decoration: none;
+    transition: 0.4s;
+}
+
+.right {
+    margin-top: 65px;
+}
