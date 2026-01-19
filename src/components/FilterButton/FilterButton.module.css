@@ -4,20 +4,24 @@
     border-radius: 6px;
     cursor: pointer;
 
-    display: flex;
-    justify-content: center;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
 
-    margin-right: 20px;
-    padding: 5px;
+    width: fit-content;
+    max-width: max-content;
+
+    padding: 6px 10px;
+    box-sizing: border-box;
 
     transition: all 0.2s ease-in-out;
 }
 
+
 .text {
     color: #000000;
-    font-size: 18px;
+    font-size: 16px;
     font-family: "Inter", sans-serif;
-    font-weight: 500;
-    margin-left: 5px;
+    margin-left: 6px;
+    white-space: nowrap;
 }

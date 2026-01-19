@@ -4,6 +4,7 @@ import styles from "./MyClasses.module.css";
 import FilterButton from "../../components/FilterButton";
 import ListClassCard from "../../components/ListClassCard";
 import Pagination from "../../components/Pagination";
+import Footer from "../../components/Footer";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -60,6 +61,7 @@ export default function SelecionarTurmas() {
           />
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -27,8 +27,9 @@ export const router = createBrowserRouter([
     path: "/minhas-turmas",
     element: < MinhasTurmas />,
   },
+  {
     path: "/classificacoes",
-    element: <Classifications />
+    element: <Classifications />,
   },
   {
     path: "/detalhes_turma",

@@ -1,14 +1,15 @@
 .container {
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .containerList {
     display: flex;
     flex-direction: column;
+    align-self: center;
 
-    border: 1px solid #359830;
+    border: 2px solid #359830; 
+    border-radius: 8px;
     width: 100%;
     height: auto;
     max-width: 1200px;
@@ -38,10 +39,13 @@
 .containerTurno {
     width: 100%;
     display: flex;
-    justify-content: flex-end; 
-    padding-right: 25px;      
-    margin-top: 20px;         
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 32px 0;
+    box-sizing: border-box;
 }
+
 
 .containerCards {
     display: grid;
@@ -57,8 +61,8 @@
 
 .paginationWrapper {
     display: flex;
-    justify-content: center;
-    padding: 16px 0;
-
+    justify-content: flex-end;
+    padding: 16px 32px;
     margin-top: auto;
-}   
+    box-sizing: border-box;
+}

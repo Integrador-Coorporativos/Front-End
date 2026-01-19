@@ -1,9 +1,8 @@
 .pagination {
     display: flex;
-    justify-content: center;
     align-items: center;
     gap: 6px;
-    margin: 20px 0;
+    margin: 0;
 }
 
 .page {
@@ -23,7 +22,7 @@
     color: #359830;
 }
 
-.active {
+.page.active {
     background: #359830;
     color: white;
     border-color: #359830;
