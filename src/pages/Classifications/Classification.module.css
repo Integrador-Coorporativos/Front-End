@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+.highlightsContainer {
+    background: #ffffff;
+    border: 2px solid #359830; 
+    border-radius: 8px;
+    padding: 20px 30px;
+    margin: 20px auto;
+    width: 81%;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.title {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #000;
+    font-family: "Inter", sans-serif;
+    border-bottom: 1px solid #cccccc;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+}
+
+@media (max-width: 900px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 13px;
+    box-shadow: 0 2px 6px rgba(16, 10, 10, 0.15);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e0e0e0;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cardIcon {
+    width: 30px;
+    height: 24px;
+}
+
+.cardTitle {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: #000;
+    font-family: "Inter", sans-serif;
+    
+}
+
+.cardSubtitle {
+    font-size: 1.1rem;
+    color: #000;
+    margin-top: 2px;
+    font-weight: 700;
+    font-family: "Inter", sans-serif;
+}
+
+.cardNota {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #000;
+    font-family: "Inter", sans-serif;
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center;
+    margin-top: 5px;
+}
+
+
+
+
+/* Classification */
+
+.classificationContainer {
+    margin-top: 40px;
+    width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.sectionTitle {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #000;
+    margin-top: -5px;
+    border-bottom: 1px solid #cccccc;
+}
+
+.box {
+    background: #fff;
+    border: 2px solid #2e7d32;
+    border-radius: 8px;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.topBar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.searchInput {
+    width: 400px;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filterLabel {
+    font-weight: 500;
+}
+
+.select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    border-radius: 4px;
+}
+
+.table th, .table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    color: #454545;
+}
+
+.table th, .table td:hover {
+    color: #000;
+    transition: 0.4s;
+}
+
+.table th {
+    background: #f5f5f5;
+    font-weight: 400;
+    color: #000000;
+    transition: 0.4s;
+}
+
+.table tbody tr:hover {
+    background: #f9f9f9;
+    color: #000000;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    flex-direction: row-reverse;
+}
+
+.pagination button {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #000000;
+}
+
+.pagination .active {
+    background: #2e7d32;
+    color: white;
+    border-color: #2e7d32;
+}
+
+.pagination span {
+    color: #555;
+}

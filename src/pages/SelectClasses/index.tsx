@@ -1,3 +1,4 @@
+import Footer from "../../components/Footer";
 import { useState } from "react";
 import Header from "../../components/Header";
 import styles from "./SelectClasses.module.css";
@@ -60,6 +61,7 @@ export default function SelecionarTurmas() {
           />
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
