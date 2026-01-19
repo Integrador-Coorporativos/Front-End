@@ -12,7 +12,7 @@ export default function Header() {
 
             <div className={styles.right}>
                 <nav className={styles.nav}>
-                    <a href="/turmas">Minhas Turmas</a>
+                    <a href="/minhas-turmas">Minhas Turmas</a>
                     <a href="/classificacoes">Classificações</a>
                 </nav>
 
