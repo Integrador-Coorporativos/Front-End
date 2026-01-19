@@ -2,6 +2,8 @@ import { createBrowserRouter } from "react-router-dom";
 import Cadastro from "../pages/SignUp";
 import Login from "../pages/Login";
 import SelecionarTurmas from "../pages/SelectClasses";
+import Classifications from "../pages/Classifications";
+import DetailsClass from "../pages/DetailsClass";
 
 export const router = createBrowserRouter([
   {
@@ -20,4 +22,12 @@ export const router = createBrowserRouter([
     path: "/selecionar-turmas",
     element: < SelecionarTurmas />,
   },
+  {
+    path: "/classificacoes",
+    element: <Classifications />
+  },
+  {
+    path: "/detalhes_turma",
+    element: <DetailsClass />
+  }
 ]);

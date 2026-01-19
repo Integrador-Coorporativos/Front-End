@@ -1,0 +1,33 @@
+.container {
+  background: #ffffff; 
+  border-bottom: 1px solid #e5e5e5; 
+  padding: 3px 60px; 
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 13px;
+  color: #777;
+  white-space: nowrap; 
+  overflow-x: hidden;
+  transition: 0.4s;
+}
+
+.link {
+  color: #777;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: rgb(0, 0, 0);
+}
+
+.separator {
+  color: #bbb;
+  font-size: 12px;
+  margin: 0 18px;
+}
+
+.current {
+  font-weight: 400;
+  color: #333;
+}
