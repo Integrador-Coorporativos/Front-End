@@ -1,0 +1,55 @@
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.page {
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: white;
+    color: #000000;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.page:hover {
+    background: #FFFFFF;
+    border-color: #359830;
+    color: #359830;
+}
+
+.page.active {
+    background: #359830;
+    color: white;
+    border-color: #359830;
+}
+
+.nav {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: white;
+    color:#000000;
+    cursor: pointer;
+}
+
+.nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.ellipsis {
+    padding: 0 6px;
+    color: #999;
+    font-weight: 500;
+}
+
+.page,
+.nav {
+    transition: background 0.15s ease, color 0.15s ease;
+}

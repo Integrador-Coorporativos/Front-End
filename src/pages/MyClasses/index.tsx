@@ -1,10 +1,10 @@
-import Footer from "../../components/Footer";
 import { useState } from "react";
 import Header from "../../components/Header";
-import styles from "./SelectClasses.module.css";
+import styles from "./MyClasses.module.css";
 import FilterButton from "../../components/FilterButton";
-import ClassCard from "../../components/ClassCard";
+import ListClassCard from "../../components/ListClassCard";
 import Pagination from "../../components/Pagination";
+import Footer from "../../components/Footer";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -30,9 +30,9 @@ export default function SelecionarTurmas() {
     <div className={styles.container}>
       <Header />
 
-      <div className={styles.containerSelect}>
+      <div className={styles.containerList}>
         <div className={styles.containerText}>
-          <h2 className={styles.title}>Selecione suas turmas desse período</h2>
+          <h2 className={styles.title}>Minhas Turmas</h2>
           <h3 className={styles.subtitle}>Semestre: 2026.1</h3>
         </div>
 
@@ -43,7 +43,7 @@ export default function SelecionarTurmas() {
 
         <div className={styles.containerCards}>
           {currentItems.map((turma, index) => (
-            <ClassCard
+            <ListClassCard
               key={index}
               anoReferencia={turma.anoReferencia}
               ano={turma.ano}

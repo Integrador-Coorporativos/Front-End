@@ -3,7 +3,7 @@
     flex-direction: column;
 }
 
-.containerSelect {
+.containerList {
     display: flex;
     flex-direction: column;
     align-self: center;
@@ -45,6 +45,7 @@
     padding: 20px 32px 0;
     box-sizing: border-box;
 }
+
 
 .containerCards {
     display: grid;
