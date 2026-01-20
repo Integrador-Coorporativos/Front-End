@@ -1,4 +1,3 @@
-import React from "react";
 import Logo from "../../assets/logo-if-footer.png";
 import InstagramLogo from "../../assets/logo-insta-footer.png";
 import GoogleSalaLogo from "../../assets/logo-gsa-footer.png";
