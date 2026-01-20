@@ -1,36 +1,62 @@
-import Header from "../../components/Header";
-import BreadCrumb from "../../components/BreadCrumb";
-import styles from "./DetailsClass.module.css";
-import { useState } from "react";
+import Header from "../../components/Header"
+import BreadCrumb from "../../components/BreadCrumb"
+import styles from "./DetailsClass.module.css"
+import { useState } from "react"
 
-import Phone from "../../assets/logo-phone.png";
-import Participation from "../../assets/participation-icon.png";
-import Performance from "../../assets/perfomance-icon.png";
-import Frequency from "../../assets/frequency-icon.png";
-import Uniform from "../../assets/uniform-icon.png";
-import Behavior from "../../assets/behavior-icon.png";
-import Footer from "../../components/Footer";
+import Phone from "../../assets/logo-phone.png"
+import Participation from "../../assets/participation-icon.png"
+import Performance from "../../assets/perfomance-icon.png"
+import Frequency from "../../assets/frequency-icon.png"
+import Uniform from "../../assets/uniform-icon.png"
+import Behavior from "../../assets/behavior-icon.png"
+import Footer from "../../components/Footer"
 
-import RadarPerformanceChart from "../../components/RadarPerformanceChart";
+import RadarPerformanceChart from "../../components/RadarPerformanceChart"
 
 type Avaliacao = {
-  frequencia: number;
-  participacao: number;
-  fardamento: number;
-  desempenho: number;
-  comportamento: number;
-  usoCelular: number;
-};
+  frequencia: number
+  participacao: number
+  fardamento: number
+  desempenho: number
+  comportamento: number
+  usoCelular: number
+}
 
 type RatingProps = {
-  label: string;
-  campo: keyof Avaliacao;
-};
+  label: string
+  campo: keyof Avaliacao
+}
 
 type ChartData = {
-  label: string;
-  value: number;
-};
+  label: string
+  value: number
+}
+
+function calcularMediaGeral(
+  dataByYear: Record<string, ChartData[]>
+): ChartData[] {
+  const acumulado: Record<
+    string,
+    { total: number; count: number }
+  > = {}
+
+  Object.values(dataByYear).forEach((yearData) => {
+    yearData.forEach(({ label, value }) => {
+      if (!acumulado[label]) {
+        acumulado[label] = { total: 0, count: 0 }
+      }
+      acumulado[label].total += value
+      acumulado[label].count += 1
+    })
+  })
+
+  return Object.entries(acumulado).map(
+    ([label, { total, count }]) => ({
+      label,
+      value: Number((total / count).toFixed(1)),
+    })
+  )
+}
 
 export default function Classifications() {
   const cards = [
@@ -40,11 +66,15 @@ export default function Classifications() {
     { title: "Frequência", icon: Frequency },
     { title: "Fardamento", icon: Uniform },
     { title: "Comportamento", icon: Behavior },
-  ];
+  ]
 
-  const [activeTab, setActiveTab] = useState<"avaliar" | "grafico">("avaliar");
-  const [selectedYear, setSelectedYear] = useState("2025");
-  const years = ["2022", "2023", "2024", "2025"];
+  const [activeTab, setActiveTab] = useState<
+    "avaliar" | "grafico"
+  >("grafico")
+
+  const [selectedYear, setSelectedYear] = useState("Geral")
+
+  const years = ["Geral", "2022", "2023", "2024", "2025"]
 
   const chartDataByYear: Record<string, ChartData[]> = {
     "2022": [
@@ -79,7 +109,12 @@ export default function Classifications() {
       { label: "Fardamento", value: 4.5 },
       { label: "Uso do Celular", value: 4.2 },
     ],
-  };
+  }
+
+  const chartDataWithGeral: Record<string, ChartData[]> = {
+    Geral: calcularMediaGeral(chartDataByYear),
+    ...chartDataByYear,
+  }
 
   const [avaliacao, setAvaliacao] = useState<Avaliacao>({
     frequencia: 0,
@@ -88,14 +123,14 @@ export default function Classifications() {
     desempenho: 0,
     comportamento: 0,
     usoCelular: 0,
-  });
+  })
 
   const handleSelect = (campo: keyof Avaliacao, valor: number) => {
     setAvaliacao((prev) => ({
       ...prev,
       [campo]: valor,
-    }));
-  };
+    }))
+  }
 
   const Rating = ({ label, campo }: RatingProps) => (
     <div className={styles.ratingGroup}>
@@ -114,21 +149,19 @@ export default function Classifications() {
         ))}
       </div>
     </div>
-  );
+  )
 
   return (
     <div>
       <Header />
 
-      <div style={{ width: "100%", padding: "3px 0" }}>
-        <BreadCrumb
-          items={[
-            { label: "Página Inicial", to: "/" },
-            { label: "Classificações", to: "/classificacoes" },
-            { label: "Detalhes da Turma", to: "/detalhes_turma" },
-          ]}
-        />
-      </div>
+      <BreadCrumb
+        items={[
+          { label: "Página Inicial", to: "/" },
+          { label: "Classificações", to: "/classificacoes" },
+          { label: "Detalhes da Turma", to: "/detalhes_turma" },
+        ]}
+      />
 
       <div className={styles.container}>
         <h2 className={styles.titledc}>Detalhes da Turma</h2>
@@ -141,7 +174,9 @@ export default function Classifications() {
             <div key={index} className={styles.card}>
               <img src={card.icon} alt={card.title} />
               <div className={styles.cardInfo}>
-                <span className={styles.cardTitle}>{card.title}</span>
+                <span className={styles.cardTitle}>
+                  {card.title}
+                </span>
                 <strong className={styles.cardScore}>5.0</strong>
               </div>
               <span className={styles.rank}>#1</span>
@@ -174,7 +209,9 @@ export default function Classifications() {
                 <button
                   key={year}
                   className={
-                    selectedYear === year ? styles.filterActive : ""
+                    selectedYear === year
+                      ? styles.filterActive
+                      : ""
                   }
                   onClick={() => setSelectedYear(year)}
                 >
@@ -185,7 +222,7 @@ export default function Classifications() {
 
             <div className={styles.graphPlaceholder}>
               <RadarPerformanceChart
-                data={chartDataByYear[selectedYear]}
+                data={chartDataWithGeral[selectedYear]}
               />
             </div>
           </div>
@@ -214,34 +251,44 @@ export default function Classifications() {
         )}
       </div>
 
-      <div className={styles.commentsContainer}>
-        <h3 className={styles.commentsTitle}>Comentários</h3>
+      {activeTab === "avaliar" && (
+        <div className={styles.commentsContainer}>
+          <h3 className={styles.commentsTitle}>Comentários</h3>
 
-        <p className={styles.commentsClass}>Informática 4 Vespertino</p>
+          <p className={styles.commentsClass}>
+            Informática 4 Vespertino
+          </p>
 
-        <div className={styles.commentsList}>
-          <div className={styles.commentItem}>
-            <strong>Sergio Pérez</strong>
-            <span>21 nov. de 2025</span>
-            <p>Turma muito participativa.</p>
+          <div className={styles.commentsList}>
+            <div className={styles.commentItem}>
+              <strong>Sergio Pérez</strong>
+              <span>21 nov. de 2025</span>
+              <p>Turma muito participativa.</p>
+            </div>
+
+            <div className={styles.commentItem}>
+              <strong>Ana Silva</strong>
+              <span>22 nov. de 2025</span>
+              <p>
+                Bom desempenho geral, mas precisam melhorar a
+                frequência.
+              </p>
+            </div>
           </div>
 
-          <div className={styles.commentItem}>
-            <strong>Ana Silva</strong>
-            <span>22 nov. de 2025</span>
-            <p>
-              Bom desempenho geral, mas precisam melhorar a frequência.
-            </p>
+          <div className={styles.newComment}>
+            <input
+              type="text"
+              placeholder="Adicionar comentário..."
+            />
+            <button className={styles.postButton}>
+              Postar
+            </button>
           </div>
         </div>
-
-        <div className={styles.newComment}>
-          <input type="text" placeholder="Adicionar comentário..." />
-          <button className={styles.postButton}>Postar</button>
-        </div>
-      </div>
+      )}
 
       <Footer />
     </div>
-  );
+  )
 }
