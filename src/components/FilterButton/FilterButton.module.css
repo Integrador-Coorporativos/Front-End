@@ -1,0 +1,27 @@
+.buttonFilter {
+    background-color: #FFFFFF;
+    border: solid 1px #CCCCCC;
+    border-radius: 6px;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+    max-width: max-content;
+
+    padding: 6px 10px;
+    box-sizing: border-box;
+
+    transition: all 0.2s ease-in-out;
+}
+
+
+.text {
+    color: #000000;
+    font-size: 16px;
+    font-family: "Inter", sans-serif;
+    margin-left: 6px;
+    white-space: nowrap;
+}

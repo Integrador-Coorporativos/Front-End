@@ -2,7 +2,10 @@ import { createBrowserRouter } from "react-router-dom";
 import Cadastro from "../pages/SignUp";
 import Login from "../pages/Login";
 import SelecionarTurmas from "../pages/SelectClasses";
+import MinhasTurmas from "../pages/MyClasses";
 import Classifications from "../pages/Classifications";
+import DetailsClass from "../pages/DetailsClass";
+import ControlPanel from "../pages/ControlPanel";
 
 export const router = createBrowserRouter([
   {
@@ -22,7 +25,19 @@ export const router = createBrowserRouter([
     element: < SelecionarTurmas />,
   },
   {
+    path: "/minhas-turmas",
+    element: < MinhasTurmas />,
+  },
+  {
     path: "/classificacoes",
-    element: <Classifications />
+    element: <Classifications />,
+  },
+  {
+    path: "/detalhes_turma",
+    element: <DetailsClass />
+  },
+  {
+    path: "/painel_controle",
+    element: <ControlPanel />
   }
 ]);
