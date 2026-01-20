@@ -158,15 +158,13 @@ export default function Classifications() {
       <BreadCrumb
         items={[
           { label: "Página Inicial", to: "/" },
-          { label: "Classificações", to: "/classificacoes" },
-          { label: "Detalhes da Turma", to: "/detalhes_turma" },
+          { label: "Classificações", to: "/classificacao/:id" },
         ]}
       />
 
       <div className={styles.container}>
-        <h2 className={styles.titledc}>Detalhes da Turma</h2>
+        <p className={styles.titledc}>Informática 4º Vespertino <b>#1</b></p>
         <p className={styles.subtitledc}>
-          Informática 4º Vespertino <b>#1</b>
         </p>
 
         <div className={styles.cardsGrid}>

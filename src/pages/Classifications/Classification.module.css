@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
+/* ===============================
+   Destaques
+================================ */
+
 .highlightsContainer {
     background: #ffffff;
     border: 2px solid #359830; 
@@ -65,7 +69,6 @@
     font-weight: 400;
     color: #000;
     font-family: "Inter", sans-serif;
-    
 }
 
 .cardSubtitle {
@@ -90,10 +93,9 @@
     margin-top: 5px;
 }
 
-
-
-
-/* Classification */
+/* ===============================
+   Classificação
+================================ */
 
 .classificationContainer {
     margin-top: 40px;
@@ -155,6 +157,10 @@
     background: #fff;
 }
 
+/* ===============================
+   Tabela
+================================ */
+
 .table {
     width: 100%;
     border-collapse: collapse;
@@ -162,29 +168,43 @@
     border-radius: 4px;
 }
 
-.table th, .table td {
+.table th {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+    background: #f5f5f5;
+    font-weight: 400;
+    color: #000000;
+}
+
+.table td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: center;
     color: #454545;
+    transition: color 0.2s ease;
 }
 
-.table th, .table td:hover {
+/* ===============================
+   Linha clicável
+================================ */
+
+.clickableRow {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.clickableRow:hover {
+    background-color: #e9f6ee;
+}
+
+.clickableRow:hover td {
     color: #000;
-    transition: 0.4s;
 }
 
-.table th {
-    background: #f5f5f5;
-    font-weight: 400;
-    color: #000000;
-    transition: 0.4s;
-}
-
-.table tbody tr:hover {
-    background: #f9f9f9;
-    color: #000000;
-}
+/* ===============================
+   Paginação
+================================ */
 
 .pagination {
     display: flex;
