@@ -1,0 +1,75 @@
+/* Container Principal */
+.courses-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.courses-title {
+  color: #2f9e41; /* Verde IFRN */
+  border-left: 5px solid #2f9e41;
+  padding-left: 15px;
+  margin-bottom: 2rem;
+}
+
+/* Grid de Cursos */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Card Individual */
+.course-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.course-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  border-color: #2f9e41;
+}
+
+.course-name {
+  color: #333;
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.course-description {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.course-footer {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 0.75rem;
+}
+
+.course-id {
+  font-weight: bold;
+  color: #999;
+}
+
+.course-tag {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
