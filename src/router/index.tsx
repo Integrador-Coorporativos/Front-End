@@ -5,6 +5,7 @@ import SelecionarTurmas from "../pages/SelectClasses";
 import MinhasTurmas from "../pages/MyClasses";
 import Classifications from "../pages/Classifications";
 import DetailsClass from "../pages/DetailsClass";
+import ControlPanel from "../pages/ControlPanel";
 
 export const router = createBrowserRouter([
   {
@@ -34,5 +35,9 @@ export const router = createBrowserRouter([
   {
     path: "/detalhes_turma",
     element: <DetailsClass />
+  },
+  {
+    path: "/painel_controle",
+    element: <ControlPanel />
   }
 ]);
