@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import Header from "../../components/Header";
 import BreadCrumb from "../../components/BreadCrumb";
@@ -19,6 +20,7 @@ const ITEMS_PER_PAGE = 10;
 
 export default function Classifications() {
   const [currentPage, setCurrentPage] = useState(1);
+  const navigate = useNavigate();
 
   const cards = [
     { title: "Uso do Celular", icon: Phone },
@@ -32,7 +34,21 @@ export default function Classifications() {
   const totalItems = 200;
   const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
 
-  const data = Array.from({ length: totalItems });
+  const data = Array.from({ length: totalItems }).map((_, index) => ({
+    id: index + 1,
+    curso: "Informática",
+    turno: "Vespertino",
+    periodo: "4º",
+    notas: {
+      frequencia: "5.0",
+      fardamento: "5.0",
+      participacao: "5.0",
+      desempenho: "5.0",
+      celular: "5.0",
+      comportamento: "5.0",
+      total: "5.0",
+    },
+  }));
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentItems = data.slice(
@@ -46,10 +62,7 @@ export default function Classifications() {
 
       <div style={{ width: "100%", padding: "3px 0" }}>
         <BreadCrumb
-          items={[
-            { label: "Página Inicial", to: "/" },
-            { label: "Classificações", to: "/classificacoes" },
-          ]}
+          items={[{ label: "Página Inicial", to: "/" }]}
         />
       </div>
 
@@ -120,19 +133,25 @@ export default function Classifications() {
             </thead>
 
             <tbody>
-              {currentItems.map((_, idx) => (
-                <tr key={idx}>
+              {currentItems.map((item, idx) => (
+                <tr
+                  key={item.id}
+                  className={styles.clickableRow}
+                  onClick={() =>
+                    navigate(`/classificacao/${item.id}`)
+                  }
+                >
                   <td>{startIndex + idx + 1}</td>
-                  <td>Informática</td>
-                  <td>Vespertino</td>
-                  <td>4º</td>
-                  <td>5.0</td>
-                  <td>5.0</td>
-                  <td>5.0</td>
-                  <td>5.0</td>
-                  <td>5.0</td>
-                  <td>5.0</td>
-                  <td>5.0</td>
+                  <td>{item.curso}</td>
+                  <td>{item.turno}</td>
+                  <td>{item.periodo}</td>
+                  <td>{item.notas.frequencia}</td>
+                  <td>{item.notas.fardamento}</td>
+                  <td>{item.notas.participacao}</td>
+                  <td>{item.notas.desempenho}</td>
+                  <td>{item.notas.celular}</td>
+                  <td>{item.notas.comportamento}</td>
+                  <td>{item.notas.total}</td>
                 </tr>
               ))}
             </tbody>

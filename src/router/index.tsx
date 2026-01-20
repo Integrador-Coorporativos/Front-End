@@ -9,7 +9,7 @@ import DetailsClass from "../pages/DetailsClass";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <h1>Home</h1>,
+    element: <Classifications />,
   },
   {
     path: "/cadastro",
@@ -28,11 +28,7 @@ export const router = createBrowserRouter([
     element: < MinhasTurmas />,
   },
   {
-    path: "/classificacoes",
-    element: <Classifications />,
-  },
-  {
-    path: "/detalhes_turma",
+    path: "/classificacao/:id",
     element: <DetailsClass />
   }
 ]);
