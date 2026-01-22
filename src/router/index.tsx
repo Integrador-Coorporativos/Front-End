@@ -4,8 +4,9 @@ import Login from "../pages/Login";
 import SelecionarTurmas from "../pages/SelectClasses";
 import MinhasTurmas from "../pages/MyClasses";
 import Classifications from "../pages/Classifications";
-import DetailsClass from "../pages/DetailsClass";
+import Classificacoes from "../pages/RankingDetail"
 import ControlPanel from "../pages/ControlPanel";
+import ClassesDetail from "../pages/ClassesDetail";
 
 export const router = createBrowserRouter([
   {
@@ -30,10 +31,14 @@ export const router = createBrowserRouter([
   },
   {
     path: "/classificacao/:id",
-    element: <DetailsClass />
+    element: <Classificacoes />
   },
   {
     path: "/painel_controle",
     element: <ControlPanel />
+  },
+  {
+    path: "/turma",
+    element: <ClassesDetail />
   }
 ]);

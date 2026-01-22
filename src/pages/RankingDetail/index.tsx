@@ -1,6 +1,6 @@
 import Header from "../../components/Header"
 import BreadCrumb from "../../components/BreadCrumb"
-import styles from "./DetailsClass.module.css"
+import styles from "./RankingDetail.module.css"
 import { useState } from "react"
 
 import Phone from "../../assets/logo-phone.png"
