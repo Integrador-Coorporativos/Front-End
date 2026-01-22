@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { Student } from "@/types/Student";
 import styles from "./EditModal.module.css";
 
@@ -19,34 +19,57 @@ export default function EditModal({
 }: EditModalProps) {
   const [localAluno, setLocalAluno] = useState<Student>(aluno);
   const [isDirty, setIsDirty] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setLocalAluno(aluno);
     setIsDirty(false);
   }, [aluno]);
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     const iraValue = parseFloat(localAluno.ira.replace(",", "."));
     if (iraValue < 0.01 || iraValue > 99.99 || isNaN(iraValue)) {
       alert("IRA deve estar entre 0,01 e 99,99");
       return;
     }
-
     onSave(localAluno);
   };
 
+  const handleSelectCurso = (curso: string) => {
+    setLocalAluno({ ...localAluno, curso });
+    setIsDropdownOpen(false);
+    setIsDirty(true);
+  };
+
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modal}>
+    <div 
+      className={styles.modalOverlay} 
+      onClick={onClose}
+    >
+      <div 
+        className={styles.modal} 
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className={styles.h2_edit_modal}>Editar Aluno</h2>
 
         {isDirty && (
           <div className={styles.alertWarning}>
-           
             <h2 className={styles.h2_alert_message}>
               Existem alterações não salvas.
             </h2>
@@ -92,25 +115,33 @@ export default function EditModal({
 
           <label>
             Curso
-            <div className={styles.selectWrapper}>
+            <div className={styles.selectWrapper} ref={dropdownRef}>
               <input
                 readOnly
                 className={styles.customSelect}
                 value={localAluno.curso}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsDropdownOpen(!isDropdownOpen);
+                }}
               />
-              <div className={styles.optionsList}>
-                {cursos.map((curso) => (
-                  <div
-                    key={curso}
-                    className={styles.optionItem}
-                    onClick={() =>
-                      setLocalAluno({ ...localAluno, curso })
-                    }
-                  >
-                    {curso}
-                  </div>
-                ))}
-              </div>
+              {isDropdownOpen && (
+                <div className={styles.optionsList}>
+                  {cursos.map((curso) => (
+                    <div
+                      key={curso}
+                      className={styles.optionItem}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleSelectCurso(curso);
+                      }}
+                    >
+                      {curso}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </label>
 

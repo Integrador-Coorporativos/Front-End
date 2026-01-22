@@ -1,14 +1,24 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Header from "../../components/Header";
 import BreadCrumb from "../../components/BreadCrumb";
-import Footer from "../../components/Footer";
 import Pagination from "../../components/Pagination";
+import Footer from "../../components/Footer";
+
 import StudentTab from "@/components/StudentTab";
 import ProfessorTab from "../../components/ProfessorTab";
+import ClassesTab from "@/components/ClassesTab"; 
+import CoursesTab from "@/components/CoursesTab"; 
+
 import EditModal from "../../components/EditModalStudent";
 import EditModalProfessor from "../../components/EditModalProfessor";
+import EditModalCourses from "@/components/EditModalCourses";
+import EditModalClasses from "@/components/EditModalClasses";
+
 import type { Student } from "@/types/Student";
 import type { Professor } from "@/types/Professor";
+import type { Classes } from "@/types/Classes"; 
+import type { Courses } from "@/types/Courses";
+
 import styles from "./ControlPanel.module.css";
 import SadtIcon from "../../assets/logo-if.png";
 import TooltipIcon from "../../assets/tooltip-icon.png";
@@ -36,6 +46,50 @@ export default function ControlPanel() {
     })
   );
 
+  const turmas: Classes[] = [
+    {
+      curso: "Informática",
+      anoIngresso: 2023,
+      turno: "Vespertino",
+      alunos: 34,
+      repetentes: 3,
+    },
+    {
+      curso: "Química",
+      anoIngresso: 2022,
+      turno: "Matutino",
+      alunos: 28,
+      repetentes: 1,
+    },
+  ];
+
+  const cursos: Courses[] = [
+    {
+      curso: "Informática",
+      quantiTurmas: 8,
+      turno: "Matutino e Vespertino",
+      quantiAlunos: 91,
+    },
+    {
+      curso: "Apicultura",
+      quantiTurmas: 8,
+      turno: "Matutino e Vespertino",
+      quantiAlunos: 90,
+    },
+    {
+      curso: "Alimentos",
+      quantiTurmas: 8,
+      turno: "Matutino e Vespertino",
+      quantiAlunos: 89,
+    },
+    {
+      curso: "Analise e Desenvolvimento de Sistemas",
+      quantiTurmas: 4,
+      turno: "Vespertino",
+      quantiAlunos: 51,
+    }
+  ];
+
   const cursosDisponiveisTeste = [
     "Informática",
     "Apicultura",
@@ -45,6 +99,8 @@ export default function ControlPanel() {
     "Agroindustria",
   ];
 
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
   const [isAlunoModalOpen, setIsAlunoModalOpen] = useState(false);
   const [selectedAluno, setSelectedAluno] = useState<Student | null>(null);
 
@@ -53,13 +109,42 @@ export default function ControlPanel() {
     null
   );
 
+  const [selectedTurma, setSelectedTurma] = useState<Classes | null>(null);
+  const [isTurmaModalOpen, setIsTurmaModalOpen] = useState(false);
+
   const [currentPage, setCurrentPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [selectedCurso, setSelectedCurso] = useState<Courses | null>(null);
+  const [isCursoModalOpen, setIsCursoModalOpen] = useState(false);
+
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+  function handleClickOutside(event: MouseEvent) {
+    if (
+      filterRef.current &&
+      !filterRef.current.contains(event.target as Node)
+    ) {
+      setIsFilterOpen(false);
+    }
+  }
+
+  if (isFilterOpen) {
+    document.addEventListener("mousedown", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [isFilterOpen]);
 
   const totalPages =
     activeTab === "alunos"
       ? Math.ceil(alunos.length / ITEMS_PER_PAGE)
-      : Math.ceil(professores.length / ITEMS_PER_PAGE);
+      : activeTab === "professores"
+      ? Math.ceil(professores.length / ITEMS_PER_PAGE)
+      : 1;
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
@@ -147,7 +232,54 @@ export default function ControlPanel() {
                 placeholder="Buscar..."
                 className={styles.searchInput}
               />
-              <button className={styles.filterButton}>Personalizado</button>
+
+              <div className={styles.filterWrapper} ref={filterRef}>
+                <button
+                  className={styles.filterButton}
+                  onClick={() => setIsFilterOpen((prev) => !prev)}
+                >
+                  Personalizado
+                </button>
+
+                {isFilterOpen && activeTab === "alunos" && (
+                  <div className={styles.filterDropdown}>
+                    <div className={styles.filterContent}>
+                      <select>
+                        <option value="">Curso</option>
+                        {cursosDisponiveisTeste.map((curso) => (
+                          <option key={curso} value={curso}>
+                            {curso}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select>
+                        <option value="">Turno</option>
+                        <option value="Matutino">Matutino</option>
+                        <option value="Vespertino">Vespertino</option>
+                      </select>
+
+                      <select>
+                        <option value="">Período</option>
+                        <option value="1">1º</option>
+                        <option value="2">2º</option>
+                        <option value="3">3º</option>
+                      </select>
+
+                      <select>
+                        <option value="">Ano de Ingresso</option>
+                        <option value="2023">2023</option>
+                        <option value="2022">2022</option>
+                        <option value="2021">2021</option>
+                      </select>
+
+                      <button className={styles.applyFilterButton}>
+                        Aplicar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           <div className={styles.filterInfo}>
@@ -180,14 +312,27 @@ export default function ControlPanel() {
           )}
           {activeTab === "turmas" && (
             <div className={styles.tabContent}>
-              <h2>Turmas</h2>
+              <ClassesTab
+                turmas={turmas}
+                onEdit={(turma) => {
+                  setSelectedTurma(turma);
+                  setIsTurmaModalOpen(true);
+                }}
+              />
             </div>
           )}
           {activeTab === "cursos" && (
             <div className={styles.tabContent}>
-              <h2>Cursos</h2>
+              <CoursesTab
+                cursos={cursos}
+                onEdit={(curso) => {
+                  setSelectedCurso(curso);
+                  setIsCursoModalOpen(true);
+                }}
+              />
             </div>
           )}
+
           <div className={styles.paginationWrapper}>
             <div className={styles.downloadWrapper}>
               <button
@@ -238,6 +383,30 @@ export default function ControlPanel() {
           }}
         />
       )}
+      {selectedCurso && (
+      <EditModalCourses
+        curso={selectedCurso}
+        isOpen={isCursoModalOpen}
+        onClose={() => setIsCursoModalOpen(false)}
+        onSave={(cursoAtualizado) => {
+          console.log("Curso salvo:", cursoAtualizado);
+          setIsCursoModalOpen(false);
+        }}
+      />
+    )}
+
+    {selectedTurma && (
+      <EditModalClasses
+        turma={selectedTurma}
+        isOpen={isTurmaModalOpen}
+        onClose={() => setIsTurmaModalOpen(false)}
+        onSave={(turmaAtualizada) => {
+          console.log("Turma salva:", turmaAtualizada);
+          setIsTurmaModalOpen(false);
+        }}
+      />
+    )}
+
       <Footer />
     </div>
   );
