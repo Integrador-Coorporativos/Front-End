@@ -1,0 +1,68 @@
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.containerDetail {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+
+    border: 2px solid #359830; 
+    border-radius: 8px;
+    width: 95%;
+    height: auto;
+    max-width: 1200px;
+    min-height: 500px;
+
+    margin-top: 40px;
+    background-color: #FFFFFF;
+}
+
+.containerText {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ddd;
+    width: 95%;
+    margin: 0 auto;
+}
+
+.title {
+    color: #000;
+}
+
+.studentsList {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  width: 95%;
+  margin: 12px auto;
+}
+
+.containerFiltro {
+  display: flex;
+  justify-content: flex-end;
+  width: 95%;
+  margin: 12px auto;
+}
+
+.paginationWrapper {
+    display: flex;
+    justify-content: flex-end;
+    padding: 16px 32px;
+    margin-top: auto;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .studentsList {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .studentsList {
+    grid-template-columns: 1fr;
+  }
+}

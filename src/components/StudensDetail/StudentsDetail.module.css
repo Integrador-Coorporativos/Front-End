@@ -1,0 +1,75 @@
+.card {
+  display: grid;
+  grid-template-columns:
+  minmax(140px, 2fr)
+  repeat(4, minmax(60px, 1fr))
+  max-content;
+  justify-content: flex-start;
+
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+
+  padding: 6px 10px;
+  margin-bottom: 8px;
+
+  max-width: 96%;
+  width: 100%;
+
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+
+.item {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ruim .status {
+  color: #dc2626;
+}
+
+.bom .status {
+  color: #ca8a04;
+}
+
+.otimo .status {
+  color: #16a34a;
+}
+
+@media (max-width: 768px) {
+  .card {
+    grid-template-columns: 1fr;
+    row-gap: 8px;
+  }
+
+  .item {
+    flex-direction: row;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .label {
+    min-width: 90px;
+  }
+}
