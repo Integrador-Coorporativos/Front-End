@@ -130,6 +130,71 @@
   color: black;
 }
 
+
+.filterWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filterDropdown {
+  position: absolute;
+  top: 100%; 
+  right: 0;   
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  min-width: 280px; 
+}
+
+.filterContent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filterContent select,
+.filterContent button {
+  flex: 1 1 120px; 
+}
+
+.filterContent select {
+  background-color: #ffffff;
+  padding: 6px;
+  border-radius: 6px;
+  color: #000000;
+  
+}
+
+.filterContent select:focus {
+  background-color: #ffffff;
+  border: 1.5px solid #008236;
+  padding: 6px;
+  border-radius: 6px;
+  color: #000000;
+}
+
+.applyFilterButton {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background: #007bff;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.applyFilterButton:hover {
+  background: #0056b3;
+  font-weight: 500;
+  transition: 0.4s;
+}
+
 .filterInfo {
   font-size: 16px;
   color: #555;

@@ -1,0 +1,71 @@
+.cardsGrid_courses {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.card_courses {
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardInfo_courses {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.infoItem_courses {
+  display: flex;
+  flex-direction: column;
+}
+
+.label_courses {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6A7282;
+  margin-bottom: 4px;
+}
+
+.value_courses {
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000;
+
+  max-width: 190px;        
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.editButton_courses {
+  background: #e5e5e5;
+  border: none;
+  cursor: pointer;
+  padding: 10px 14px 10px 50px;
+
+  background-image: url('/../sadt-front/src/assets/edited-logo-icon.png');
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  color: black;
+}
+
+.editButton_courses:hover {
+  background: #d4d4d4;
+  background-image: url('/../sadt-front/src/assets/edited-logo-icon.png');
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+  transition: 0.4s;
+}
