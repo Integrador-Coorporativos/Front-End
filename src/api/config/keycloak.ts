@@ -1,5 +1,5 @@
 import Keycloak from 'keycloak-js';
-import { envConfig } from '../../config/env';
+import { envConfig } from './env';
 
 const keycloakConfig = {
   url: envConfig.keycloak.baseUrl, // URL do seu container Keycloak

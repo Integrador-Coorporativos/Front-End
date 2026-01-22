@@ -10,12 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "^1.13.2",
-    "keycloak-js": "^26.2.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
+    "@grafana/faro-react": "^2.2.0",
+    "@grafana/faro-web-sdk": "^2.2.0",
+    "@grafana/faro-web-tracing": "^2.2.0",
     "@mui/icons-material": "^7.3.6",
     "@mui/material": "^7.3.6",
+    "axios": "^1.13.2",
+    "keycloak-js": "^26.2.2",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -27,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@grafana/faro-rollup-plugin": "^0.8.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

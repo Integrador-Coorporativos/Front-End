@@ -1,4 +1,4 @@
-import { envConfig } from "./env";
+import { envConfig } from "../config/env";
 
 // ---------- Função utilitária para normalizar URLs ----------
 const normalizeUrl = (base: string, path: string): string => {

@@ -1,6 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
-import keycloak from '../api/services/keycloak'; // Ajuste o caminho conforme sua pasta
-import { envConfig } from '../config/env';
+import keycloak from './config/keycloak'; // Ajuste o caminho conforme sua pasta
+import { envConfig } from './config/env';
 
 const api = axios.create({
   baseURL: envConfig.baseUrl

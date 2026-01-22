@@ -1,34 +1,9 @@
-import { useEffect, useState } from 'react';
-import './CursosList.css'; // Importando o CSS que criamos
-import { getCourses } from '../api/services/courseService';
-
-interface Course {
-  id: number;
-  name: string;
-  description: string | null;
-}
+import './CursosList.css';
+import { useCourses } from '../hooks/courses/useCourses';
 
 export function CursosList() {
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-useEffect(() => {
-    // Criamos uma função interna para usar async/await
-    const loadData = async () => {
-      try {
-        const data = await getCourses();
-        setCourses(data);
-      } catch (err) {
-        console.error(err);
-        setError("Erro ao carregar cursos.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadData();
-  }, []);
+  // Chamamos o nosso hook customizado
+  const { courses, loading, error } = useCourses();
 
   if (loading) return <div className="loading-state">Carregando cursos...</div>;
   if (error) return <div className="error-state">{error}</div>;
@@ -43,7 +18,7 @@ useEffect(() => {
             <div>
               <h2 className="course-name font-bold">{course.name}</h2>
               <p className="course-description">
-                {course.description || "Este curso ainda não possui uma descrição detalhada cadastrada no sistema."}
+                {course.description || "Este curso ainda não possui uma descrição..."}
               </p>
             </div>
             
