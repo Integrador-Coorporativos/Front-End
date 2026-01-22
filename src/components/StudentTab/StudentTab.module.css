@@ -1,0 +1,67 @@
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 32px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column; 
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6A7282; 
+  margin-bottom: 4px;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 400;
+  color: #000000; 
+  white-space: nowrap;
+}
+
+.editButton {
+  background: #e5e5e5;
+  border: none;
+  cursor: pointer;
+  padding: 10px 14px 10px 50px;
+
+  background-image: url('/../sadt-front/src/assets/edited-logo-icon.png'); 
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 400;
+  color: black;
+}
+
+.editButton:hover {
+  background: #d4d4d4;
+  background-image: url('/../sadt-front/src/assets/edited-logo-icon.png'); 
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+  transition: 0.4s;
+}

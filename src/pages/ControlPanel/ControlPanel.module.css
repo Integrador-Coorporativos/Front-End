@@ -1,0 +1,213 @@
+.h1_content_controlpanel_nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 85%;
+  margin: 0 auto;
+}
+
+.h1_content_controlpanel {
+  font-size: 28px;
+  font-weight: 600;
+  color: rgb(0, 0, 0);
+  margin-top: 30px;
+  margin-bottom: 35px;
+}
+
+.tabs {
+  display: flex;
+  gap: 12px;
+}
+
+.tab {
+  padding: 10px 60px;
+  border-radius: 8px;
+  border: 1.5px solid #008236;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tab:hover {
+  background: #e9f6ee;
+}
+
+.active {
+  background: #008236;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.content {
+  margin-top: 20px;
+}
+
+.left_cont_cp {
+  display: flex;
+  align-items: center;
+}
+
+.logoIcon_container {
+  width: 90px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.title {
+  font-size: 30px;
+  padding-top: 20px;
+  font-weight: bold;
+  color: #359830;
+}
+
+.container {
+  width: 80%;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 24px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin: 0 auto;
+}
+
+.headerContainer_content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.right_cont_cp {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.importButton {
+  background-color: #008236;
+  color: white;
+  border: none;
+  padding: 12px 50px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.searchInput {
+  padding: 10px 14px 12px 50px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  font-size: 14px;
+  color: #000000;
+  width: 200px;
+  background-image: url('/../sadt-front/src/assets/logo-search-icon.png'); 
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+}
+.searchInput:focus {
+
+  color: #000000;
+  border: 1px solid black;
+  transition: 0.4s;
+}
+
+.filterButton {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 10px 14px 12px 50px;
+
+  background-image: url('/../sadt-front/src/assets/filter-icon.png'); 
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: black;
+}
+
+.filterInfo {
+  font-size: 16px;
+  color: #555;
+  margin: 12px 0 20px 0;
+  user-select: none;
+}
+
+.filterItem {
+  font-weight: 600;
+  font-size: 14px;
+  color: #000000; 
+}
+
+.paginationWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 24px;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tooltip_icon {
+  width: 24px;
+}
+
+.tooltip_text {
+  position: absolute;
+  top: auto; bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+
+  background-color: #333;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none; 
+  transition: opacity 0.4s ease;
+  z-index: 999;
+}
+
+.tooltip:hover .tooltip_text {
+  opacity: 1;
+  visibility: visible;
+}
+
+.downloadButton {
+  padding: 10px 20px 10px 60px;
+  background-color: #ffffff;
+  color: rgb(0, 0, 0);
+
+  background-image: url('/../sadt-front/src/assets/spreadsheet-icon.png'); 
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+  border: 2px solid #E5E7EB;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 400;
+  font-size: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.downloadButton:hover {
+  background-color: #E5E7EB;
+}
+
+.downloadWrapper {
+  display: flex;
+  align-items: center;
+  gap: 21px; 
+}

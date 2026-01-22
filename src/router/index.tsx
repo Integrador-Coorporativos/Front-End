@@ -5,11 +5,12 @@ import SelecionarTurmas from "../pages/SelectClasses";
 import MinhasTurmas from "../pages/MyClasses";
 import Classifications from "../pages/Classifications";
 import DetailsClass from "../pages/DetailsClass";
+import ControlPanel from "../pages/ControlPanel";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <h1>Home</h1>,
+    element: <Classifications />,
   },
   {
     path: "/cadastro",
@@ -28,11 +29,11 @@ export const router = createBrowserRouter([
     element: < MinhasTurmas />,
   },
   {
-    path: "/classificacoes",
-    element: <Classifications />,
+    path: "/classificacao/:id",
+    element: <DetailsClass />
   },
   {
-    path: "/detalhes_turma",
-    element: <DetailsClass />
+    path: "/painel_controle",
+    element: <ControlPanel />
   }
 ]);
