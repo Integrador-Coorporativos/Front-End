@@ -1,11 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getCourses } from '../../api/services/courseService';
-
-interface Course {
-  id: number;
-  name: string;
-  description: string | null;
-}
+import type { Course } from '@/api/types/course';
 
 export function useCourses() {
   const [courses, setCourses] = useState<Course[]>([]);

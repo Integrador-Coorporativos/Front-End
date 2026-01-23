@@ -5,28 +5,32 @@ import StudentsDetail from "../../components/StudensDetail";
 import FilterButton from "../../components/FilterButton";
 import Pagination from "../../components/Pagination";
 import { useState } from "react";
+import { useClassDetails } from "@/hooks/courses/useClassDetails";
+import { useParams } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 10;
 
-const turmas = Array.from({ length: 201 }).map(() => ({
-    nomeCompleto: "Josiel Orlando Texas",
-    indiceRendimentoAcademico: 61.22,
-    matricula: "20241094040001",
-    numReprovacoes: 5,
-    frequencia: 40.1,
-    situacao: "Ruim" as const,
-}));
-
 export default function ClassesDetail() {
+
+  const { id } = useParams<{ id: string }>(); // Pega o ID da URL (ex: /classes/1)
+  const classId = id ? parseInt(id) : undefined;
+  
+  const { classData, loading, error } = useClassDetails(classId);
   const [currentPage, setCurrentPage] = useState(1);
-  
-  const totalPages = Math.ceil(turmas.length / ITEMS_PER_PAGE);
-  
+
+  // Se estiver carregando, mostra um feedback
+  if (loading) return <div className={styles.container}>Carregando dados da turma...</div>;
+  if (error) return <div className={styles.container}>Erro: {error}</div>;
+  if (!classData) return <div className={styles.container}>Turma não encontrada.</div>;
+
+  // Lógica de Paginação baseada nos estudantes REAIS que vieram do backend
+  const totalPages = Math.ceil(classData.students.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = turmas.slice(
-      startIndex,
-      startIndex + ITEMS_PER_PAGE
-    );
+  const currentItems = classData.students.slice(
+    startIndex,
+    startIndex + ITEMS_PER_PAGE
+  );
+
 
   return (
     <div className={styles.container}>
@@ -45,12 +49,12 @@ export default function ClassesDetail() {
           {currentItems.map((student, index) => (
             <StudentsDetail
               key={index}
-              nomeCompleto={student.nomeCompleto}
-              indiceRendimentoAcademico={student.indiceRendimentoAcademico}
-              matricula={student.matricula}
-              numReprovacoes={student.numReprovacoes}
-              frequencia={student.frequencia}
-              situacao={student.situacao}
+              nomeCompleto={student.name}
+              indiceRendimentoAcademico={student.ira}
+              matricula={student.registration}
+              numReprovacoes={student.failedSubjects}
+              frequencia={student.averageScore}
+              situacao={student.status}
             />
           ))}
         </div>

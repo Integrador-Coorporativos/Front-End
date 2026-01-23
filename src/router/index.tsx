@@ -52,7 +52,7 @@ export const router = createBrowserRouter([
     element: <ControlPanel />
   },
   {
-    path: "/turma",
+    path: "/turma/:id",
     element: <ClassesDetail />
   }
 ]);
