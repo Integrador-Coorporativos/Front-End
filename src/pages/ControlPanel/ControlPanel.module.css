@@ -47,19 +47,8 @@
 .left_cont_cp {
   display: flex;
   align-items: center;
-}
-
-.logoIcon_container {
-  width: 90px;
-  height: 60px;
-  object-fit: contain;
-}
-
-.title {
-  font-size: 30px;
-  padding-top: 20px;
-  font-weight: bold;
-  color: #359830;
+  color: #000000;
+  gap: 12px;
 }
 
 .container {

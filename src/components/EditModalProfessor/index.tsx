@@ -36,76 +36,92 @@ export default function EditModalProfessor({
   };
 
   return (
-    <div className={styles.modalOverlay_professor}>
-      <div className={styles.modal_professor}>
-        <h2 className={styles.h2_edit_modal_professor}>Editar Professor</h2>
+  <div
+    className={styles.modalOverlay_professor}
+    onClick={onClose}
+  >
+    <div
+      className={styles.modal_professor}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <h2 className={styles.h2_edit_modal_professor}>Editar Professor</h2>
 
-        {isDirty && (
-          <div className={styles.alertWarning_professor}>
-            <h2 className={styles.h2_alert_message_professor}>
-              Existem alterações não salvas.
-            </h2>
-          </div>
-        )}
+      {isDirty && (
+        <div className={styles.alertWarning_professor}>
+          <h2 className={styles.h2_alert_message_professor}>
+            Existem alterações não salvas.
+          </h2>
+        </div>
+      )}
 
-        <form onChange={() => setIsDirty(true)} onSubmit={handleSubmit}>
-          <label>
-            Nome
-            <input
-              type="text"
-              value={localProfessor.nome}
-              onChange={(e) =>
-                setLocalProfessor({ ...localProfessor, nome: e.target.value })
-              }
-            />
-          </label>
-          <label>
-            Ano de Ingresso
-            <input
-              type="number"
-              value={localProfessor.anoIngresso}
-              min={1900}
-              max={new Date().getFullYear()}
-              onChange={(e) =>
-                setLocalProfessor({ ...localProfessor, anoIngresso: Number(e.target.value) })
-              }
-            />
-          </label>
-          <label>
-            Turno
-            <input
-              type="text"
-              value={localProfessor.turno}
-              onChange={(e) =>
-                setLocalProfessor({ ...localProfessor, turno: e.target.value })
-              }
-            />
-          </label>
-          <label>
-            Número de alunos
-            <input
-              type="number"
-              value={localProfessor.alunos}
-              min={0}
-              onChange={(e) =>
-                setLocalProfessor({ ...localProfessor, alunos: Number(e.target.value) })
-              }
-            />
-          </label>
-          <div className={styles.modalActions_professor}>
-            <button
-              type="button"
-              className={styles.cancelButton_professor}
-              onClick={onClose}
-            >
-              Cancelar
-            </button>
-            <button type="submit" className={styles.saveButton_professor}>
-              Salvar
-            </button>
-          </div>
-        </form>
-      </div>
+      <form onChange={() => setIsDirty(true)} onSubmit={handleSubmit}>
+        <label>
+          Nome
+          <input
+            type="text"
+            value={localProfessor.nome}
+            onChange={(e) =>
+              setLocalProfessor({ ...localProfessor, nome: e.target.value })
+            }
+          />
+        </label>
+
+        <label>
+          Ano de Ingresso
+          <input
+            type="number"
+            value={localProfessor.anoIngresso}
+            min={1900}
+            max={new Date().getFullYear()}
+            onChange={(e) =>
+              setLocalProfessor({
+                ...localProfessor,
+                anoIngresso: Number(e.target.value),
+              })
+            }
+          />
+        </label>
+
+        <label>
+          Turno
+          <input
+            type="text"
+            value={localProfessor.turno}
+            onChange={(e) =>
+              setLocalProfessor({ ...localProfessor, turno: e.target.value })
+            }
+          />
+        </label>
+
+        <label>
+          Número de alunos
+          <input
+            type="number"
+            value={localProfessor.alunos}
+            min={0}
+            onChange={(e) =>
+              setLocalProfessor({
+                ...localProfessor,
+                alunos: Number(e.target.value),
+              })
+            }
+          />
+        </label>
+
+        <div className={styles.modalActions_professor}>
+          <button
+            type="button"
+            className={styles.cancelButton_professor}
+            onClick={onClose}
+          >
+            Cancelar
+          </button>
+          <button type="submit" className={styles.saveButton_professor}>
+            Salvar
+          </button>
+        </div>
+      </form>
     </div>
-  );
+  </div>
+);
 }

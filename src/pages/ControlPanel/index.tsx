@@ -20,7 +20,6 @@ import type { Classes } from "@/types/Classes";
 import type { Courses } from "@/types/Courses";
 
 import styles from "./ControlPanel.module.css";
-import SadtIcon from "../../assets/logo-if.png";
 import TooltipIcon from "../../assets/tooltip-icon.png";
 
 const ITEMS_PER_PAGE = 8;
@@ -63,32 +62,37 @@ export default function ControlPanel() {
     },
   ];
 
-  const cursos: Courses[] = [
-    {
-      curso: "Informática",
-      quantiTurmas: 8,
-      turno: "Matutino e Vespertino",
-      quantiAlunos: 91,
-    },
-    {
-      curso: "Apicultura",
-      quantiTurmas: 8,
-      turno: "Matutino e Vespertino",
-      quantiAlunos: 90,
-    },
-    {
-      curso: "Alimentos",
-      quantiTurmas: 8,
-      turno: "Matutino e Vespertino",
-      quantiAlunos: 89,
-    },
-    {
-      curso: "Analise e Desenvolvimento de Sistemas",
-      quantiTurmas: 4,
-      turno: "Vespertino",
-      quantiAlunos: 51,
-    }
-  ];
+  const [courses, setCourses] = useState<Courses[]>([]);
+
+  useEffect(() => {
+    fetch("http://localhost:8085/api/courses")
+      .then(async (res) => {
+        console.log("STATUS:", res.status);
+
+        const text = await res.text();
+        console.log("BODY:", text);
+
+        if (res.status === 204) return [];
+
+        if (!res.ok) {
+          throw new Error(`Erro HTTP ${res.status}`);
+        }
+
+        return JSON.parse(text);
+      })
+      .then((data) => {
+        const mapped = data.map((c: any) => ({
+          id: c.id,
+          course: c.name,
+          quantClasses: 0,
+          quantStudent: 0,
+          shift: "—",
+        }));
+
+        setCourses(mapped);
+      })
+      .catch(console.error);
+  }, []);
 
   const cursosDisponiveisTeste = [
     "Informática",
@@ -120,12 +124,41 @@ export default function ControlPanel() {
 
   const filterRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const handleSaveCourse = async (cursoAtualizado: Courses) => {
+  try {
+    const response = await fetch(
+      `http://localhost:8085/api/courses/${cursoAtualizado.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: cursoAtualizado.course, 
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Erro ao salvar curso: ${response.status}`);
+    }
+
+    setCourses((oldCourses) =>
+      oldCourses.map((c) =>
+        c.id === cursoAtualizado.id ? cursoAtualizado : c
+      )
+    );
+
+    setIsCursoModalOpen(false);
+    console.log("Curso salvo com sucesso!");
+  } catch (error) {
+    console.error("Erro ao salvar curso:", error);
+  }
+};
+
+useEffect(() => {
   function handleClickOutside(event: MouseEvent) {
-    if (
-      filterRef.current &&
-      !filterRef.current.contains(event.target as Node)
-    ) {
+    if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
       setIsFilterOpen(false);
     }
   }
@@ -139,11 +172,14 @@ export default function ControlPanel() {
   };
 }, [isFilterOpen]);
 
+
   const totalPages =
     activeTab === "alunos"
       ? Math.ceil(alunos.length / ITEMS_PER_PAGE)
       : activeTab === "professores"
       ? Math.ceil(professores.length / ITEMS_PER_PAGE)
+      : activeTab === "cursos"
+      ? Math.ceil(courses.length / ITEMS_PER_PAGE)
       : 1;
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -153,6 +189,7 @@ export default function ControlPanel() {
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
+  const currentCourses = courses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
@@ -202,16 +239,15 @@ export default function ControlPanel() {
           ))}
         </div>
       </div>
+
       <main className={styles.page}>
         <div className={styles.container}>
           <div className={styles.headerContainer_content}>
             <div className={styles.left_cont_cp}>
-              <img
-                className={styles.logoIcon_container}
-                src={SadtIcon}
-                alt="Logo do IF"
-              />
-              <span className={styles.title}>SADT</span>
+              Filtrado por:{" "}
+              <span className={styles.filterItem}>
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              </span>
             </div>
             <div className={styles.right_cont_cp}>
               <button
@@ -282,12 +318,7 @@ export default function ControlPanel() {
               </div>
             </div>
           </div>
-          <div className={styles.filterInfo}>
-            Filtrado por:{" "}
-            <span className={styles.filterItem}>
-              {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-            </span>
-          </div>
+
           {activeTab === "alunos" && (
             <div className={styles.tabContent}>
               <StudentTab
@@ -324,7 +355,7 @@ export default function ControlPanel() {
           {activeTab === "cursos" && (
             <div className={styles.tabContent}>
               <CoursesTab
-                cursos={cursos}
+                cursos={currentCourses}
                 onEdit={(curso) => {
                   setSelectedCurso(curso);
                   setIsCursoModalOpen(true);
@@ -360,6 +391,7 @@ export default function ControlPanel() {
           </div>
         </div>
       </main>
+
       {selectedAluno && (
         <EditModal
           aluno={selectedAluno}
@@ -372,6 +404,7 @@ export default function ControlPanel() {
           }}
         />
       )}
+
       {selectedProfessor && (
         <EditModalProfessor
           professor={selectedProfessor}
@@ -383,29 +416,27 @@ export default function ControlPanel() {
           }}
         />
       )}
-      {selectedCurso && (
-      <EditModalCourses
-        curso={selectedCurso}
-        isOpen={isCursoModalOpen}
-        onClose={() => setIsCursoModalOpen(false)}
-        onSave={(cursoAtualizado) => {
-          console.log("Curso salvo:", cursoAtualizado);
-          setIsCursoModalOpen(false);
-        }}
-      />
-    )}
 
-    {selectedTurma && (
-      <EditModalClasses
-        turma={selectedTurma}
-        isOpen={isTurmaModalOpen}
-        onClose={() => setIsTurmaModalOpen(false)}
-        onSave={(turmaAtualizada) => {
-          console.log("Turma salva:", turmaAtualizada);
-          setIsTurmaModalOpen(false);
-        }}
-      />
-    )}
+      {selectedCurso && isCursoModalOpen && (
+  <EditModalCourses
+    curso={selectedCurso}
+    isOpen={isCursoModalOpen}
+    onClose={() => setIsCursoModalOpen(false)}
+    onSave={handleSaveCourse} 
+  />
+)}
+
+      {selectedTurma && (
+        <EditModalClasses
+          turma={selectedTurma}
+          isOpen={isTurmaModalOpen}
+          onClose={() => setIsTurmaModalOpen(false)}
+          onSave={(turmaAtualizada) => {
+            console.log("Turma salva:", turmaAtualizada);
+            setIsTurmaModalOpen(false);
+          }}
+        />
+      )}
 
       <Footer />
     </div>

@@ -28,7 +28,7 @@ export default function EditModalCourses({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (localCurso.quantiTurmas < 0 || localCurso.quantiAlunos < 0) {
+    if (localCurso.quantClasses < 0 || localCurso.quantStudent < 0) {
       alert("Valores inválidos");
       return;
     }
@@ -37,8 +37,8 @@ export default function EditModalCourses({
   };
 
   return (
-    <div className={styles.modalOverlay_courses}>
-      <div className={styles.modal_courses}>
+    <div className={styles.modalOverlay_courses} onClick={onClose}>
+      <div className={styles.modal_courses} onClick={(e) => e.stopPropagation()}>
         <h2 className={styles.h2_edit_modal_courses}>Editar Curso</h2>
 
         {isDirty && (
@@ -53,9 +53,9 @@ export default function EditModalCourses({
             Curso
             <input
               type="text"
-              value={localCurso.curso}
+              value={localCurso.course}   
               onChange={(e) =>
-                setLocalCurso({ ...localCurso, curso: e.target.value })
+                setLocalCurso({ ...localCurso, course: e.target.value })
               }
             />
           </label>
@@ -65,11 +65,11 @@ export default function EditModalCourses({
             <input
               type="number"
               min={0}
-              value={localCurso.quantiTurmas}
+              value={localCurso.quantClasses}
               onChange={(e) =>
                 setLocalCurso({
                   ...localCurso,
-                  quantiTurmas: Number(e.target.value),
+                  quantClasses: Number(e.target.value),
                 })
               }
             />
@@ -79,9 +79,9 @@ export default function EditModalCourses({
             Turno
             <input
               type="text"
-              value={localCurso.turno}
+              value={localCurso.shift}
               onChange={(e) =>
-                setLocalCurso({ ...localCurso, turno: e.target.value })
+                setLocalCurso({ ...localCurso, shift: e.target.value })
               }
             />
           </label>
@@ -91,11 +91,11 @@ export default function EditModalCourses({
             <input
               type="number"
               min={0}
-              value={localCurso.quantiAlunos}
+              value={localCurso.quantStudent}
               onChange={(e) =>
                 setLocalCurso({
                   ...localCurso,
-                  quantiAlunos: Number(e.target.value),
+                  quantStudent: Number(e.target.value),
                 })
               }
             />

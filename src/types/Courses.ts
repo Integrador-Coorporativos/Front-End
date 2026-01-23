@@ -1,6 +1,7 @@
 export type Courses = {
-  curso: string;
-  quantiTurmas: number;
-  turno: string;
-  quantiAlunos: number;
+  id: number;
+  course: string;
+  quantClasses: number;
+  quantStudent: number;
+  shift: string;
 };

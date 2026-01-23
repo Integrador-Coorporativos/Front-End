@@ -16,30 +16,30 @@ export default function CoursesTab({ cursos, onEdit }: CoursesTabProps) {
               <span className={styles.label_courses}>Curso</span>
               <span
                 className={styles.value_courses}
-                title={curso.curso}
+                title={curso.course}
               >
-                {curso.curso}
+                {curso.course}
               </span>
             </div>
 
             <div className={styles.infoItem_courses}>
               <span className={styles.label_courses}>Turmas</span>
               <span className={styles.value_courses}>
-                {curso.quantiTurmas}
+                {curso.quantClasses}
               </span>
             </div>
 
             <div className={styles.infoItem_courses}>
               <span className={styles.label_courses}>Turno</span>
               <span className={styles.value_courses}>
-                {curso.turno}
+                {curso.shift}
               </span>
             </div>
 
             <div className={styles.infoItem_courses}>
               <span className={styles.label_courses}>Alunos</span>
               <span className={styles.value_courses}>
-                {curso.quantiAlunos}
+                {curso.quantStudent}
               </span>
             </div>
           </div>
