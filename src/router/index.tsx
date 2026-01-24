@@ -8,25 +8,12 @@ import Classifications from "../pages/Classifications";
 import Classificacoes from "../pages/RankingDetail"
 import ControlPanel from "../pages/ControlPanel";
 import ClassesDetail from "../pages/ClassesDetail";
-import { CursosList } from "@/components/CursosList";
-
-
 
 export const router = createBrowserRouter([
   {
     path: "/",
     element: <Classifications />,
   },
-
-
-
-  {//Atenção: Página de testes que deve ser removida após o termino.
-    path: "/cursosList",
-    element: <CursosList />,
-  },
-
-
-
   {
     path: "/cadastro",
     element: <Cadastro />,
