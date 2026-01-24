@@ -5,26 +5,22 @@ import styles from "./SelectClasses.module.css";
 import FilterButton from "../../components/FilterButton";
 import ClassCard from "../../components/ClassCard";
 import Pagination from "../../components/Pagination";
+import { useClasses } from "@/hooks/classes/useAllClasses";
 
 const ITEMS_PER_PAGE = 9;
 
-const turmas = Array.from({ length: 201 }).map(() => ({
-  anoReferencia: "2022",
-  ano: "4º",
-  curso: "Informática",
-  turno: "Vespertino",
-}));
-
 export default function SelecionarTurmas() {
-  const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(turmas.length / ITEMS_PER_PAGE);
-
+const [currentPage, setCurrentPage] = useState(1);
+  const { classes, loading, error } = useClasses();
+  const totalPages = Math.ceil(classes.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = turmas.slice(
+  const currentItems = classes.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
+  if (loading) return <div className={styles.container}><Header /><p>Carregando turmas...</p></div>;
+  if (error) return <div className={styles.container}><Header /><p>{error}</p></div>;
 
   return (
     <div className={styles.container}>
@@ -45,10 +41,10 @@ export default function SelecionarTurmas() {
           {currentItems.map((turma, index) => (
             <ClassCard
               key={index}
-              anoReferencia={turma.anoReferencia}
-              ano={turma.ano}
-              curso={turma.curso}
-              turno={turma.turno}
+              anoReferencia={turma.classId.match(/^\d{4}/)?.[0] || "N/A"}
+              ano={turma.semester}
+              curso={turma.course.name}
+              turno={turma.shift}
             />
           ))}
         </div>

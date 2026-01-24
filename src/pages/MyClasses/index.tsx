@@ -1,27 +1,21 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Header from "../../components/Header";
 import styles from "./MyClasses.module.css";
 import FilterButton from "../../components/FilterButton";
 import ListClassCard from "../../components/ListClassCard";
 import Pagination from "../../components/Pagination";
 import Footer from "../../components/Footer";
+import { useClasses } from "@/hooks/classes/useAllClasses"; //Atenção: Endpoint de turmas de um professor ainda não foi feito
 
 const ITEMS_PER_PAGE = 9;
 
-const turmas = Array.from({ length: 201 }).map(() => ({
-  anoReferencia: "2022",
-  ano: "4º",
-  curso: "Informática",
-  turno: "Vespertino",
-}));
-
 export default function SelecionarTurmas() {
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(turmas.length / ITEMS_PER_PAGE);
-
+const [currentPage, setCurrentPage] = useState(1);
+  const { classes, loading, error } = useClasses();
+  const totalPages = Math.ceil(classes.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = turmas.slice(
+  const currentItems = classes.slice(
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );
@@ -43,13 +37,18 @@ export default function SelecionarTurmas() {
 
         <div className={styles.containerCards}>
           {currentItems.map((turma, index) => (
-            <ListClassCard
-              key={index}
-              anoReferencia={turma.anoReferencia}
-              ano={turma.ano}
-              curso={turma.curso}
-              turno={turma.turno}
-            />
+            <Link 
+              to={`/turma/${turma.id}`}
+              key={turma.id || index} 
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <ListClassCard
+                anoReferencia={turma.classId.match(/^\d{4}/)?.[0] || "N/A"}
+                ano={turma.semester}
+                curso={turma.course.name}
+                turno={turma.shift}
+              />
+            </Link>
           ))}
         </div>
 
