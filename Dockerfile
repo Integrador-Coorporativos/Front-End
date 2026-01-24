@@ -6,6 +6,10 @@ RUN apk add --no-cache git
 
 WORKDIR /app
 
+COPY package*.json ./
+RUN npm install
+COPY . .
+
 # Recebe as variáveis do ambiente como argumentos de build
 ARG VITE_API_BASE_URL
 ARG VITE_KEYCLOAK_BASE_URL
@@ -18,7 +22,6 @@ ENV VITE_KEYCLOAK_REALM=$VITE_KEYCLOAK_REALM
 ENV VITE_KEYCLOAK_CLIENT_ID=$VITE_KEYCLOAK_CLIENT_ID
 
 
-RUN npm install
 RUN npm run build
 
 # Estágio 2: Nginx
