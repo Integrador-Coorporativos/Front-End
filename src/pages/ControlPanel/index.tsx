@@ -12,6 +12,8 @@ import type { Professor } from "@/types/Professor";
 import styles from "./ControlPanel.module.css";
 import SadtIcon from "../../assets/logo-if.png";
 import TooltipIcon from "../../assets/tooltip-icon.png";
+import { useDownloadTemplate } from "@/hooks/processing/useDownloadTemplate";
+import { useUploadPlanilha } from "@/hooks/processing/useUploadPlanilha";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -55,6 +57,8 @@ export default function ControlPanel() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { upload, isUploading, success } = useUploadPlanilha();
+  const { download, isDownloading, error } = useDownloadTemplate();
 
   const totalPages =
     activeTab === "alunos"
@@ -72,19 +76,12 @@ export default function ControlPanel() {
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      upload(file);
       console.log("Arquivo selecionado:", file.name);
     }
-  };
-
-  const handleDownloadModelo = () => {
-    const link = document.createElement("a");
-    link.href = "/path/to/modelo.xlsx";
-    link.download = "modelo.xlsx";
-    link.click();
   };
 
   return (
@@ -133,7 +130,7 @@ export default function ControlPanel() {
                 className={styles.importButton}
                 onClick={handleButtonClick}
               >
-                Importar dados
+                {isUploading ? "Processando..." : "Importar dados"}
               </button>
               <input
                 type="file"
@@ -142,6 +139,7 @@ export default function ControlPanel() {
                 accept=".xlsx"
                 onChange={handleFileChange}
               />
+              {success && <p style={{ color: 'green' }}>Importação concluída!</p>}
               <input
                 type="text"
                 placeholder="Buscar..."
@@ -190,11 +188,11 @@ export default function ControlPanel() {
           )}
           <div className={styles.paginationWrapper}>
             <div className={styles.downloadWrapper}>
-              <button
-                className={styles.downloadButton}
-                onClick={handleDownloadModelo}
+              <button 
+                onClick={() => download('modelo_planilha.xlsx')}
+                disabled={isDownloading}
               >
-                Baixar modelo
+                {isDownloading ? 'Gerando Planilha...' : 'Baixar Modelo'}
               </button>
               <div className={styles.tooltip}>
                 <img
