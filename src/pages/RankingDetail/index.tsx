@@ -159,6 +159,7 @@ export default function Classifications() {
         items={[
           { label: "Página Inicial", to: "/" },
           { label: "Classificações", to: "/classificacao/:id" },
+          { label: "Turma nome", to: "/classificacao/:id" },
         ]}
       />
 
