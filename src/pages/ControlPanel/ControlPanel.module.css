@@ -47,19 +47,8 @@
 .left_cont_cp {
   display: flex;
   align-items: center;
-}
-
-.logoIcon_container {
-  width: 90px;
-  height: 60px;
-  object-fit: contain;
-}
-
-.title {
-  font-size: 30px;
-  padding-top: 20px;
-  font-weight: bold;
-  color: #359830;
+  color: #000000;
+  gap: 12px;
 }
 
 .container {
@@ -130,6 +119,71 @@
   color: black;
 }
 
+
+.filterWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.filterDropdown {
+  position: absolute;
+  top: 100%; 
+  right: 0;   
+  margin-top: 0.5rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  z-index: 100;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  min-width: 280px; 
+}
+
+.filterContent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filterContent select,
+.filterContent button {
+  flex: 1 1 120px; 
+}
+
+.filterContent select {
+  background-color: #ffffff;
+  padding: 6px;
+  border-radius: 6px;
+  color: #000000;
+  
+}
+
+.filterContent select:focus {
+  background-color: #ffffff;
+  border: 1.5px solid #008236;
+  padding: 6px;
+  border-radius: 6px;
+  color: #000000;
+}
+
+.applyFilterButton {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background: oklch(59.6% 0.145 163.225);
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.applyFilterButton:hover {
+  background: oklch(69.6% 0.17 162.48);
+  font-weight: 500;
+  transition: 0.4s;
+}
+
 .filterInfo {
   font-size: 16px;
   color: #555;
@@ -138,10 +192,15 @@
 }
 
 .filterItem {
-  font-weight: 600;
+  max-width: 450px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #000000;
   font-size: 14px;
-  color: #000000; 
+  font-weight: 500;
 }
+
 
 .paginationWrapper {
   display: flex;
@@ -210,4 +269,46 @@
   display: flex;
   align-items: center;
   gap: 21px; 
+}
+
+.emptyMessage_filter {
+  padding: 34px;
+  text-align: center;
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
+}
+
+.clearButton_filter {
+  margin-top: 12px;
+  padding: 12px 46px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: oklch(44.8% 0.119 151.328);
+  color: white;
+  font-weight: 500;
+}
+
+.clearButton_filter:hover {
+  cursor: pointer;
+  background-color: oklch(52.7% 0.154 150.069);
+  transition: 0.4s;
+}
+
+.clearButton_filtred {
+  margin-top: 12px;
+  padding: 12px 46px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: oklch(44.8% 0.119 151.328);
+  color: white;
+  font-weight: 500;
+}
+
+.clearButton_filtred:hover {
+  cursor: pointer;
+  background-color: oklch(52.7% 0.154 150.069);
+  transition: 0.4s;
 }

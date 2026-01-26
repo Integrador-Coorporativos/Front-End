@@ -1,0 +1,119 @@
+.modalOverlay_classes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal_classes form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal_classes label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  color: #000;
+  gap: 4px;
+}
+
+.modal_classes input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  color: #000000;
+  background-color: #ffffff;
+  font-size: 14px;
+}
+
+.modal_classes input:focus {
+  outline: none;
+  border-color: #4caf50;
+}
+
+
+.modal_classes {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  width: 400px;
+  max-width: 90%;
+}
+
+.h2_edit_modal_classes {
+  margin-bottom: 16px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #000000;
+}
+
+.alertWarning_classes {
+  background: #fff3cd;
+  color: #856404;
+
+  padding: 8px 12px 8px 55px; 
+  border-radius: 8px;
+  margin-bottom: 14px;
+
+  display: flex;
+  align-items: center;
+
+  background-image: url('/../sadt-front/src/assets/alert-icon-message.png');
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  background-size: 22px 20px;
+
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.h2_alert_message_classes {
+  font-size: 14px;
+  margin: 0;
+}
+
+.modalActions_classes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.saveButton_classes {
+  background: oklch(62.7% 0.194 149.214);
+  color: white;
+  border: none;
+  padding: 10px 50px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.saveButton_classes:hover {
+  background: oklch(72.3% 0.219 149.579);
+  font-weight: 500;
+}
+
+.cancelButton_classes {
+  background: #e5e7eb;
+  color: rgb(145, 145, 145);
+  border: none;
+  padding: 10px 50px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cancelButton_classes:hover {
+  background: oklch(57.7% 0.245 27.325);
+  color: #ffffff;
+  font-weight: 500;
+}
