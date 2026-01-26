@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getCourses } from '../../api/services/classesService'; 
+import { getClasses } from '../../api/services/classesService'; 
 import type { ClassResponse } from '@/api/types/classes';
 
 export function useClasses() {
@@ -11,7 +11,7 @@ export function useClasses() {
     setLoading(true);
     setError(null);
     try {
-      const data = await getCourses();
+      const data = await getClasses();
       setClasses(data);
     } catch (err) {
       console.error("Erro no hook useClasses:", err);

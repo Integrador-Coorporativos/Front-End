@@ -12,3 +12,8 @@ export const createCourse = async (courseData: Omit<Course, 'id'>): Promise<Cour
   const response = await api.post<Course>('/api/courses', courseData);
   return response.data;
 };
+
+export const updateCourse = async (id: number, data: Partial<Course>): Promise<Course> => {
+  const response = await api.put<Course>(`/api/courses/${id}`, data);
+  return response.data;
+};

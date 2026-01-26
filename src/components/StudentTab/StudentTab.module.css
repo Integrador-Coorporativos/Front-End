@@ -47,7 +47,7 @@
   cursor: pointer;
   padding: 10px 14px 10px 50px;
 
-  background-image: url('/../sadt-front/src/assets/edited-logo-icon.png'); 
+  background-image: url('../../assets/edited-logo-icon.png'); 
   background-repeat: no-repeat;
   background-position: 10px center;
   background-size: 20px 20px;
@@ -59,7 +59,7 @@
 
 .editButton:hover {
   background: #d4d4d4;
-  background-image: url('/../sadt-front/src/assets/edited-logo-icon.png'); 
+  background-image: url('../../assets/edited-logo-icon.png'); 
   background-repeat: no-repeat;
   background-position: 10px center;
   background-size: 20px 20px;
