@@ -39,6 +39,7 @@
   font-weight: 400;
   color: #000000;
   white-space: nowrap;
+  max-width: 50px;
 }
 
 .editButton_classes {

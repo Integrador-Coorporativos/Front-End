@@ -40,3 +40,19 @@
   font-weight: 500;
   transition: 0.4s;
 }
+
+.clearFilterButton_course {
+  background: transparent;
+  border: 1px solid #ccc;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.clearFilterButton_course:hover {
+  background: #f2f2f2;
+  transition: 0.4s;
+  border: 1px solid #008236;
+}

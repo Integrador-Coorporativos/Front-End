@@ -8,6 +8,7 @@ import StudentTab from "@/components/StudentTab";
 import ProfessorTab from "../../components/ProfessorTab";
 import ClassesTab from "@/components/ClassesTab";
 import CoursesTab from "@/components/CoursesTab";
+import Toast from "@/components/Toast";
 
 import EditModal from "../../components/EditModalStudent";
 import EditModalProfessor from "../../components/EditModalProfessor";
@@ -19,17 +20,32 @@ import FiltersClasse from "../../components/FiltersClasse";
 
 import type { Student } from "@/types/Student";
 import type { Professor } from "@/types/Professor";
-import type { Classes } from "@/types/Classes";
+import type { ClassPanel } from "@/api/types/classPanel";
+import type { Classes } from "@/api/types/classes";
 import type { Courses } from "@/types/Courses";
+import type { CoursePanel } from "@/types/CoursesPanel";
+import type { ClassListItem } from "@/api/types/classListItem";
 
 import styles from "./ControlPanel.module.css";
 import TooltipIcon from "../../assets/tooltip-icon.png";
 import { useDownloadTemplate } from "@/hooks/processing/useDownloadTemplate";
 import { useUploadPlanilha } from "@/hooks/processing/useUploadPlanilha";
+import { useCoursesPanel } from "@/hooks/courses/useCoursesPanel";
+import { useUpdateCourse } from "@/hooks/courses/useUpdateCourse";
+import { useClassesPanel } from "@/hooks/classes/useClassesPanel";
+import { useUpdateClass } from "@/hooks/classes/useUpdateClass";
 
 const ITEMS_PER_PAGE = 8;
 
 export default function ControlPanel() {
+
+  const { coursesPanel } = useCoursesPanel();
+  const { executeUpdate } = useUpdateCourse();
+
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
+
   const [activeTab, setActiveTab] = useState<
     "alunos" | "professores" | "turmas" | "cursos"
   >("alunos");
@@ -50,60 +66,40 @@ export default function ControlPanel() {
     })
   );
 
-  const [classes, setClasses] = useState<Classes[]>([]);
+  const { classes, loading: classesLoading, error: classesError } =
+    useClassesPanel();
+  const { executeUpdate: executeUpdateClasses } = useUpdateClass();
 
-  const [courses, setCourses] = useState<Courses[]>([]);
-
-  useEffect(() => {
-    fetch("http://localhost:8085/api/courses")
-      .then(async (res) => {
-        console.log("STATUS:", res.status);
-
-        const text = await res.text();
-        console.log("BODY:", text);
-
-        if (res.status === 204) return [];
-
-        if (!res.ok) {
-          throw new Error(`Erro HTTP ${res.status}`);
-        }
-
-        return JSON.parse(text);
-      })
-      .then((data) => {
-        const mapped = data.map((c: any) => ({
-          id: c.id,
-          course: c.name,
-          quantClasses: 0,
-          quantStudent: 0,
-          shift: "—",
-        }));
-
-        setCourses(mapped);
-      })
-      .catch(console.error);
-  }, []);
+  const [localCoursesPanel, setLocalCoursesPanel] = useState<CoursePanel[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8085/api/classes")
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Erro ao buscar turmas");
-        return res.json();
-      })
-      .then((data) => {
-        const mapped = data.map((t: any) => ({
-          id: t.id,
-          name: t.name,
-          shift: t.shift,
-          course: t.course
-            ? { id: t.course.id, name: t.course.name }
-            : null,
-        }));
+    setLocalCoursesPanel(coursesPanel);
+  }, [coursesPanel]);
 
-        setClasses(mapped);
-      })
-      .catch(console.error);
-  }, []);
+  const handleSaveCourse = async (curso: CoursePanel) => {
+    try {
+      await executeUpdate(curso.courseId, { name: curso.courseName });
+
+      setLocalCoursesPanel(prev =>
+        prev.map(c =>
+          c.courseId === curso.courseId
+            ? { ...c, courseName: curso.courseName }
+            : c
+        )
+      );
+
+      setIsCursoModalOpen(false);
+
+      setToastMessage("Curso alterado com sucesso!");
+      setShowSuccessToast(true);
+
+      setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 5500);
+    } catch (err) {
+      console.error("Erro ao salvar curso:", err);
+    }
+  };
 
   const cursosDisponiveisTeste = [
     "Informática",
@@ -132,7 +128,7 @@ export default function ControlPanel() {
   const { upload, isUploading, success } = useUploadPlanilha();
   const { download, isDownloading, error } = useDownloadTemplate();
 
-  const [selectedCurso, setSelectedCurso] = useState<Courses | null>(null);
+  const [selectedCurso, setSelectedCurso] = useState<CoursePanel | null>(null);
   const [isCursoModalOpen, setIsCursoModalOpen] = useState(false);
 
   const getFilterLabel = () => {
@@ -174,66 +170,69 @@ export default function ControlPanel() {
 
   const hasSearch = search.trim().length > 0;
 
-  const handleSaveCourse = async (cursoAtualizado: Courses) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8085/api/courses/${cursoAtualizado.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: cursoAtualizado.course,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Erro ao salvar curso: ${response.status}`);
-      }
-
-      setCourses((oldCourses) =>
-        oldCourses.map((c) =>
-          c.id === cursoAtualizado.id ? cursoAtualizado : c
-        )
-      );
-
-      setIsCursoModalOpen(false);
-      console.log("Curso salvo com sucesso!");
-    } catch (error) {
-      console.error("Erro ao salvar curso:", error);
+  function convertToAPIClass(turma: Classes): import('@/api/types/classes').Classes {
+    if (!turma.course) {
+      throw new Error("Curso inválido!");
     }
-  };
 
-  const handleSaveClasses = async (turmaAtualizada: Classes) => {
+    return {
+      id: turma.id,
+      name: turma.name,
+      shift: turma.shift,
+      course: {
+        id: turma.course.id,
+        name: turma.course.name,
+        description: "string", 
+      },
+    };
+  }
+
+  const handleSaveClasses = async (turmaAtualizada: import('@/types/Classes').Classes) => {
     try {
-      const response = await fetch(
-        `http://localhost:8085/api/classes/${turmaAtualizada.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(turmaAtualizada),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Erro ao salvar turma");
+      if (!turmaAtualizada.course) {
+        throw new Error("A turma precisa ter um curso antes de salvar.");
       }
 
-      const updated = await response.json();
+      const turmaParaAPI: import('@/api/types/classes').Classes = {
+        id: turmaAtualizada.id,
+        name: turmaAtualizada.name,
+        shift: turmaAtualizada.shift,
+        course: {
+          id: turmaAtualizada.course.id,
+          name: turmaAtualizada.course.name,
+          description: "", 
+        },
+      };
 
-      setClasses((prev) =>
-        prev.map((t) => (t.id === updated.id ? updated : t))
+      const updated = await executeUpdateClasses(turmaParaAPI.id, turmaParaAPI);
+
+      const updatedPanel = mapResponseToPanel(updated); 
+      setLocalClasses(prev =>
+        prev.map(t => (t.id === updatedPanel.id ? updatedPanel : t))
       );
 
       setIsTurmaModalOpen(false);
-    } catch (error) {
-      console.error("Erro ao salvar turma:", error);
+    } catch (err) {
+      console.error("Erro ao salvar turma:", err);
     }
   };
+
+  const [localClasses, setLocalClasses] = useState<ClassPanel[]>([]);
+
+  function mapResponseToPanel(updated: import('@/api/types/classes').ClassResponse): ClassPanel {
+    return {
+      id: updated.id,
+      name: updated.name,
+      shift: updated.shift,
+      courseId: updated.course.id,
+      courseName: updated.course.name,
+    };
+  }
+
+  useEffect(() => {
+    if (classes) setLocalClasses(classes);
+  }, [classes]);
+
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -267,23 +266,19 @@ export default function ControlPanel() {
     appliedFilterTurno !== "" ||
     appliedFilterAlunos !== "";
 
-  const filteredCourses = courses
+  const filteredCourses = localCoursesPanel
     .filter((course) =>
-      course.course.toLowerCase().includes(search.toLowerCase())
+      course.courseName.toLowerCase().includes(search.toLowerCase())
     )
     .filter((course) => {
-      if (appliedFilterTurmas === "maior") return course.quantClasses >= 1;
-      if (appliedFilterTurmas === "menor") return course.quantClasses <= 0;
+      if (appliedFilterTurmas === "maior") return course.totalClasses >= 1;
+      if (appliedFilterTurmas === "menor") return course.totalClasses <= 0;
       return true;
     })
     .filter((course) => {
-      if (appliedFilterAlunos === "maior") return course.quantStudent >= 1;
-      if (appliedFilterAlunos === "menor") return course.quantStudent <= 0;
+      if (appliedFilterAlunos === "maior") return course.totalStudents >= 1;
+      if (appliedFilterAlunos === "menor") return course.totalStudents <= 0;
       return true;
-    })
-    .filter((course) => {
-      if (!appliedFilterTurno) return true;
-      return course.shift === appliedFilterTurno;
     });
 
   const filteredClasses = classes.filter((t) => {
@@ -291,7 +286,7 @@ export default function ControlPanel() {
 
     const nomeTurma = t.name?.toLowerCase() ?? "";
     const turno = t.shift?.toLowerCase() ?? "";
-    const nomeCurso = t.course?.name?.toLowerCase() ?? "";
+    const nomeCurso = t.courseName?.toLowerCase() ?? "";
 
     return (
       nomeTurma.includes(query) ||
@@ -326,6 +321,13 @@ export default function ControlPanel() {
     startIndex,
     startIndex + ITEMS_PER_PAGE
   );;
+
+  const currentClassesListItems: ClassListItem[] = currentClasses.map((t) => ({
+    id: t.id,
+    name: t.name,
+    shift: t.shift,
+    course: t.courseId && t.courseName ? { id: t.courseId, name: t.courseName } : null,
+  }));
 
   const totalPages =
     activeTab === "alunos"
@@ -417,8 +419,6 @@ export default function ControlPanel() {
                     <FiltersCourse
                       filterTurmas={filterTurmas}
                       setFilterTurmas={setFilterTurmas}
-                      filterTurno={filterTurno}
-                      setFilterTurno={setFilterTurno}
                       filterAlunos={filterAlunos}
                       setFilterAlunos={setFilterAlunos}
                       onApply={() => {
@@ -429,6 +429,18 @@ export default function ControlPanel() {
                         setCurrentPage(1);
                         setIsFilterOpen(false);
                         setFiltersApplied(true);
+                      }}
+
+                      onClear={() => {
+                        setFilterTurmas("");
+                        setFilterTurno("");
+                        setFilterAlunos("");
+
+                        setAppliedFilterTurmas("");
+                        setAppliedFilterTurno("");
+                        setAppliedFilterAlunos("");
+
+                        setCurrentPage(1);
                       }}
                     />
                   </div>
@@ -473,7 +485,6 @@ export default function ControlPanel() {
                   </div>
                 )}
 
-                
               </div>
             </div>
           </div>
@@ -503,7 +514,11 @@ export default function ControlPanel() {
 
           {activeTab === "turmas" && (
             <div className={styles.tabContent}>
-              {filteredClasses.length === 0 ? (
+              {classesLoading ? (
+                <p>Carregando turmas...</p>
+              ) : classesError ? (
+                <p>{classesError}</p>
+              ) : filteredClasses.length === 0 ? (
                 <div className={styles.emptyMessage_filter}>
                   <p>Desculpe, nenhuma turma encontrada com base na sua pesquisa.</p>
 
@@ -521,9 +536,19 @@ export default function ControlPanel() {
                 </div>
               ) : (
                 <ClassesTab
-                  classes={currentClasses}
-                  onEdit={(turma) => {
-                    setSelectedTurma(turma);
+                  classes={currentClassesListItems}
+                  onEdit={(turma: ClassListItem) => {
+                    const turmaParaModal: Classes = {
+                      id: turma.id,
+                      name: turma.name,
+                      shift: turma.shift,
+                      course: {
+                        id: turma.course?.id ?? 0,
+                        name: turma.course?.name ?? "Desconhecido",
+                        description: "string", 
+                      },
+                    };
+                    setSelectedTurma(turmaParaModal);
                     setIsTurmaModalOpen(true);
                   }}
                 />
@@ -535,7 +560,6 @@ export default function ControlPanel() {
               {filteredCourses.length === 0 ? (
                 <div className={styles.emptyMessage_filter}>
                   <p>Desculpe, nenhum curso encontrado com base na sua pesquisa.</p>
-
                   {hasSearch && (
                     <button
                       className={styles.clearButton_filter}
@@ -582,7 +606,7 @@ export default function ControlPanel() {
 
           <div className={styles.paginationWrapper}>
             <div className={styles.downloadWrapper}>
-              <button  onClick={() => download('modelo_planilha.xlsx')} disabled={isDownloading}>
+              <button onClick={() => download('modelo_planilha.xlsx')} disabled={isDownloading} className={styles.downloadButton}>
                 {isDownloading ? 'Gerando Planilha...' : 'Baixar Modelo'}
               </button>
               <div className={styles.tooltip}>
@@ -640,9 +664,10 @@ export default function ControlPanel() {
           turma={selectedTurma}
           isOpen={isTurmaModalOpen}
           onClose={() => setIsTurmaModalOpen(false)}
-          onSave={handleSaveClasses}
+          onSave={(turmaAtualizada) => void handleSaveClasses(turmaAtualizada)}
         />
       )}
+      <Toast message={toastMessage} isOpen={showSuccessToast} />
       <Footer />
     </div>
   );

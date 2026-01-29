@@ -1,9 +1,21 @@
 import { type Course } from './course';
+
+export interface Classes {
+  id: number;
+  name: string;
+  shift: string;
+  course: {
+    id: number;
+    name: string;
+    description: string;
+  };
+}
+
 export interface StudentPerformance {
   id: number;
   name: string;
   registration: string;
-  studentId: string; // O UUID que vem do Keycloak
+  studentId: string;
   classId: string;
   averageScore: number;
   attendenceRate: number;
@@ -15,12 +27,24 @@ export interface StudentPerformance {
 
 export interface ClassResponse {
   id: number;
-  classId: string; // ID textual da turma (ex: 20231.1.09404.1V)
+  classId: string;
   name: string;
   semester: string;
   shift: string;
   gradleLevel: number;
   course: Course;
   students: StudentPerformance[];
-  comments: any[]; 
+  comments: any[];
+}
+
+export interface ClassListItem {
+  id: number;
+  name: string;
+  semester: string;
+  shift: string;
+  gradleLevel: number;
+  course: {
+    id: number;
+    name: string;
+  };
 }

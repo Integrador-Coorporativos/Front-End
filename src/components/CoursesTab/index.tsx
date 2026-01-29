@@ -1,9 +1,9 @@
-import type { Courses } from "@/types/Courses";
+import type { CoursePanel } from "@/types/CoursesPanel";
 import styles from "./CoursesTab.module.css";
 
 type CoursesTabProps = {
-  cursos: Courses[];
-  onEdit: (curso: Courses) => void;
+  cursos: CoursePanel[];
+  onEdit: (curso: CoursePanel) => void;
 };
 
 export default function CoursesTab({ cursos, onEdit }: CoursesTabProps) {
@@ -16,30 +16,23 @@ export default function CoursesTab({ cursos, onEdit }: CoursesTabProps) {
               <span className={styles.label_courses}>Curso</span>
               <span
                 className={styles.value_courses}
-                title={curso.course}
+                title={curso.courseName}
               >
-                {curso.course}
+                {curso.courseName}
               </span>
             </div>
 
             <div className={styles.infoItem_courses}>
               <span className={styles.label_courses}>Turmas</span>
               <span className={styles.value_courses}>
-                {curso.quantClasses}
-              </span>
-            </div>
-
-            <div className={styles.infoItem_courses}>
-              <span className={styles.label_courses}>Turno</span>
-              <span className={styles.value_courses}>
-                {curso.shift}
+                {curso.totalClasses}
               </span>
             </div>
 
             <div className={styles.infoItem_courses}>
               <span className={styles.label_courses}>Alunos</span>
               <span className={styles.value_courses}>
-                {curso.quantStudent}
+                {curso.totalStudents}
               </span>
             </div>
           </div>
