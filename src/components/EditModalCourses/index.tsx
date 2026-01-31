@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { CoursePanel } from "@/types/CoursesPanel";
+import type { CoursePanel } from "@/types/coursesPanel";
 import styles from "./EditModalCourses.module.css";
 
 type EditModalCoursesProps = {
@@ -15,7 +15,6 @@ export default function EditModalCourses({
   onClose,
   onSave,
 }: EditModalCoursesProps) {
-
   const [localCurso, setLocalCurso] = useState<CoursePanel>(curso);
   const [isDirty, setIsDirty] = useState(false);
 
@@ -29,41 +28,47 @@ export default function EditModalCourses({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(localCurso);
+    setIsDirty(false);
   };
 
   return (
-    <div className={styles.modalOverlay_courses} onClick={onClose}>
-      <div className={styles.modal_courses} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.h2_edit_modal_courses}>Editar Curso</h2>
-
+    <div className={styles.modalOverlay_courses}>
+      <form className={styles.modal_courses} onSubmit={handleSubmit}>
         {isDirty && (
           <div className={styles.alertWarning_courses}>
             <span>Existem alterações não salvas.</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} onChange={() => setIsDirty(true)}>
-          <label>
-            Curso
-            <input
-              type="text"
-              value={localCurso.courseName}
-              onChange={(e) =>
-                setLocalCurso({ ...localCurso, courseName: e.target.value })
-              }
-            />
-          </label>
+        <label>
+          Curso
+          <input
+            type="text"
+            value={localCurso.courseName}
+            onChange={(e) => {
+              setLocalCurso({
+                ...localCurso,
+                courseName: e.target.value,
+              });
+              setIsDirty(true);
+            }}
+          />
+        </label>
 
-          <div className={styles.modalActions_courses}>
-            <button type="button" className={styles.cancelButton_courses} onClick={onClose}>
-              Cancelar
-            </button>
-            <button type="submit" className={styles.saveButton_courses}>
-              Salvar
-            </button>
-          </div>
-        </form>
-      </div>
+        <div className={styles.modalActions_courses}>
+          <button
+            type="button"
+            className={styles.cancelButton_courses}
+            onClick={onClose}
+          >
+            Cancelar
+          </button>
+
+          <button type="submit" className={styles.saveButton_courses}>
+            Salvar
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

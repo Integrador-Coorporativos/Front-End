@@ -21,19 +21,19 @@ export default function ProfessorTab({
             </div>
 
             <div className={styles.infoItem}>
-              <span className={styles.label}>Ano de Ingresso</span>
+              <span className={styles.label}>E-mail</span>
               <span className={styles.value}>
                 {professor.anoIngresso}
               </span>
             </div>
 
             <div className={styles.infoItem}>
-              <span className={styles.label}>Turno</span>
+              <span className={styles.label}>Matricula</span>
               <span className={styles.value}>{professor.turno}</span>
             </div>
 
             <div className={styles.infoItem}>
-              <span className={styles.label}>Alunos</span>
+              <span className={styles.label}>Alunos - remove</span>
               <span className={styles.value}>{professor.alunos}</span>
             </div>
           </div>

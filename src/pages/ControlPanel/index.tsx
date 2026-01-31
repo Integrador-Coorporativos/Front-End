@@ -23,8 +23,10 @@ import type { Professor } from "@/types/Professor";
 import type { ClassPanel } from "@/api/types/classPanel";
 import type { Classes } from "@/api/types/classes";
 import type { Courses } from "@/types/Courses";
-import type { CoursePanel } from "@/types/CoursesPanel";
+import type { CoursePanel } from "@/types/coursesPanel";
 import type { ClassListItem } from "@/api/types/classListItem";
+import type { EditableClass } from "@/types/EditableClass";
+import type { ClassUpdateRequest } from '@/api/types/classUpdate';
 
 import styles from "./ControlPanel.module.css";
 import TooltipIcon from "../../assets/tooltip-icon.png";
@@ -34,6 +36,7 @@ import { useCoursesPanel } from "@/hooks/courses/useCoursesPanel";
 import { useUpdateCourse } from "@/hooks/courses/useUpdateCourse";
 import { useClassesPanel } from "@/hooks/classes/useClassesPanel";
 import { useUpdateClass } from "@/hooks/classes/useUpdateClass";
+import { useStudentManager } from "@/hooks/student/useStudentManager";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -50,13 +53,6 @@ export default function ControlPanel() {
     "alunos" | "professores" | "turmas" | "cursos"
   >("alunos");
 
-  const alunos: Student[] = Array.from({ length: 201 }).map((_, index) => ({
-    nome: `Aluno ${index + 1}`,
-    ira: "61,22",
-    matricula: "20241094040001",
-    curso: "Informática",
-  }));
-
   const professores: Professor[] = Array.from({ length: 40 }).map(
     (_, index) => ({
       nome: `Professor ${index + 1}`,
@@ -65,6 +61,10 @@ export default function ControlPanel() {
       alunos: 34,
     })
   );
+
+  const { alunos, handleEdit, isModalOpen, setIsModalOpen, selectedAluno,
+    handleSave
+  } = useStudentManager();
 
   const { classes, loading: classesLoading, error: classesError } =
     useClassesPanel();
@@ -112,15 +112,13 @@ export default function ControlPanel() {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  const [isAlunoModalOpen, setIsAlunoModalOpen] = useState(false);
-  const [selectedAluno, setSelectedAluno] = useState<Student | null>(null);
-
   const [isProfessorModalOpen, setIsProfessorModalOpen] = useState(false);
   const [selectedProfessor, setSelectedProfessor] = useState<Professor | null>(
     null
   );
 
-  const [selectedTurma, setSelectedTurma] = useState<Classes | null>(null);
+  const [selectedTurma, setSelectedTurma] =
+    useState<EditableClass | null>(null);
   const [isTurmaModalOpen, setIsTurmaModalOpen] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -182,40 +180,42 @@ export default function ControlPanel() {
       course: {
         id: turma.course.id,
         name: turma.course.name,
-        description: "string", 
       },
     };
   }
 
-  const handleSaveClasses = async (turmaAtualizada: import('@/types/Classes').Classes) => {
+
+  const handleSaveClasses = async (turmaAtualizada: any) => {
     try {
-      if (!turmaAtualizada.course) {
-        throw new Error("A turma precisa ter um curso antes de salvar.");
+      const idParaUrl = Number(turmaAtualizada.id || selectedTurma?.id || 0);
+
+      if (idParaUrl === 0) {
+        alert("Erro: ID da turma inválido.");
+        return;
       }
 
-      const turmaParaAPI: import('@/api/types/classes').Classes = {
-        id: turmaAtualizada.id,
-        name: turmaAtualizada.name,
-        shift: turmaAtualizada.shift,
-        course: {
-          id: turmaAtualizada.course.id,
-          name: turmaAtualizada.course.name,
-          description: "", 
-        },
+      const updatePayload = {
+        name: String(turmaAtualizada.name || selectedTurma?.name || ""),
+        shift: String(turmaAtualizada.shift || selectedTurma?.shift || ""),
+        semester: String(turmaAtualizada.semester || (selectedTurma as any)?.semester || "2024.1"),
+        classId: String(turmaAtualizada.classId || (selectedTurma as any)?.classId || "ID-GERADO")
       };
 
-      const updated = await executeUpdateClasses(turmaParaAPI.id, turmaParaAPI);
+      console.log("Enviando ID:", idParaUrl);
+      console.log("Enviando Body:", updatePayload);
 
-      const updatedPanel = mapResponseToPanel(updated); 
-      setLocalClasses(prev =>
-        prev.map(t => (t.id === updatedPanel.id ? updatedPanel : t))
-      );
+      await executeUpdateClasses(idParaUrl, updatePayload as any);
 
       setIsTurmaModalOpen(false);
-    } catch (err) {
-      console.error("Erro ao salvar turma:", err);
+      setToastMessage("Turma atualizada com sucesso!");
+      setShowSuccessToast(true);
+
+    } catch (err: any) {
+      console.error("Erro detalhado no Backend:", err.response?.data);
     }
   };
+
+
 
   const [localClasses, setLocalClasses] = useState<ClassPanel[]>([]);
 
@@ -281,7 +281,7 @@ export default function ControlPanel() {
       return true;
     });
 
-  const filteredClasses = classes.filter((t) => {
+  const filteredClasses = localClasses.filter((t) => {
     const query = search.toLowerCase();
 
     const nomeTurma = t.name?.toLowerCase() ?? "";
@@ -493,10 +493,7 @@ export default function ControlPanel() {
             <div className={styles.tabContent}>
               <StudentTab
                 alunos={currentAlunos}
-                onEdit={(aluno) => {
-                  setSelectedAluno(aluno);
-                  setIsAlunoModalOpen(true);
-                }}
+                onEdit={handleEdit}
               />
             </div>
           )}
@@ -538,16 +535,18 @@ export default function ControlPanel() {
                 <ClassesTab
                   classes={currentClassesListItems}
                   onEdit={(turma: ClassListItem) => {
-                    const turmaParaModal: Classes = {
+                    const turmaParaModal: EditableClass = {
                       id: turma.id,
                       name: turma.name,
                       shift: turma.shift,
-                      course: {
-                        id: turma.course?.id ?? 0,
-                        name: turma.course?.name ?? "Desconhecido",
-                        description: "string", 
-                      },
+                      semester: (turma as any).semester || "2024.1",
+                      classId: (turma as any).classId || "ID-TURMA",
+                      course: turma.course ? {
+                        id: turma.course.id,
+                        name: turma.course.name,
+                      } : null,
                     };
+
                     setSelectedTurma(turmaParaModal);
                     setIsTurmaModalOpen(true);
                   }}
@@ -627,14 +626,11 @@ export default function ControlPanel() {
 
       {selectedAluno && (
         <EditModal
-          aluno={selectedAluno}
+          aluno={selectedAluno as any}
           cursos={cursosDisponiveisTeste}
-          isOpen={isAlunoModalOpen}
-          onClose={() => setIsAlunoModalOpen(false)}
-          onSave={(alunoAtualizado) => {
-            console.log("Aluno salvo:", alunoAtualizado);
-            setIsAlunoModalOpen(false);
-          }}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSave as any}
         />
       )}
 
@@ -664,7 +660,7 @@ export default function ControlPanel() {
           turma={selectedTurma}
           isOpen={isTurmaModalOpen}
           onClose={() => setIsTurmaModalOpen(false)}
-          onSave={(turmaAtualizada) => void handleSaveClasses(turmaAtualizada)}
+          onSave={handleSaveClasses}
         />
       )}
       <Toast message={toastMessage} isOpen={showSuccessToast} />
