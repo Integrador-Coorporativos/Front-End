@@ -1,21 +1,17 @@
 import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
 import Header from "../../components/Header";
 import BreadCrumb from "../../components/BreadCrumb";
 import FilterButton from "../../components/FilterButton";
 import Pagination from "../../components/Pagination";
 import Footer from "../../components/Footer";
-
 import styles from "./Classification.module.css";
-
 import Phone from "../../assets/logo-phone.png";
 import Participation from "../../assets/participation-icon.png";
 import Performance from "../../assets/perfomance-icon.png";
 import Frequency from "../../assets/frequency-icon.png";
 import Uniform from "../../assets/uniform-icon.png";
 import Behavior from "../../assets/behavior-icon.png";
-
 import { useAllClassPerformance } from "@/hooks/performance/useAllClassPerformance";
 
 const ITEMS_PER_PAGE = 10;
@@ -35,12 +31,12 @@ export default function Classifications() {
   }, [loading, error, performance]);
 
   const cards = [
-    { title: "Uso do Celular", icon: Phone },
-    { title: "Participação", icon: Participation },
-    { title: "Desempenho", icon: Performance },
-    { title: "Frequência", icon: Frequency },
-    { title: "Fardamento", icon: Uniform },
-    { title: "Comportamento", icon: Behavior },
+    { title: "Uso do Celular", icon: Phone, key: "celular" as const },
+    { title: "Participação", icon: Participation, key: "participacao" as const },
+    { title: "Desempenho", icon: Performance, key: "desempenho" as const },
+    { title: "Frequência", icon: Frequency, key: "frequencia" as const },
+    { title: "Fardamento", icon: Uniform, key: "fardamento" as const },
+    { title: "Comportamento", icon: Behavior, key: "comportamento" as const },
   ];
 
   const formatScore = (v: unknown) => {
@@ -99,6 +95,30 @@ export default function Classifications() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentItems = normalized.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
+  const highlights = useMemo(() => {
+    if (!normalized.length) return null;
+
+    const pickBest = (key: keyof typeof normalized[number]["notas"]) => {
+      return [...normalized].sort((a, b) => {
+        const va = Number(a.notas[key]);
+        const vb = Number(b.notas[key]);
+        if (!Number.isFinite(vb) && !Number.isFinite(va)) return 0;
+        if (!Number.isFinite(vb)) return -1;
+        if (!Number.isFinite(va)) return 1;
+        return vb - va;
+      })[0];
+    };
+
+    return {
+      celular: pickBest("celular"),
+      participacao: pickBest("participacao"),
+      desempenho: pickBest("desempenho"),
+      frequencia: pickBest("frequencia"),
+      fardamento: pickBest("fardamento"),
+      comportamento: pickBest("comportamento"),
+    };
+  }, [normalized]);
+
   return (
     <div>
       <Header />
@@ -110,27 +130,63 @@ export default function Classifications() {
       <div className={styles.highlightsContainer}>
         <h2 className={styles.title}>Destaques</h2>
 
-        <div className={styles.grid}>
-          {cards.map((item, index) => (
-            <div key={index} className={styles.card}>
-              <div className={styles.cardHeader}>
-                <img
-                  src={item.icon}
-                  alt={`${item.title}-icon`}
-                  className={styles.cardIcon}
-                />
-                <strong className={styles.cardTitle}>{item.title}</strong>
-              </div>
+        {loading && <p>Carregando destaques...</p>}
 
-              <div className={styles.infoRow}>
-                <span className={styles.cardSubtitle}>
-                  Informática 4 Vespertino
-                </span>
-                <span className={styles.cardNota}>5.0</span>
-              </div>
-            </div>
-          ))}
-        </div>
+        {error && (
+          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+            <p style={{ margin: 0 }}>{error}</p>
+            <button onClick={refresh}>Tentar novamente</button>
+          </div>
+        )}
+
+        {!loading && !error && normalized.length === 0 && (
+          <p>Sem dados de performance para exibir.</p>
+        )}
+
+        {!loading && !error && highlights && (
+          <div className={styles.grid}>
+            {cards.map((item) => {
+              const best = highlights[item.key];
+
+              const scoreByKey: Record<(typeof item.key), unknown> = {
+                celular: best.notas.celular,
+                participacao: best.notas.participacao,
+                desempenho: best.notas.desempenho,
+                frequencia: best.notas.frequencia,
+                fardamento: best.notas.fardamento,
+                comportamento: best.notas.comportamento,
+              };
+
+              const score = scoreByKey[item.key];
+
+              return (
+                <div
+                  key={item.title}
+                  className={styles.card}
+                  onClick={() => navigate(`/classificacao/${best.id}`)}
+                  style={{ cursor: "pointer" }}
+                  title="Clique para ver detalhes"
+                >
+                  <div className={styles.cardHeader}>
+                    <img
+                      src={item.icon}
+                      alt={`${item.title}-icon`}
+                      className={styles.cardIcon}
+                    />
+                    <strong className={styles.cardTitle}>{item.title}</strong>
+                  </div>
+
+                  <div className={styles.infoRow}>
+                    <span className={styles.cardSubtitle}>
+                      {best.curso} {best.periodo} {best.turno}
+                    </span>
+                    <span className={styles.cardNota}>{formatScore(score)}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className={styles.classificationContainer}>
