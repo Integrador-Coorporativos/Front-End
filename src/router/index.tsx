@@ -28,7 +28,10 @@ export const router = createBrowserRouter([
   },
   {
     path: "/minhas-turmas",
-    element: < MinhasTurmas />,
+    children: [
+      { index: true, element: <MinhasTurmas /> },
+      { path: ":id", element: <ClassesDetail /> },
+    ],
   },
   {
     path: "/classificacao/:id",
@@ -38,9 +41,5 @@ export const router = createBrowserRouter([
     path: "/painel_controle",
     element: <ControlPanel />
   },
-  {
-    path: "/turma/:id",
-    element: <ClassesDetail />
-  }
 ]);
 export const rotas = withFaroRouterInstrumentation(router);

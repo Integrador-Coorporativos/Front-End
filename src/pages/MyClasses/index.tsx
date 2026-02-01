@@ -38,7 +38,7 @@ const [currentPage, setCurrentPage] = useState(1);
         <div className={styles.containerCards}>
           {currentItems.map((turma, index) => (
             <Link 
-              to={`/turma/${turma.id}`}
+              to={`/minhas-turmas/${turma.id}`}
               key={turma.id || index} 
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
