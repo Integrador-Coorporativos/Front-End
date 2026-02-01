@@ -1,8 +1,8 @@
 import Header from "../../components/Header"
 import BreadCrumb from "../../components/BreadCrumb"
 import styles from "./RankingDetail.module.css"
-import { useState } from "react"
-
+import { useMemo, useState } from "react"
+import { useParams } from "react-router-dom"
 import Phone from "../../assets/logo-phone.png"
 import Participation from "../../assets/participation-icon.png"
 import Performance from "../../assets/perfomance-icon.png"
@@ -10,8 +10,8 @@ import Frequency from "../../assets/frequency-icon.png"
 import Uniform from "../../assets/uniform-icon.png"
 import Behavior from "../../assets/behavior-icon.png"
 import Footer from "../../components/Footer"
-
 import RadarPerformanceChart from "../../components/RadarPerformanceChart"
+import { useClassPerformanceByYear } from "../../hooks/performance/useClassPerformanceByYear"
 
 type Avaliacao = {
   frequencia: number
@@ -32,88 +32,86 @@ type ChartData = {
   value: number
 }
 
-function calcularMediaGeral(
-  dataByYear: Record<string, ChartData[]>
-): ChartData[] {
-  const acumulado: Record<
-    string,
-    { total: number; count: number }
-  > = {}
-
-  Object.values(dataByYear).forEach((yearData) => {
-    yearData.forEach(({ label, value }) => {
-      if (!acumulado[label]) {
-        acumulado[label] = { total: 0, count: 0 }
-      }
-      acumulado[label].total += value
-      acumulado[label].count += 1
-    })
-  })
-
-  return Object.entries(acumulado).map(
-    ([label, { total, count }]) => ({
-      label,
-      value: Number((total / count).toFixed(1)),
-    })
-  )
-}
-
 export default function Classifications() {
+  const { id } = useParams()
+  const classId = Number(id)
+
   const cards = [
-    { title: "Uso do Celular", icon: Phone },
-    { title: "Participação", icon: Participation },
-    { title: "Desempenho", icon: Performance },
-    { title: "Frequência", icon: Frequency },
-    { title: "Fardamento", icon: Uniform },
-    { title: "Comportamento", icon: Behavior },
-  ]
+    { key: "cellPhoneUse", title: "Uso do Celular", icon: Phone },
+    { key: "participation", title: "Participação", icon: Participation },
+    { key: "performance", title: "Desempenho", icon: Performance },
+    { key: "frequency", title: "Frequência", icon: Frequency },
+    { key: "unifirm", title: "Fardamento", icon: Uniform },
+    { key: "behavior", title: "Comportamento", icon: Behavior },
+  ] as const
 
-  const [activeTab, setActiveTab] = useState<
-    "avaliar" | "grafico"
-  >("grafico")
+  const [activeTab, setActiveTab] = useState<"avaliar" | "grafico">("grafico")
+  const [selectedYear, setSelectedYear] = useState<string>("2026")
 
-  const [selectedYear, setSelectedYear] = useState("Geral")
+  const years = ["2026", "2027", "2028", "2029"]
 
-  const years = ["Geral", "2022", "2023", "2024", "2025"]
+  const { data, loading, error, refresh } = useClassPerformanceByYear(
+    Number.isFinite(classId) ? classId : undefined,
+    Number(selectedYear)
+  )
 
-  const chartDataByYear: Record<string, ChartData[]> = {
-    "2022": [
-      { label: "Frequência", value: 4.1 },
-      { label: "Participação", value: 3.9 },
-      { label: "Desempenho", value: 4.0 },
-      { label: "Comportamento", value: 4.2 },
-      { label: "Fardamento", value: 3.8 },
-      { label: "Uso do Celular", value: 3.6 },
-    ],
-    "2023": [
-      { label: "Frequência", value: 4.3 },
-      { label: "Participação", value: 4.0 },
-      { label: "Desempenho", value: 4.4 },
-      { label: "Comportamento", value: 4.6 },
-      { label: "Fardamento", value: 4.0 },
-      { label: "Uso do Celular", value: 3.8 },
-    ],
-    "2024": [
-      { label: "Frequência", value: 4.6 },
-      { label: "Participação", value: 4.4 },
-      { label: "Desempenho", value: 4.7 },
-      { label: "Comportamento", value: 4.8 },
-      { label: "Fardamento", value: 4.3 },
-      { label: "Uso do Celular", value: 4.0 },
-    ],
-    "2025": [
-      { label: "Frequência", value: 4.8 },
-      { label: "Participação", value: 4.6 },
-      { label: "Desempenho", value: 4.9 },
-      { label: "Comportamento", value: 5.0 },
-      { label: "Fardamento", value: 4.5 },
-      { label: "Uso do Celular", value: 4.2 },
-    ],
-  }
+  const titleText = data
+    ? `${data.courseName} ${data.gradleLevel} ${data.shift}`
+    : "Turma"
 
-  const chartDataWithGeral: Record<string, ChartData[]> = {
-    Geral: calcularMediaGeral(chartDataByYear),
-    ...chartDataByYear,
+  const averageText = data ? data.averageScore.toFixed(1) : "-"
+  const averageRankText = data ? `#${data.rank.averageRank}` : "#-"
+
+  const radarData: ChartData[] = useMemo(() => {
+    if (!data) return []
+
+    return [
+      { label: "Frequência", value: data.frequencyScore },
+      { label: "Participação", value: data.participationScore },
+      { label: "Desempenho", value: data.performanceScore },
+      { label: "Comportamento", value: data.behaviorScore },
+      { label: "Fardamento", value: data.unifirmScore },
+      { label: "Uso do Celular", value: data.cellPhoneUseScore },
+    ]
+  }, [data])
+
+  const getCardScoreAndRank = (key: (typeof cards)[number]["key"]) => {
+    if (!data) return { score: "-", rank: "-" }
+
+    switch (key) {
+      case "frequency":
+        return {
+          score: data.frequencyScore.toFixed(1),
+          rank: `#${data.rank.frequencyRank}`,
+        }
+      case "unifirm":
+        return {
+          score: data.unifirmScore.toFixed(1),
+          rank: `#${data.rank.unifirmRank}`,
+        }
+      case "behavior":
+        return {
+          score: data.behaviorScore.toFixed(1),
+          rank: `#${data.rank.behaviorRank}`,
+        }
+      case "participation":
+        return {
+          score: data.participationScore.toFixed(1),
+          rank: `#${data.rank.participationRank}`,
+        }
+      case "performance":
+        return {
+          score: data.performanceScore.toFixed(1),
+          rank: `#${data.rank.performanceRank}`,
+        }
+      case "cellPhoneUse":
+        return {
+          score: data.cellPhoneUseScore.toFixed(1),
+          rank: `#${data.rank.cellPhoneUseRank}`,
+        }
+      default:
+        return { score: "-", rank: "-" }
+    }
   }
 
   const [avaliacao, setAvaliacao] = useState<Avaliacao>({
@@ -126,10 +124,7 @@ export default function Classifications() {
   })
 
   const handleSelect = (campo: keyof Avaliacao, valor: number) => {
-    setAvaliacao((prev) => ({
-      ...prev,
-      [campo]: valor,
-    }))
+    setAvaliacao((prev) => ({ ...prev, [campo]: valor }))
   }
 
   const Rating = ({ label, campo }: RatingProps) => (
@@ -159,28 +154,43 @@ export default function Classifications() {
         items={[
           { label: "Página Inicial", to: "/" },
           { label: "Classificações", to: "/classificacao/:id" },
-          { label: "Turma nome", to: "/classificacao/:id" },
+          { label: "Turma", to: `/classificacao/${id}` },
         ]}
       />
 
       <div className={styles.container}>
-        <p className={styles.titledc}>Informática 4º Vespertino <b>#1</b></p>
-        <p className={styles.subtitledc}>
+        <p className={styles.titledc}>
+          {titleText} <b>{averageRankText}</b>
         </p>
 
+        <p className={styles.subtitledc}>
+
+        </p>
+
+        {error && (
+          <div style={{ marginTop: 8 }}>
+            <p style={{ marginBottom: 6 }}>{error}</p>
+            <button onClick={refresh}>Tentar novamente</button>
+          </div>
+        )}
+
         <div className={styles.cardsGrid}>
-          {cards.map((card, index) => (
-            <div key={index} className={styles.card}>
-              <img src={card.icon} alt={card.title} />
-              <div className={styles.cardInfo}>
-                <span className={styles.cardTitle}>
-                  {card.title}
-                </span>
-                <strong className={styles.cardScore}>5.0</strong>
+          {cards.map((card, index) => {
+            const { score, rank } = getCardScoreAndRank(card.key)
+
+            return (
+              <div key={index} className={styles.card}>
+                <img src={card.icon} alt={card.title} />
+                <div className={styles.cardInfo}>
+                  <span className={styles.cardTitle}>{card.title}</span>
+                  <strong className={styles.cardScore}>
+                    {loading ? "..." : score}
+                  </strong>
+                </div>
+                <span className={styles.rank}>{loading ? "#..." : rank}</span>
               </div>
-              <span className={styles.rank}>#1</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -207,11 +217,7 @@ export default function Classifications() {
               {years.map((year) => (
                 <button
                   key={year}
-                  className={
-                    selectedYear === year
-                      ? styles.filterActive
-                      : ""
-                  }
+                  className={selectedYear === year ? styles.filterActive : ""}
                   onClick={() => setSelectedYear(year)}
                 >
                   {year}
@@ -220,18 +226,18 @@ export default function Classifications() {
             </div>
 
             <div className={styles.graphPlaceholder}>
-              <RadarPerformanceChart
-                data={chartDataWithGeral[selectedYear]}
-              />
+              {loading ? (
+                <p>Carregando gráfico...</p>
+              ) : (
+                <RadarPerformanceChart data={radarData} />
+              )}
             </div>
           </div>
         )}
 
         {activeTab === "avaliar" && (
           <div className={styles.evaluateContainer}>
-            <h3 className={styles.h3_evaluation_class}>
-              Avalie a turma Informática - 4 - V
-            </h3>
+            <h3 className={styles.h3_evaluation_class}>Avalie a turma</h3>
 
             <div className={styles.grid}>
               <Rating label="Frequência" campo="frequencia" />
@@ -254,9 +260,7 @@ export default function Classifications() {
         <div className={styles.commentsContainer}>
           <h3 className={styles.commentsTitle}>Comentários</h3>
 
-          <p className={styles.commentsClass}>
-            Informática 4 Vespertino
-          </p>
+          <p className={styles.commentsClass}>Informática 4 Vespertino</p>
 
           <div className={styles.commentsList}>
             <div className={styles.commentItem}>
@@ -269,20 +273,14 @@ export default function Classifications() {
               <strong>Ana Silva</strong>
               <span>22 nov. de 2025</span>
               <p>
-                Bom desempenho geral, mas precisam melhorar a
-                frequência.
+                Bom desempenho geral, mas precisam melhorar a frequência.
               </p>
             </div>
           </div>
 
           <div className={styles.newComment}>
-            <input
-              type="text"
-              placeholder="Adicionar comentário..."
-            />
-            <button className={styles.postButton}>
-              Postar
-            </button>
+            <input type="text" placeholder="Adicionar comentário..." />
+            <button className={styles.postButton}>Postar</button>
           </div>
         </div>
       )}
