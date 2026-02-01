@@ -6,7 +6,7 @@ import FilterButton from "../../components/FilterButton";
 import ListClassCard from "../../components/ListClassCard";
 import Pagination from "../../components/Pagination";
 import Footer from "../../components/Footer";
-import { useClasses } from "@/hooks/classes/useAllClasses"; //Atenção: Endpoint de turmas de um professor ainda não foi feito
+import { useClasses } from "@/hooks/classes/useMyClasses"; //Atenção: Endpoint de turmas de um professor ainda não foi feito
 
 const ITEMS_PER_PAGE = 9;
 

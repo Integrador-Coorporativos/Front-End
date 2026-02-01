@@ -32,6 +32,7 @@ export interface ClassResponse {
   semester: string;
   shift: string;
   gradleLevel: number;
+  teacherLinked: boolean;
   course: Course;
   students: StudentPerformance[];
   comments: any[];
@@ -43,6 +44,7 @@ export interface ClassListItem {
   semester: string;
   shift: string;
   gradleLevel: number;
+  teacherLinked: boolean;
   course: {
     id: number;
     name: string;
