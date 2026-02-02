@@ -1,4 +1,4 @@
-.h1_content_controlpanel_nav {
+/* .h1_content_controlpanel_nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -38,7 +38,107 @@
   background: #008236;
   color: #ffffff;
   font-weight: 600;
+} */
+
+  
+.h1_content_controlpanel_nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    /* ESSENCIAL PARA RESPONSIVIDADE */
+    flex-wrap: wrap; 
+    gap: 16px; /* Se a tela encolher, o título e os botões não grudam */
+
+    width: 100%;
+    max-width: 1300px; 
+    margin: 10px auto 8px;
+    padding: 0 30px; 
+    
+    /* border: 1px solid black;  */
 }
+
+.h1_content_controlpanel {
+    font-size: clamp(24px, 4vw, 32px); /* Fonte responsiva automática */
+    font-weight: 600;
+    color: rgb(0, 0, 0);
+    margin: 0;
+    line-height: 1.2;
+    white-space: nowrap; /* Impede o título de quebrar linha se tiver espaço */
+}
+
+/* Estilo para a div dos botões que você comentou */
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto; /* Se tiver muitos botões, permite scroll lateral no celular */
+  padding-bottom: 5px; /* Evita cortar o foco do botão no scroll */
+}
+
+.tab {
+  padding: 10px 60px;
+  border-radius: 8px;
+  border: 1.5px solid #008236;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  margin-bottom: 3px;
+}
+
+.active {
+  background: #008236;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+
+
+
+
+
+
+
+/* Responsividade */
+
+/* --- RESPONSIVIDADE (Abaixo de 600px) --- */
+@media (max-width: 600px) {
+  /* 1. Resetar o container do topo */
+  .h1_content_controlpanel_nav {
+    flex-direction: column;
+    align-items: center;
+    padding: 0 15px; /* Respiro de segurança lateral */
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  /* 2. Corrigir a div das Tabs */
+  .tabs {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr; /* Divide a tela em 2 colunas iguais */
+    gap: 10px;
+    width: 100% !important; /* Ocupa a largura total disponível */
+    max-width: 500px; 
+    margin: 0 auto !important; /* Força a centralização */
+    padding: 0; /* Remove paddings que possam estar somando na largura */
+  }
+
+  /* 3. Ajustar os botões (O SEGREDO) */
+  .tab {
+    width: 100% !important;
+    /* REMOVA o padding lateral fixo (os 60px) aqui dentro */
+    padding: 12px 0 !important; 
+    font-size: 14px;
+    text-align: center;
+    box-sizing: border-box; /* Garante que a borda não aumente o tamanho */
+  }
+}
+
+/* RESP */
+
+
 
 .content {
   margin-top: 20px;
@@ -269,6 +369,14 @@
   display: flex;
   align-items: center;
   gap: 21px; 
+}
+
+.loadingMessage {
+  padding: 34px;
+  text-align: center;
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
 }
 
 .emptyMessage_filter {

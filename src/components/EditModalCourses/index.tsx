@@ -32,8 +32,10 @@ export default function EditModalCourses({
   };
 
   return (
-    <div className={styles.modalOverlay_courses}>
-      <form className={styles.modal_courses} onSubmit={handleSubmit}>
+    <div className={styles.modalOverlay_courses} onClick={onClose}>
+      <form className={styles.modal_courses} onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
+        <h2 className={styles.h2_edit_modal_courses}>Editar Turma</h2>
+
         {isDirty && (
           <div className={styles.alertWarning_courses}>
             <span>Existem alterações não salvas.</span>
@@ -41,7 +43,7 @@ export default function EditModalCourses({
         )}
 
         <label>
-          Curso
+          Nome ( curso )
           <input
             type="text"
             value={localCurso.courseName}
