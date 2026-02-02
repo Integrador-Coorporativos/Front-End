@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
+:root {
+  --page-max: 1200px;
+  --page-pad: 16px;
+}
+
 .page {
   width: 100%;
 }
@@ -10,7 +15,9 @@
   border-radius: 8px;
   padding: 20px 30px;
   margin: 20px auto;
-  width: min(1160px, 90%);
+
+  width: min(var(--page-max), calc(100% - (var(--page-pad) * 2)));
+
   display: flex;
   flex-direction: column;
   gap: 20px;
