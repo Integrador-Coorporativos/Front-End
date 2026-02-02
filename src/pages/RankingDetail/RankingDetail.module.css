@@ -282,6 +282,7 @@ body {
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
+  cursor: pointer;
 }
 
 .confirm {
@@ -290,6 +291,7 @@ body {
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
+  cursor: pointer;
 }
 
 .commentsTitle {
@@ -351,4 +353,5 @@ body {
   padding: 8px 16px;
   border-radius: 6px;
   border: none;
+  cursor: pointer;
 }

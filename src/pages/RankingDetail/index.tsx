@@ -12,6 +12,7 @@ import Behavior from "../../assets/behavior-icon.png"
 import Footer from "../../components/Footer"
 import RadarPerformanceChart from "../../components/RadarPerformanceChart"
 import { useClassPerformanceByYear } from "../../hooks/performance/useClassPerformanceByYear"
+import { useClassComments } from "../../hooks/comments/useClassComments"
 
 type Avaliacao = {
   frequencia: number
@@ -32,6 +33,17 @@ type ChartData = {
   value: number
 }
 
+function formatDatePtBR(dateStr: string) {
+  if (!dateStr) return "-"
+  const d = new Date(dateStr)
+  if (Number.isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  })
+}
+
 export default function Classifications() {
   const { id } = useParams()
   const classId = Number(id)
@@ -50,64 +62,77 @@ export default function Classifications() {
 
   const years = ["2026", "2027", "2028", "2029"]
 
-  const { data, loading, error, refresh } = useClassPerformanceByYear(
+  const {
+    data: performanceData,
+    loading: performanceLoading,
+    error: performanceError,
+    refresh: refreshPerformance,
+  } = useClassPerformanceByYear(
     Number.isFinite(classId) ? classId : undefined,
     Number(selectedYear)
   )
 
-  const titleText = data
-    ? `${data.courseName} ${data.gradleLevel} ${data.shift}`
+  const {
+    data: comments,
+    loading: commentsLoading,
+    error: commentsError,
+    refresh: refreshComments,
+  } = useClassComments(Number.isFinite(classId) ? classId : undefined)
+
+  const titleText = performanceData
+    ? `${performanceData.courseName} ${performanceData.gradleLevel} ${performanceData.shift}`
     : "Turma"
 
-  const averageText = data ? data.averageScore.toFixed(1) : "-"
-  const averageRankText = data ? `#${data.rank.averageRank}` : "#-"
+  const averageRankText = performanceData
+    ? `#${performanceData.rank.averageRank}`
+    : "#-"
 
   const radarData: ChartData[] = useMemo(() => {
-    if (!data) return []
+    if (!performanceData) return []
 
     return [
-      { label: "Frequência", value: data.frequencyScore },
-      { label: "Participação", value: data.participationScore },
-      { label: "Desempenho", value: data.performanceScore },
-      { label: "Comportamento", value: data.behaviorScore },
-      { label: "Fardamento", value: data.unifirmScore },
-      { label: "Uso do Celular", value: data.cellPhoneUseScore },
+      { label: "Frequência", value: performanceData.frequencyScore },
+      { label: "Participação", value: performanceData.participationScore },
+      { label: "Desempenho", value: performanceData.performanceScore },
+      { label: "Comportamento", value: performanceData.behaviorScore },
+      { label: "Fardamento", value: performanceData.unifirmScore },
+      { label: "Uso do Celular", value: performanceData.cellPhoneUseScore },
     ]
-  }, [data])
+  }, [performanceData])
 
   const getCardScoreAndRank = (key: (typeof cards)[number]["key"]) => {
-    if (!data) return { score: "-", rank: "-" }
+    if (!performanceData) return { score: "-", rank: "-" }
 
     switch (key) {
       case "frequency":
         return {
-          score: data.frequencyScore.toFixed(1),
-          rank: `#${data.rank.frequencyRank}`,
+          score: performanceData.frequencyScore.toFixed(1),
+          rank: `#${performanceData.rank.frequencyRank}`,
         }
       case "unifirm":
         return {
-          score: data.unifirmScore.toFixed(1),
-          rank: `#${data.rank.unifirmRank}`,
+          score: performanceData.unifirmScore.toFixed(1),
+          rank: `#${performanceData.rank.unifirmRank}`,
         }
       case "behavior":
         return {
-          score: data.behaviorScore.toFixed(1),
-          rank: `#${data.rank.behaviorRank}`,
+          score: performanceData.behaviorScore.toFixed(1),
+          rank: `#${performanceData.rank.behaviorRank}`,
         }
       case "participation":
         return {
-          score: data.participationScore.toFixed(1),
-          rank: `#${data.rank.participationRank}`,
+          score: performanceData.participationScore.toFixed(1),
+          rank: `#${performanceData.rank.participationRank}`,
         }
       case "performance":
         return {
-          score: data.performanceScore.toFixed(1),
-          rank: `#${data.rank.performanceRank}`,
+          score: performanceData.performanceScore.toFixed(1),
+          rank: `#${performanceData.rank.performanceRank}`,
         }
       case "cellPhoneUse":
         return {
-          score: data.cellPhoneUseScore.toFixed(1),
-          rank: `#${data.rank.cellPhoneUseRank}`,
+          score: performanceData.cellPhoneUseScore.toFixed(1),
+          rank: `#${performanceData.rank.cellPhoneUseRank}`,
         }
       default:
         return { score: "-", rank: "-" }
@@ -138,6 +163,7 @@ export default function Classifications() {
               avaliacao[campo] === num ? styles.active : ""
             }`}
             onClick={() => handleSelect(campo, num)}
+            type="button"
           >
             {num}
           </button>
@@ -163,14 +189,14 @@ export default function Classifications() {
           {titleText} <b>{averageRankText}</b>
         </p>
 
-        <p className={styles.subtitledc}>
+        <p className={styles.subtitledc}></p>
 
-        </p>
-
-        {error && (
+        {performanceError && (
           <div style={{ marginTop: 8 }}>
-            <p style={{ marginBottom: 6 }}>{error}</p>
-            <button onClick={refresh}>Tentar novamente</button>
+            <p style={{ marginBottom: 6 }}>{performanceError}</p>
+            <button onClick={refreshPerformance} type="button">
+              Tentar novamente
+            </button>
           </div>
         )}
 
@@ -184,10 +210,12 @@ export default function Classifications() {
                 <div className={styles.cardInfo}>
                   <span className={styles.cardTitle}>{card.title}</span>
                   <strong className={styles.cardScore}>
-                    {loading ? "..." : score}
+                    {performanceLoading ? "..." : score}
                   </strong>
                 </div>
-                <span className={styles.rank}>{loading ? "#..." : rank}</span>
+                <span className={styles.rank}>
+                  {performanceLoading ? "#..." : rank}
+                </span>
               </div>
             )
           })}
@@ -199,6 +227,7 @@ export default function Classifications() {
           <button
             className={activeTab === "grafico" ? styles.active : ""}
             onClick={() => setActiveTab("grafico")}
+            type="button"
           >
             Gráfico de Desempenho
           </button>
@@ -206,6 +235,7 @@ export default function Classifications() {
           <button
             className={activeTab === "avaliar" ? styles.active : ""}
             onClick={() => setActiveTab("avaliar")}
+            type="button"
           >
             Avaliar
           </button>
@@ -219,6 +249,7 @@ export default function Classifications() {
                   key={year}
                   className={selectedYear === year ? styles.filterActive : ""}
                   onClick={() => setSelectedYear(year)}
+                  type="button"
                 >
                   {year}
                 </button>
@@ -226,7 +257,7 @@ export default function Classifications() {
             </div>
 
             <div className={styles.graphPlaceholder}>
-              {loading ? (
+              {performanceLoading ? (
                 <p>Carregando gráfico...</p>
               ) : (
                 <RadarPerformanceChart data={radarData} />
@@ -249,8 +280,12 @@ export default function Classifications() {
             </div>
 
             <div className={styles.actions}>
-              <button className={styles.cancel}>Cancelar</button>
-              <button className={styles.confirm}>Confirmar</button>
+              <button className={styles.cancel} type="button">
+                Cancelar
+              </button>
+              <button className={styles.confirm} type="button">
+                Confirmar
+              </button>
             </div>
           </div>
         )}
@@ -260,27 +295,38 @@ export default function Classifications() {
         <div className={styles.commentsContainer}>
           <h3 className={styles.commentsTitle}>Comentários</h3>
 
-          <p className={styles.commentsClass}>Informática 4 Vespertino</p>
+          <p className={styles.commentsClass}>{titleText}</p>
+
+          {commentsError && (
+            <div style={{ marginTop: 8, marginBottom: 8 }}>
+              <p style={{ marginBottom: 6 }}>{commentsError}</p>
+              <button onClick={refreshComments} type="button">
+                Tentar novamente
+              </button>
+            </div>
+          )}
 
           <div className={styles.commentsList}>
-            <div className={styles.commentItem}>
-              <strong>Sergio Pérez</strong>
-              <span>21 nov. de 2025</span>
-              <p>Turma muito participativa.</p>
-            </div>
-
-            <div className={styles.commentItem}>
-              <strong>Ana Silva</strong>
-              <span>22 nov. de 2025</span>
-              <p>
-                Bom desempenho geral, mas precisam melhorar a frequência.
-              </p>
-            </div>
+            {commentsLoading ? (
+              <p>Carregando comentários...</p>
+            ) : comments.length === 0 ? (
+              <p>Nenhum comentário ainda.</p>
+            ) : (
+              comments.map((c) => (
+                <div key={c.id} className={styles.commentItem}>
+                  <strong>{c.professorName}</strong>
+                  <span>{formatDatePtBR(c.createdAt)}</span>
+                  <p>{c.comment}</p>
+                </div>
+              ))
+            )}
           </div>
 
           <div className={styles.newComment}>
             <input type="text" placeholder="Adicionar comentário..." />
-            <button className={styles.postButton}>Postar</button>
+            <button className={styles.postButton} type="button">
+              Postar
+            </button>
           </div>
         </div>
       )}
