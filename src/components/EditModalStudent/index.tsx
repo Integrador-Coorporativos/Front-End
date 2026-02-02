@@ -58,79 +58,101 @@ export default function EditModal({
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <h2 className={styles.h2_edit_modal}>Editar Aluno</h2>
+        <header className={styles.modalHeader}>
+          <h2 className={styles.h2_edit_modal}>Editar Aluno</h2>
+          <button className={styles.closeX} onClick={onClose}>&times;</button>
+        </header>
 
         {isDirty && (
           <div className={styles.alertWarning}>
-            <h2 className={styles.h2_alert_message}>Existem alterações não salvas.</h2>
+            <span className={styles.h2_alert_message}>Existem alterações não salvas neste formulário.</span>
           </div>
         )}
 
-        <form onChange={() => setIsDirty(true)} onSubmit={handleSubmit}>
-          <label>
-  Aluno
-  <input
-    type="text"
-    value={localAluno.name || ""} 
-    onChange={(e) => setLocalAluno({ ...localAluno, name: e.target.value })}
-  />
-</label>
-
-<label>
-  IRA
-  <input
-    type="number"
-    value={localAluno.ira || 0} 
-    onChange={(e) => setLocalAluno({ ...localAluno, ira: parseFloat(e.target.value) })}
-  />
-</label>
-          <label>
-            Matrícula
-            <input
-              type="text"
-              readOnly
-              value={localAluno.studentId}
-            />
-          </label>
-
-          <label>
-            Curso / Turma
-            <div className={styles.selectWrapper} ref={dropdownRef}>
+        <form onSubmit={handleSubmit}>
+          <div className={styles.formGroup}>
+            <label className={styles.inputLabel}>
+              NOME DO ALUNO
               <input
-                readOnly
-                className={styles.customSelect}
-                value={localAluno.classId}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsDropdownOpen(!isDropdownOpen);
+                type="text"
+                className={styles.mainInput}
+                value={localAluno.name || ""} 
+                onChange={(e) => {
+                  setLocalAluno({ ...localAluno, name: e.target.value });
+                  setIsDirty(true);
                 }}
               />
-              {isDropdownOpen && (
-                <div className={styles.optionsList}>
-                  {cursos.map((curso) => (
-                    <div
-                      key={curso}
-                      className={styles.optionItem}
-                      onMouseDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleSelectCurso(curso);
-                      }}
-                    >
-                      {curso}
-                    </div>
-                  ))}
-                </div>
-              )}
+            </label>
+          </div>
+
+          <div className={styles.row}>
+            <div className={styles.formGroup} style={{ flex: 1 }}>
+              <label className={styles.inputLabel}>
+                I.R.A
+                <input
+                  type="number"
+                  step="0.01"
+                  className={styles.mainInput}
+                  value={localAluno.ira || 0} 
+                  onChange={(e) => {
+                    setLocalAluno({ ...localAluno, ira: parseFloat(e.target.value) });
+                    setIsDirty(true);
+                  }}
+                />
+              </label>
             </div>
-          </label>
+
+            <div className={styles.formGroup} style={{ flex: 2 }}>
+              <label className={styles.inputLabel}>
+                MATRÍCULA (SISTEMA)
+                <input
+                  type="text"
+                  readOnly
+                  className={`${styles.mainInput} ${styles.readOnlyInput}`}
+                  value={aluno.registration || "N/A"}
+                  title="A matrícula é um identificador único e não pode ser alterada."
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.inputLabel}>
+              CURSO / TURMA
+              <div className={styles.selectWrapper} ref={dropdownRef}>
+                <input
+                  readOnly
+                  className={`${styles.customSelect} ${isDropdownOpen ? styles.activeSelect : ""}`}
+                  value={localAluno.classId || "Selecione o curso"}
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                />
+                {isDropdownOpen && (
+                  <div className={styles.optionsList}>
+                    {cursos.map((curso) => (
+                      <div
+                        key={curso}
+                        className={`${styles.optionItem} ${localAluno.classId === curso ? styles.selectedOption : ""}`}
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleSelectCurso(curso);
+                        }}
+                      >
+                        {curso}
+                        {localAluno.classId === curso && <span className={styles.checkIcon}>✓</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </label>
+          </div>
 
           <div className={styles.modalActions}>
             <button type="button" className={styles.cancelButton} onClick={onClose}>
               Cancelar
             </button>
             <button type="submit" className={styles.saveButton}>
-              Salvar
+              Salvar Alterações
             </button>
           </div>
         </form>

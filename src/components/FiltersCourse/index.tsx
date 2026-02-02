@@ -27,6 +27,7 @@ export default function CourseFilters({
       value={filterTurmas}
       onChange={(e) => setFilterTurmas(e.target.value as any)}
     >
+      <option value="padrao">Padrão</option>
       <option value="maior">Maior quantidade</option>
       <option value="menor">Menor quantidade</option>
     </select>
@@ -38,6 +39,7 @@ export default function CourseFilters({
       value={filterAlunos}
       onChange={(e) => setFilterAlunos(e.target.value as any)}
     >
+      <option value="padrao">Padrão</option>
       <option value="maior">Maior quantidade</option>
       <option value="menor">Menor quantidade</option>
     </select>

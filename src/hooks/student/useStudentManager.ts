@@ -8,40 +8,62 @@ export function useStudentManager() {
   const [selectedAluno, setSelectedAluno] = useState<StudentPerformance | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Busca a lista de alunos
   const fetchAlunos = async () => {
     setLoading(true);
     try {
-      // Nova URL do Controller de Painel de Controle
       const response = await axios.get("http://localhost:8085/api/admin-panel/students");
-      
-      // LOG DE DIAGNÓSTICO: Abra o F12 no navegador para ver o que o Java está enviando
-      console.log("Dados recebidos do Java:", response.data);
-      
-      setAlunos(response.data); 
+      setAlunos(response.data);
     } catch (error) {
-      console.error("Erro ao carregar do novo painel:", error);
+      console.error("Erro ao carregar alunos:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSave = async (dadosAtualizados: StudentPerformance) => {
+  // Salva as alterações
+  const handleSave = async (dados: StudentPerformance) => {
     try {
-      // Verifique se o ID existe antes de tentar o PUT
-      if (!dadosAtualizados.id) {
-        console.error("Não é possível salvar: ID do aluno não encontrado.");
+      if (!dados.id) {
+        alert("Erro: ID do aluno não encontrado.");
         return;
       }
 
-      console.log("Enviando atualização para o ID:", dadosAtualizados.id);
-      
-      // Enviando para o endpoint de performance (verifique se este ainda é o caminho correto)
-      await axios.put(`http://localhost:8085/api/performance/student/${dadosAtualizados.id}`, dadosAtualizados);
+      /**
+       * LIMPEZA DE PAYLOAD (Para evitar Erro 500 no Java)
+       * Enviamos apenas o que o banco precisa atualizar. 
+       * Campos como 'status' ou 'studentId' (UUID) costumam travar o JPA/Hibernate no PUT.
+       */
+      const payload = {
+        id: dados.id,
+        name: dados.name,
+        ira: dados.ira,
+        classId: dados.classId,
+        attendenceRate: dados.attendenceRate,
+        averageScore: dados.averageScore,
+        registration: dados.registration // Apenas se o Java permitir
+      };
+
+      console.log("Enviando atualização para ID:", dados.id, payload);
+
+      await axios.put(
+        `http://localhost:8085/api/performance/student/${dados.id}`, 
+        payload
+      );
       
       setIsModalOpen(false);
-      await fetchAlunos(); // Recarrega a lista para mostrar os dados atualizados
-    } catch (error) {
-      console.error("Erro ao salvar alterações:", error);
+      await fetchAlunos(); // Atualiza a tabela/cards
+      alert("Aluno atualizado com sucesso!");
+
+    } catch (error: any) {
+      console.error("Erro ao salvar:");
+      if (error.response) {
+        // O servidor respondeu com um erro (500, 400, etc)
+        console.error("Dados do erro Java:", error.response.data);
+        alert(`Erro no Servidor: ${error.response.data.message || "Erro Interno"}`);
+      } else {
+        alert("Erro de conexão com o servidor.");
+      }
     }
   };
 
@@ -50,7 +72,6 @@ export function useStudentManager() {
   }, []);
 
   const handleEdit = (aluno: StudentPerformance) => {
-    console.log("Editando aluno:", aluno);
     setSelectedAluno(aluno);
     setIsModalOpen(true);
   };
@@ -63,6 +84,6 @@ export function useStudentManager() {
     setIsModalOpen,
     handleEdit,
     handleSave,
-    refreshAlunos: fetchAlunos // Caso precise atualizar manualmente
+    refreshAlunos: fetchAlunos
   };
 }

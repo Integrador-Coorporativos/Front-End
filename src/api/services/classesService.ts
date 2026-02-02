@@ -9,8 +9,19 @@ export const getClassesForPanel = async (): Promise<ClassPanel[]> => {
   return response.data;
 };
 
-export const getClasses = async (): Promise<ClassListItem[]> => {
-  const response = await api.get<ClassListItem[]>('/api/classes');
+export const getClasses = async (): Promise<ClassResponse[]> => {
+  const response = await api.get<ClassResponse[]>('/api/classes');
+  return response.data;
+};
+
+
+export const getMyClasses = async (): Promise<ClassResponse[]> => {
+  const response = await api.get<ClassResponse[]>('/api/classes/my-classes');
+  return response.data;
+};
+
+export const setMyClasses = async (classId: number): Promise<ClassResponse> => {
+  const response = await api.patch<ClassResponse>(`/api/classes/${classId}/professor`);
   return response.data;
 };
 

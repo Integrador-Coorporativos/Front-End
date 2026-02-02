@@ -45,34 +45,28 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    
-    /* ESSENCIAL PARA RESPONSIVIDADE */
     flex-wrap: wrap; 
-    gap: 16px; /* Se a tela encolher, o título e os botões não grudam */
-
+    gap: 16px; 
     width: 100%;
     max-width: 1300px; 
     margin: 10px auto 8px;
     padding: 0 30px; 
-    
-    /* border: 1px solid black;  */
 }
 
 .h1_content_controlpanel {
-    font-size: clamp(24px, 4vw, 32px); /* Fonte responsiva automática */
+    font-size: clamp(24px, 4vw, 32px); 
     font-weight: 600;
     color: rgb(0, 0, 0);
     margin: 0;
     line-height: 1.2;
-    white-space: nowrap; /* Impede o título de quebrar linha se tiver espaço */
+    white-space: nowrap; 
 }
 
-/* Estilo para a div dos botões que você comentou */
 .tabs {
   display: flex;
   gap: 8px;
-  overflow-x: auto; /* Se tiver muitos botões, permite scroll lateral no celular */
-  padding-bottom: 5px; /* Evita cortar o foco do botão no scroll */
+  overflow-x: auto; 
+  padding-bottom: 5px; 
 }
 
 .tab {
@@ -97,47 +91,37 @@
 
 
 
-
-
-
-
 /* Responsividade */
 
-/* --- RESPONSIVIDADE (Abaixo de 600px) --- */
 @media (max-width: 600px) {
-  /* 1. Resetar o container do topo */
   .h1_content_controlpanel_nav {
     flex-direction: column;
     align-items: center;
-    padding: 0 15px; /* Respiro de segurança lateral */
+    padding: 0 15px; 
     width: 100%;
     margin: 10px 0;
   }
 
-  /* 2. Corrigir a div das Tabs */
   .tabs {
     display: grid !important;
-    grid-template-columns: 1fr 1fr; /* Divide a tela em 2 colunas iguais */
+    grid-template-columns: 1fr 1fr; 
     gap: 10px;
-    width: 100% !important; /* Ocupa a largura total disponível */
+    width: 100% !important; 
     max-width: 500px; 
-    margin: 0 auto !important; /* Força a centralização */
-    padding: 0; /* Remove paddings que possam estar somando na largura */
+    margin: 0 auto !important; 
+    padding: 0; 
   }
 
   /* 3. Ajustar os botões (O SEGREDO) */
   .tab {
     width: 100% !important;
-    /* REMOVA o padding lateral fixo (os 60px) aqui dentro */
     padding: 12px 0 !important; 
     font-size: 14px;
     text-align: center;
-    box-sizing: border-box; /* Garante que a borda não aumente o tamanho */
+    box-sizing: border-box; 
   }
 }
-
 /* RESP */
-
 
 
 .content {
@@ -387,21 +371,105 @@
   font-weight: 500;
 }
 
-.clearButton_filter {
-  margin-top: 12px;
+.filterDropdown_student {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 8px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  border: 1px solid #e0e0e0;
+}
+
+.filterContent_student {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; 
+  padding: 16px;
+  width: 240px; 
+  background: #fff;
+}
+
+.filterLabel_student {
+  font-size: 11px; 
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.filterContent_student select {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 8px 10px; 
+  border-radius: 8px;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  outline: none;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterContent_student select:focus {
+  border-color: #008236;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(0, 130, 54, 0.1);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.applyFilterButton_student {
+  border: none;
+  background-color: #008236;
+  color: #fff;
+  width: 60%;
+  border-radius: 6px;
+}
+.applyFilterButton_student:hover {
+  background-color: #006a2c;
+  cursor: pointer;
+}
+
+.clearFilterButton_student {
+   background-color: #fff;
+  border: 1px solid #d1d1d1;
+  color: #444;
+  width: 40%;
+  padding: 8px;
+  border-radius: 6px;
+
+}
+
+.clearFilterButton_student:hover {
+  background-color: #f9f9f9;
+  border-color: #008236;
+  color: #008236;
+  cursor: pointer;
+} 
+
+.clearButton_filter_search {
+  display: block;          
+  margin: 20px auto 0;     
   padding: 12px 46px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  background-color: oklch(44.8% 0.119 151.328);
+  background-color: oklch(44.8% 0.119 151.328); 
   color: white;
   font-weight: 500;
+  transition: opacity 0.2s;
 }
 
-.clearButton_filter:hover {
-  cursor: pointer;
-  background-color: oklch(52.7% 0.154 150.069);
-  transition: 0.4s;
+.clearButton_filter_search:hover {
+  opacity: 0.9;
 }
 
 .clearButton_filtred {
