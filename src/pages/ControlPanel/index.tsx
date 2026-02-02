@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import Header from "../../components/Header";
 import BreadCrumb from "../../components/BreadCrumb";
 import Pagination from "../../components/Pagination";
@@ -17,14 +17,17 @@ import EditModalClasses from "@/components/EditModalClasses";
 
 import FiltersCourse from "../../components/FiltersCourse";
 import FiltersClasse from "../../components/FiltersClasse";
+import FiltersProfessor from "@/components/FiltersProfessor";
 
 import type { Student } from "@/types/Student";
 import type { Professor } from "@/types/Professor";
 import type { ClassPanel } from "@/api/types/classPanel";
 import type { Classes } from "@/api/types/classes";
 import type { Courses } from "@/types/Courses";
-import type { CoursePanel } from "@/types/CoursesPanel";
+import type { CoursePanel } from "@/types/coursesPanel";
 import type { ClassListItem } from "@/api/types/classListItem";
+import type { EditableClass } from "@/types/EditableClass";
+import type { ClassUpdateRequest } from '@/api/types/classUpdate';
 
 import styles from "./ControlPanel.module.css";
 import TooltipIcon from "../../assets/tooltip-icon.png";
@@ -34,37 +37,48 @@ import { useCoursesPanel } from "@/hooks/courses/useCoursesPanel";
 import { useUpdateCourse } from "@/hooks/courses/useUpdateCourse";
 import { useClassesPanel } from "@/hooks/classes/useClassesPanel";
 import { useUpdateClass } from "@/hooks/classes/useUpdateClass";
+import { useStudentManager } from "@/hooks/student/useStudentManager";
+import { useProfessorManager } from "@/hooks/professor/useProfessorManager";
 
 const ITEMS_PER_PAGE = 8;
 
 export default function ControlPanel() {
 
-  const { coursesPanel } = useCoursesPanel();
+  const { coursesPanel, loading: coursesLoading } = useCoursesPanel();
   const { executeUpdate } = useUpdateCourse();
-
+  const [filterProfNome, setFilterProfNome] = useState<"asc" | "desc" | "">("");
+  const [filterProfTurmas, setFilterProfTurmas] = useState<"maior" | "menor" | "">("");
+  const [appliedProfNome, setAppliedProfNome] = useState<"asc" | "desc" | "">("");
+  const [appliedProfTurmas, setAppliedProfTurmas] = useState<"maior" | "menor" | "">("");
+  const [filterAlunoStatus, setFilterAlunoStatus] = useState("");
+  const [filterAlunoSituacao, setFilterAlunoSituacao] = useState("");
+  const [appliedAlunoStatus, setAppliedAlunoStatus] = useState("");
+  const [appliedAlunoSituacao, setAppliedAlunoSituacao] = useState("");
+  const [search, setSearch] = useState("");
+  const [filterCurso, setFilterCurso] = useState("");
+  const [filterAno, setFilterAno] = useState("");
+  const [appliedFilterCurso, setAppliedFilterCurso] = useState("");
+  const [appliedFilterAno, setAppliedFilterAno] = useState("");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-
+  const { professores, loading: professorsLoading } = useProfessorManager();
+  const [studentsLoading, setStudentsLoading] = useState(true);
 
   const [activeTab, setActiveTab] = useState<
     "alunos" | "professores" | "turmas" | "cursos"
   >("alunos");
 
-  const alunos: Student[] = Array.from({ length: 201 }).map((_, index) => ({
-    nome: `Aluno ${index + 1}`,
-    ira: "61,22",
-    matricula: "20241094040001",
-    curso: "Informática",
-  }));
+  const { alunos, handleEdit, isModalOpen, setIsModalOpen, selectedAluno,
+    handleSave
+  } = useStudentManager();
 
-  const professores: Professor[] = Array.from({ length: 40 }).map(
-    (_, index) => ({
-      nome: `Professor ${index + 1}`,
-      anoIngresso: 2019,
-      turno: "Vespertino",
-      alunos: 34,
-    })
-  );
+  useEffect(() => {
+    if (alunos && alunos.length > 0) {
+      setStudentsLoading(false);
+    }
+    const timer = setTimeout(() => setStudentsLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, [alunos]);
 
   const { classes, loading: classesLoading, error: classesError } =
     useClassesPanel();
@@ -101,6 +115,20 @@ export default function ControlPanel() {
     }
   };
 
+  const alunosFiltrados = useMemo(() => {
+    const filtrados = (alunos || []).filter((aluno) => {
+      const matchesSearch = !search || aluno.studentId.toLowerCase().includes(search.toLowerCase());
+
+      const matchesStatus = !appliedAlunoSituacao || aluno.status === appliedAlunoSituacao;
+
+      return matchesSearch && matchesStatus;
+    });
+
+    return [...filtrados].sort((a, b) => {
+      return b.attendenceRate - a.attendenceRate;
+    });
+  }, [alunos, search, appliedAlunoSituacao]);
+
   const cursosDisponiveisTeste = [
     "Informática",
     "Apicultura",
@@ -111,63 +139,64 @@ export default function ControlPanel() {
   ];
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-  const [isAlunoModalOpen, setIsAlunoModalOpen] = useState(false);
-  const [selectedAluno, setSelectedAluno] = useState<Student | null>(null);
-
   const [isProfessorModalOpen, setIsProfessorModalOpen] = useState(false);
   const [selectedProfessor, setSelectedProfessor] = useState<Professor | null>(
     null
   );
-
-  const [selectedTurma, setSelectedTurma] = useState<Classes | null>(null);
+  const [selectedTurma, setSelectedTurma] =
+    useState<EditableClass | null>(null);
   const [isTurmaModalOpen, setIsTurmaModalOpen] = useState(false);
-
   const [currentPage, setCurrentPage] = useState(1);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { upload, isUploading, success } = useUploadPlanilha();
   const { download, isDownloading, error } = useDownloadTemplate();
-
   const [selectedCurso, setSelectedCurso] = useState<CoursePanel | null>(null);
   const [isCursoModalOpen, setIsCursoModalOpen] = useState(false);
-
   const getFilterLabel = () => {
     const parts: string[] = [];
 
     if (search) parts.push(`Busca: "${search}"`);
 
+    if (activeTab === "alunos") {
+      if (appliedAlunoSituacao) {
+        parts.push(`Situação: ${appliedAlunoSituacao}`);
+      }
+    }
+
+    if (activeTab === "professores") {
+      if (appliedProfNome) {
+        parts.push(appliedProfNome === "asc" ? "Nome (A-Z)" : "Nome (Z-A)");
+      }
+      if (appliedProfTurmas) {
+        parts.push(appliedProfTurmas === "maior" ? "Mais Turmas" : "Menos Turmas");
+      }
+    }
+
+    if (activeTab === "turmas") {
+      if (appliedFilterCurso) parts.push(`Curso: ${appliedFilterCurso}`);
+      if (appliedFilterTurno) parts.push(`Turno: ${appliedFilterTurno}`);
+      if (appliedFilterAlunos) {
+        parts.push(appliedFilterAlunos === "maior" ? "Mais Alunos" : "Menos Alunos");
+      }
+      if (appliedFilterAno) parts.push(`Ano: ${appliedFilterAno}`);
+    }
+
     if (activeTab === "cursos") {
       if (appliedFilterTurmas) {
-        parts.push(
-          appliedFilterTurmas === "maior"
-            ? "Maior quantidade de turmas"
-            : "Menor quantidade de turmas"
-        );
+        parts.push(appliedFilterTurmas === "maior" ? "Mais Turmas" : "Menos Turmas");
       }
-
-      if (appliedFilterTurno) {
-        parts.push(appliedFilterTurno);
-      }
-
+      if (appliedFilterTurno) parts.push(appliedFilterTurno);
       if (appliedFilterAlunos) {
-        parts.push(
-          appliedFilterAlunos === "maior"
-            ? "Maior quantidade de alunos"
-            : "Menor quantidade de alunos"
-        );
+        parts.push(appliedFilterAlunos === "maior" ? "Mais Alunos" : "Menos Alunos");
       }
     }
 
     return parts.length ? parts.join(" > ") : null;
   };
 
-  const [search, setSearch] = useState("");
-
   const filterRef = useRef<HTMLDivElement>(null);
-
   const hasSearchOnClasses =
     activeTab === "turmas" && search.trim().length > 0;
-
   const hasSearch = search.trim().length > 0;
 
   function convertToAPIClass(turma: Classes): import('@/api/types/classes').Classes {
@@ -182,57 +211,34 @@ export default function ControlPanel() {
       course: {
         id: turma.course.id,
         name: turma.course.name,
-        description: "string", 
       },
     };
   }
 
-  const handleSaveClasses = async (turmaAtualizada: import('@/types/Classes').Classes) => {
+  const handleSaveClasses = async (turmaAtualizada: any) => {
     try {
-      if (!turmaAtualizada.course) {
-        throw new Error("A turma precisa ter um curso antes de salvar.");
+      const idParaUrl = Number(turmaAtualizada.id || selectedTurma?.id || 0);
+      if (idParaUrl === 0) {
+        return;
       }
 
-      const turmaParaAPI: import('@/api/types/classes').Classes = {
-        id: turmaAtualizada.id,
-        name: turmaAtualizada.name,
-        shift: turmaAtualizada.shift,
-        course: {
-          id: turmaAtualizada.course.id,
-          name: turmaAtualizada.course.name,
-          description: "", 
-        },
+      const updatePayload = {
+        name: String(turmaAtualizada.name || selectedTurma?.name || ""),
+        shift: String(turmaAtualizada.shift || selectedTurma?.shift || ""),
+        semester: String(turmaAtualizada.semester || (selectedTurma as any)?.semester || "2024.1"),
+        classId: String(turmaAtualizada.classId || (selectedTurma as any)?.classId || "ID-GERADO")
       };
 
-      const updated = await executeUpdateClasses(turmaParaAPI.id, turmaParaAPI);
-
-      const updatedPanel = mapResponseToPanel(updated); 
-      setLocalClasses(prev =>
-        prev.map(t => (t.id === updatedPanel.id ? updatedPanel : t))
-      );
+      await executeUpdateClasses(idParaUrl, updatePayload as any);
 
       setIsTurmaModalOpen(false);
-    } catch (err) {
-      console.error("Erro ao salvar turma:", err);
+      setToastMessage("Turma atualizada com sucesso!");
+      setShowSuccessToast(true);
+
+    } catch (err: any) {
+      console.error("Erro detalhado no Backend:", err.response?.data);
     }
   };
-
-  const [localClasses, setLocalClasses] = useState<ClassPanel[]>([]);
-
-  function mapResponseToPanel(updated: import('@/api/types/classes').ClassResponse): ClassPanel {
-    return {
-      id: updated.id,
-      name: updated.name,
-      shift: updated.shift,
-      courseId: updated.course.id,
-      courseName: updated.course.name,
-    };
-  }
-
-  useEffect(() => {
-    if (classes) setLocalClasses(classes);
-  }, [classes]);
-
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -253,47 +259,71 @@ export default function ControlPanel() {
   const [appliedFilterTurmas, setAppliedFilterTurmas] = useState<"maior" | "menor" | "">("");
   const [appliedFilterTurno, setAppliedFilterTurno] = useState<"Matutino" | "Vespertino" | "Noturno" | "">("");
   const [appliedFilterAlunos, setAppliedFilterAlunos] = useState<"maior" | "menor" | "">("");
-
-
   const [filterTurmas, setFilterTurmas] = useState<"maior" | "menor" | "">("");
   const [filterTurno, setFilterTurno] = useState<"Matutino" | "Vespertino" | "Noturno" | "">("");
   const [filterAlunos, setFilterAlunos] = useState<"maior" | "menor" | "">("");
-
   const [filtersApplied, setFiltersApplied] = useState(false);
-
-  const hasCourseFilters =
-    appliedFilterTurmas !== "" ||
-    appliedFilterTurno !== "" ||
-    appliedFilterAlunos !== "";
 
   const filteredCourses = localCoursesPanel
     .filter((course) =>
       course.courseName.toLowerCase().includes(search.toLowerCase())
     )
-    .filter((course) => {
-      if (appliedFilterTurmas === "maior") return course.totalClasses >= 1;
-      if (appliedFilterTurmas === "menor") return course.totalClasses <= 0;
-      return true;
-    })
-    .filter((course) => {
-      if (appliedFilterAlunos === "maior") return course.totalStudents >= 1;
-      if (appliedFilterAlunos === "menor") return course.totalStudents <= 0;
-      return true;
+
+    .sort((a, b) => {
+      if (appliedFilterAlunos === "maior") {
+        return b.totalStudents - a.totalStudents;
+      }
+      if (appliedFilterAlunos === "menor") {
+        return a.totalStudents - b.totalStudents;
+      }
+      if (appliedFilterTurmas === "maior") {
+        return b.totalClasses - a.totalClasses;
+      }
+      return 0;
     });
 
-  const filteredClasses = classes.filter((t) => {
-    const query = search.toLowerCase();
+  const filteredClasses = useMemo(() => {
+    return (classes || []).filter((t) => {
+      const query = search.toLowerCase();
+      const matchesSearch =
+        t.name?.toLowerCase().includes(query) ||
+        t.shift?.toLowerCase().includes(query) ||
+        t.courseName?.toLowerCase().includes(query);
 
-    const nomeTurma = t.name?.toLowerCase() ?? "";
-    const turno = t.shift?.toLowerCase() ?? "";
-    const nomeCurso = t.courseName?.toLowerCase() ?? "";
+      const matchesCurso = appliedFilterCurso === "" || t.courseName === appliedFilterCurso;
+      const matchesTurno = appliedFilterTurno === "" || t.shift === appliedFilterTurno;
+      const matchesAno = appliedFilterAno === "" || t.name.includes(appliedFilterAno);
 
-    return (
-      nomeTurma.includes(query) ||
-      turno.includes(query) ||
-      nomeCurso.includes(query)
-    );
-  });
+      return matchesSearch && matchesCurso && matchesTurno && matchesAno;
+    })
+      .sort((a, b) => {
+        if (appliedFilterAlunos === "maior") return b.totalStudents - a.totalStudents;
+        if (appliedFilterAlunos === "menor") return a.totalStudents - b.totalStudents;
+        return 0;
+      });
+  }, [classes, search, appliedFilterCurso, appliedFilterTurno, appliedFilterAno, appliedFilterAlunos]);
+
+  const professoresOrdenados = useMemo(() => {
+    const filtrados = (professores || []).filter((prof) => {
+      const query = search.toLowerCase().trim();
+      if (!query) return true;
+      return (
+        (prof.name || "").toLowerCase().includes(query) ||
+        (prof.email || "").toLowerCase().includes(query) ||
+        (prof.registration || "").toLowerCase().includes(query)
+      );
+    });
+
+    return [...filtrados].sort((a, b) => {
+      if (appliedProfTurmas === "maior") return (b.quantityClass || 0) - (a.quantityClass || 0);
+      if (appliedProfTurmas === "menor") return (a.quantityClass || 0) - (b.quantityClass || 0);
+
+      if (appliedProfNome === "asc") return a.name.localeCompare(b.name);
+      if (appliedProfNome === "desc") return b.name.localeCompare(a.name);
+
+      return 0;
+    });
+  }, [professores, search, appliedProfNome, appliedProfTurmas]);
 
   useEffect(() => {
     const hasFilter =
@@ -306,10 +336,10 @@ export default function ControlPanel() {
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
 
-  const currentAlunos = alunos.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  const currentProfessores = professores.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
+  const currentAlunos = alunosFiltrados.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const currentProfessores = professoresOrdenados.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    ((currentPage - 1) * ITEMS_PER_PAGE) + ITEMS_PER_PAGE
   );
 
   const currentCourses = filteredCourses.slice(
@@ -326,14 +356,15 @@ export default function ControlPanel() {
     id: t.id,
     name: t.name,
     shift: t.shift,
+    totalStudents: t.totalStudents,
     course: t.courseId && t.courseName ? { id: t.courseId, name: t.courseName } : null,
   }));
 
   const totalPages =
     activeTab === "alunos"
-      ? Math.ceil(alunos.length / ITEMS_PER_PAGE)
+      ? Math.ceil(alunosFiltrados.length / ITEMS_PER_PAGE)
       : activeTab === "professores"
-        ? Math.ceil(professores.length / ITEMS_PER_PAGE)
+        ? Math.ceil(professoresOrdenados.length / ITEMS_PER_PAGE)
         : activeTab === "turmas"
           ? Math.ceil(filteredClasses.length / ITEMS_PER_PAGE)
           : Math.ceil(filteredCourses.length / ITEMS_PER_PAGE);
@@ -349,17 +380,25 @@ export default function ControlPanel() {
     }
   };
 
+  const handleApplyFilters = () => {
+    setAppliedFilterTurmas(filterTurmas);
+    setAppliedFilterTurno(filterTurno);
+    setAppliedFilterAlunos(filterAlunos);
+    setAppliedFilterCurso(filterCurso);
+    setAppliedFilterAno(filterAno);
+    setIsFilterOpen(false);
+    setCurrentPage(1);
+  };
+
   return (
     <div>
       <Header />
-
       <BreadCrumb
         items={[
           { label: "Página Inicial", to: "/" },
           { label: "Painel de Controle", to: "/painel_controle" },
         ]}
       />
-
       <div className={styles.h1_content_controlpanel_nav}>
         <h1 className={styles.h1_content_controlpanel}>Painel de controle</h1>
         <div className={styles.tabs}>
@@ -378,7 +417,6 @@ export default function ControlPanel() {
           ))}
         </div>
       </div>
-
       <main className={styles.page}>
         <div className={styles.container}>
           <div className={styles.headerContainer_content}>
@@ -395,7 +433,6 @@ export default function ControlPanel() {
                 )}
               </span>
             </div>
-
             <div className={styles.right_cont_cp}>
               <button className={styles.importButton} onClick={handleButtonClick}>
                 {isUploading ? "Processando..." : "Importar dados"}
@@ -406,14 +443,12 @@ export default function ControlPanel() {
                 setCurrentPage(1);
               }}
               />
-
               <div className={styles.filterWrapper} ref={filterRef}>
                 <button
                   className={styles.filterButton}
                   onClick={() => setIsFilterOpen((prev) => !prev)}>
                   Personalizar
                 </button>
-
                 {isFilterOpen && activeTab === "cursos" && (
                   <div className={styles.filterDropdown}>
                     <FiltersCourse
@@ -423,108 +458,198 @@ export default function ControlPanel() {
                       setFilterAlunos={setFilterAlunos}
                       onApply={() => {
                         setAppliedFilterTurmas(filterTurmas);
-                        setAppliedFilterTurno(filterTurno);
                         setAppliedFilterAlunos(filterAlunos);
-
                         setCurrentPage(1);
                         setIsFilterOpen(false);
                         setFiltersApplied(true);
                       }}
-
                       onClear={() => {
                         setFilterTurmas("");
                         setFilterTurno("");
                         setFilterAlunos("");
-
                         setAppliedFilterTurmas("");
                         setAppliedFilterTurno("");
                         setAppliedFilterAlunos("");
-
                         setCurrentPage(1);
+                        setFiltersApplied(false);
+                        setIsFilterOpen(false);
                       }}
                     />
                   </div>
                 )}
-
-                {isFilterOpen && activeTab === "alunos" && (
+                {isFilterOpen && activeTab === "professores" && (
                   <div className={styles.filterDropdown}>
-                    <div className={styles.filterContent}>
-                      <select>
-                        <option value="">Curso</option>
-                        {cursosDisponiveisTeste.map((curso) => (
-                          <option key={curso} value={curso}>
-                            {curso}
-                          </option>
-                        ))}
-                      </select>
-
-                      <select>
-                        <option value="">Turno</option>
-                        <option value="Matutino">Matutino</option>
-                        <option value="Vespertino">Vespertino</option>
-                      </select>
-
-                      <select>
-                        <option value="">Período</option>
-                        <option value="1">1º</option>
-                        <option value="2">2º</option>
-                        <option value="3">3º</option>
-                      </select>
-
-                      <select>
-                        <option value="">Ano de Ingresso</option>
-                        <option value="2023">2023</option>
-                        <option value="2022">2022</option>
-                        <option value="2021">2021</option>
-                      </select>
-
-                      <button className={styles.applyFilterButton}>
-                        Aplicar
-                      </button>
+                    <FiltersProfessor
+                      filterNome={filterProfNome}
+                      setFilterNome={setFilterProfNome}
+                      filterTurmas={filterProfTurmas}
+                      setFilterTurmas={setFilterProfTurmas}
+                      onApply={() => {
+                        setAppliedProfNome(filterProfNome);
+                        setAppliedProfTurmas(filterProfTurmas);
+                        setIsFilterOpen(false);
+                        setCurrentPage(1);
+                      }}
+                      onClear={() => {
+                        setFilterProfNome("");
+                        setFilterProfTurmas("");
+                        setAppliedProfNome("");
+                        setAppliedProfTurmas("");
+                        setIsFilterOpen(false);
+                      }}
+                    />
+                  </div>
+                )}
+                {isFilterOpen && activeTab === "alunos" && (
+                  <div className={styles.filterDropdown_student}>
+                    <div className={styles.filterContent_student}>
+                      <div className={styles.filterField}>
+                        <label className={styles.filterLabel_student}>SITUAÇÃO DO ALUNO</label>
+                        <select
+                          value={filterAlunoSituacao}
+                          onChange={(e) => setFilterAlunoSituacao(e.target.value)}
+                        >
+                          <option value="">Todos os Status</option>
+                          <option value="Ótimo">Ótimo</option>
+                          <option value="Bom">Bom</option>
+                          <option value="Ruim">Ruim</option>
+                        </select>
+                      </div>
+                      <div className={styles.buttonGroup}>
+                        <button
+                          className={styles.clearFilterButton_student}
+                          onClick={() => {
+                            setFilterAlunoSituacao("");
+                            setAppliedAlunoSituacao("");
+                            setIsFilterOpen(false);
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Limpar
+                        </button>
+                        <button
+                          className={styles.applyFilterButton_student}
+                          onClick={() => {
+                            setAppliedAlunoSituacao(filterAlunoSituacao);
+                            setIsFilterOpen(false);
+                            setCurrentPage(1);
+                          }}
+                        >
+                          Aplicar
+                        </button>
+                      </div>
                     </div>
+                  </div>
+                )}
+                {isFilterOpen && activeTab === "turmas" && (
+                  <div className={styles.filterDropdown}>
+                    <FiltersClasse
+                      cursos={localCoursesPanel}
+                      filterCurso={filterCurso}
+                      setFilterCurso={setFilterCurso}
+                      filterAno={filterAno}
+                      setFilterAno={setFilterAno}
+                      filterTurno={filterTurno}
+                      setFilterTurno={setFilterTurno}
+                      filterAlunos={filterAlunos}
+                      setFilterAlunos={setFilterAlunos}
+                      onApply={handleApplyFilters}
+                      onClear={() => {
+                        setFilterCurso("");
+                        setFilterAno("");
+                        setFilterTurno("");
+                        setFilterAlunos("");
+                        setAppliedFilterCurso("");
+                        setAppliedFilterAno("");
+                        setAppliedFilterTurno("");
+                        setAppliedFilterAlunos("");
+                        setCurrentPage(1);
+                        setIsFilterOpen(false);
+                      }}
+                    />
                   </div>
                 )}
 
               </div>
             </div>
           </div>
-
           {activeTab === "alunos" && (
             <div className={styles.tabContent}>
-              <StudentTab
-                alunos={currentAlunos}
-                onEdit={(aluno) => {
-                  setSelectedAluno(aluno);
-                  setIsAlunoModalOpen(true);
-                }}
-              />
+              {studentsLoading ? (
+                <div className={styles.loadingMessage}>
+                  <p>Carregando alunos do sistema...</p>
+                </div>
+              ) : alunosFiltrados.length === 0 ? (
+                <div className={styles.noResults}>
+                  <div className={styles.noResultsContent}>
+                    <p className={styles.emptyMessage_filter}>
+                      Desculpe, Nenhum aluno encontrado com <strong>"{search}"</strong>
+                    </p>
+                    {search && (
+                      <button
+                        onClick={() => {
+                          setSearch("");
+                          setCurrentPage(1);
+                        }}
+                        className={styles.clearButton_filter_search}
+                      >
+                        Limpar busca
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <StudentTab
+                  alunos={currentAlunos}
+                  onEdit={handleEdit}
+                />
+              )}
             </div>
           )}
           {activeTab === "professores" && (
             <div className={styles.tabContent}>
-              <ProfessorTab
-                professores={currentProfessores}
-                onEdit={(professor) => {
-                  setSelectedProfessor(professor);
-                  setIsProfessorModalOpen(true);
-                }}
-              />
+              {professorsLoading ? (
+                <p className={styles.emptyMessage_filter}>Carregando professores do sistema...</p>
+              ) : professoresOrdenados.length === 0 ? (
+                <div className={styles.emptyMessage_filter}>
+                  <p className={styles.emptyMessage_filter}>Desculpe, Nenhum professor encontrado com <strong>"{search}"</strong></p>
+                  {search && (
+                    <button
+                      className={styles.clearButton_filter_search}
+                      onClick={() => {
+                        setSearch("");
+                        setCurrentPage(1);
+                      }}
+                    >
+                      Limpar busca
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <ProfessorTab
+                  professores={currentProfessores}
+                  onEdit={(professor) => {
+                    setSelectedProfessor(professor);
+                    setIsProfessorModalOpen(true);
+                  }}
+                />
+              )}
             </div>
           )}
-
           {activeTab === "turmas" && (
             <div className={styles.tabContent}>
               {classesLoading ? (
-                <p>Carregando turmas...</p>
+                <p className={styles.loadingMessage}>Carregando turmas do sistema...</p>
               ) : classesError ? (
-                <p>{classesError}</p>
+                <div className={styles.emptyMessage_filter}>
+                  <p>Erro ao carregar turmas. Verifique a conexão com o servidor.</p>
+                </div>
               ) : filteredClasses.length === 0 ? (
                 <div className={styles.emptyMessage_filter}>
-                  <p>Desculpe, nenhuma turma encontrada com base na sua pesquisa.</p>
-
-                  {hasSearchOnClasses && (
+                  <p className={styles.emptyMessage_filter}>Desculpe, Nenhum turma encontrada com <strong>"{search}"</strong></p>
+                  {(search || hasSearchOnClasses) && (
                     <button
-                      className={styles.clearButton_filtred}
+                      className={styles.clearButton_filter_search}
                       onClick={() => {
                         setSearch("");
                         setCurrentPage(1);
@@ -538,16 +663,18 @@ export default function ControlPanel() {
                 <ClassesTab
                   classes={currentClassesListItems}
                   onEdit={(turma: ClassListItem) => {
-                    const turmaParaModal: Classes = {
+                    const turmaParaModal: EditableClass = {
                       id: turma.id,
                       name: turma.name,
                       shift: turma.shift,
-                      course: {
-                        id: turma.course?.id ?? 0,
-                        name: turma.course?.name ?? "Desconhecido",
-                        description: "string", 
-                      },
+                      semester: (turma as any).semester || "2024.1",
+                      classId: (turma as any).classId || "ID-TURMA",
+                      course: turma.course ? {
+                        id: turma.course.id,
+                        name: turma.course.name,
+                      } : null,
                     };
+
                     setSelectedTurma(turmaParaModal);
                     setIsTurmaModalOpen(true);
                   }}
@@ -557,12 +684,16 @@ export default function ControlPanel() {
           )}
           {activeTab === "cursos" && (
             <div className={styles.tabContent}>
-              {filteredCourses.length === 0 ? (
+              {coursesLoading ? (
+                <div className={styles.loadingMessage}>
+                  <p>Carregando cursos do sistema...</p>
+                </div>
+              ) : filteredCourses.length === 0 ? (
                 <div className={styles.emptyMessage_filter}>
-                  <p>Desculpe, nenhum curso encontrado com base na sua pesquisa.</p>
-                  {hasSearch && (
+                  <p className={styles.emptyMessage_filter}>Desculpe, Nenhum curso encontrado com <strong>"{search}"</strong></p>
+                  {search && (
                     <button
-                      className={styles.clearButton_filter}
+                      className={styles.clearButton_filter_search}
                       onClick={() => {
                         setSearch("");
                         setCurrentPage(1);
@@ -571,26 +702,22 @@ export default function ControlPanel() {
                       Limpar busca
                     </button>
                   )}
-
-                  {!hasSearch && hasCourseFilters && (
+                  {!hasSearch && filteredCourses && (
                     <button
                       className={styles.clearButton_filtred}
                       onClick={() => {
                         setFilterTurmas("");
                         setFilterTurno("");
                         setFilterAlunos("");
-
                         setAppliedFilterTurmas("");
                         setAppliedFilterTurno("");
                         setAppliedFilterAlunos("");
-
                         setCurrentPage(1);
                       }}
                     >
                       Limpar filtros
                     </button>
                   )}
-
                 </div>
               ) : (
                 <CoursesTab
@@ -603,7 +730,6 @@ export default function ControlPanel() {
               )}
             </div>
           )}
-
           <div className={styles.paginationWrapper}>
             <div className={styles.downloadWrapper}>
               <button onClick={() => download('modelo_planilha.xlsx')} disabled={isDownloading} className={styles.downloadButton}>
@@ -624,20 +750,15 @@ export default function ControlPanel() {
           </div>
         </div>
       </main>
-
       {selectedAluno && (
         <EditModal
-          aluno={selectedAluno}
+          aluno={selectedAluno as any}
           cursos={cursosDisponiveisTeste}
-          isOpen={isAlunoModalOpen}
-          onClose={() => setIsAlunoModalOpen(false)}
-          onSave={(alunoAtualizado) => {
-            console.log("Aluno salvo:", alunoAtualizado);
-            setIsAlunoModalOpen(false);
-          }}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSave={handleSave as any}
         />
       )}
-
       {selectedProfessor && (
         <EditModalProfessor
           professor={selectedProfessor}
@@ -649,7 +770,6 @@ export default function ControlPanel() {
           }}
         />
       )}
-
       {selectedCurso && isCursoModalOpen && (
         <EditModalCourses
           curso={selectedCurso}
@@ -658,13 +778,12 @@ export default function ControlPanel() {
           onSave={handleSaveCourse}
         />
       )}
-
       {selectedTurma && (
         <EditModalClasses
           turma={selectedTurma}
           isOpen={isTurmaModalOpen}
           onClose={() => setIsTurmaModalOpen(false)}
-          onSave={(turmaAtualizada) => void handleSaveClasses(turmaAtualizada)}
+          onSave={handleSaveClasses}
         />
       )}
       <Toast message={toastMessage} isOpen={showSuccessToast} />

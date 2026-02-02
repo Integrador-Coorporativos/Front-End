@@ -42,6 +42,8 @@
     font-size: 14px;
     opacity: 0.85;
     margin-top: 15px;
+    color: #ffffff;
+
 }
 
 .footer .logo {
@@ -70,11 +72,28 @@
     margin-bottom: 8px;
 }
 
+.Insta_p {
+    color: #ffffff;
+}
+
+.Insta_p:hover {
+    color: #e7e7e7;
+}
+
 .footer .linkItem_2 {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 8px;
+    color: #ffffff;
+
+}
+.footer .linkItem_2:hover {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    color: #e7e7e7;
 }
 
 .footer .linkItem_1 img {
@@ -85,15 +104,17 @@
     margin-left: 75px;
 }
 
-.Insta_p {
-    margin: 0 auto;
-    font-size: 16px;
-    opacity: 0.9;
-}
-
 a {
     text-decoration: none;
     color: #ffffff;
+}
+
+.backToTop {
+    color: #ffffff;
+}
+
+.backToTop:hover {
+    color: #e7e7e7;
 }
 
 a:hover {

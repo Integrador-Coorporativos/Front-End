@@ -7,7 +7,6 @@ export interface Classes {
   course: {
     id: number;
     name: string;
-    description: string;
   };
 }
 

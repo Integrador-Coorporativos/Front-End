@@ -1,5 +1,5 @@
 .buttonFilter {
-    background-color: #FFFFFF;
+    /* background-color: #FFFFFF;
     border: solid 1px #CCCCCC;
     border-radius: 6px;
     cursor: pointer;
@@ -14,8 +14,22 @@
     padding: 6px 10px;
     box-sizing: border-box;
 
-    transition: all 0.2s ease-in-out;
+    transition: all 0.2s ease-in-out; */
+    /* .filterButton { */
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 10px 14px 12px 50px;
+
+  background-image: url('../../assets/filter-icon.png'); 
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 20px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: black;
 }
+/* } */
 
 
 .text {

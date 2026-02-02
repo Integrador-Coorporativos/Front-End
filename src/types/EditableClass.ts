@@ -1,10 +1,11 @@
-export type ClassListItem = {
+export interface EditableClass {
   id: number;
   name: string;
   shift: string;
-  totalStudents?: number;
+  semester: string; 
+  classId: string;  
   course: {
     id: number;
     name: string;
-  } | null;
-};
+  } | null; 
+}

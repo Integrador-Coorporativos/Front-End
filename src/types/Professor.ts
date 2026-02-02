@@ -1,6 +1,8 @@
 export type Professor = {
-  nome: string;
-  anoIngresso: number;
-  turno: string;
-  alunos: number;
+  id?: number;
+  name: string;
+  email: string;
+  registration: string;
+  quantityStudents: number;
+  quantityClass: number;
 };

@@ -1,4 +1,4 @@
-import type { CoursePanel } from "@/types/CoursesPanel";
+import type { CoursePanel } from "@/types/coursesPanel";
 import styles from "./CoursesTab.module.css";
 
 type CoursesTabProps = {
