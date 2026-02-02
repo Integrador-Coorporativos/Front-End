@@ -13,6 +13,8 @@ import Footer from "../../components/Footer"
 import RadarPerformanceChart from "../../components/RadarPerformanceChart"
 import { useClassPerformanceByYear } from "../../hooks/performance/useClassPerformanceByYear"
 import { useClassComments } from "../../hooks/comments/useClassComments"
+import { useCreateEvaluation } from "../../hooks/evaluation/useCreateEvaluation"
+import { useCreateClassComment } from "../../hooks/comments/useCreateClassComment"
 
 type Avaliacao = {
   frequencia: number
@@ -78,6 +80,14 @@ export default function Classifications() {
     error: commentsError,
     refresh: refreshComments,
   } = useClassComments(Number.isFinite(classId) ? classId : undefined)
+
+  const {
+    loading: creatingEvaluation,
+    error: createEvaluationError,
+    submitEvaluation,
+  } = useCreateEvaluation()
+
+  const [successMsg, setSuccessMsg] = useState<string>("")
 
   const titleText = performanceData
     ? `${performanceData.courseName} ${performanceData.gradleLevel} ${performanceData.shift}`
@@ -150,6 +160,57 @@ export default function Classifications() {
 
   const handleSelect = (campo: keyof Avaliacao, valor: number) => {
     setAvaliacao((prev) => ({ ...prev, [campo]: valor }))
+    setSuccessMsg("")
+  }
+
+  const resetAvaliacao = () => {
+    setAvaliacao({
+      frequencia: 0,
+      participacao: 0,
+      fardamento: 0,
+      desempenho: 0,
+      comportamento: 0,
+      usoCelular: 0,
+    })
+    setSuccessMsg("")
+  }
+
+  const isAvaliacaoValida = useMemo(() => {
+    const values = Object.values(avaliacao)
+    return values.every((v) => v >= 1 && v <= 5)
+  }, [avaliacao])
+
+  const handleConfirmEvaluation = async () => {
+    setSuccessMsg("")
+
+    if (!Number.isFinite(classId)) {
+      setSuccessMsg("Turma inválida.")
+      return
+    }
+
+    if (!isAvaliacaoValida) {
+      setSuccessMsg("Preencha todas as notas (1 a 5) antes de confirmar.")
+      return
+    }
+
+    const result = await submitEvaluation(classId, {
+      frequencyScore: avaliacao.frequencia,
+      unifirmScore: avaliacao.fardamento,
+      behaviorScore: avaliacao.comportamento,
+      participationScore: avaliacao.participacao,
+      performanceScore: avaliacao.desempenho,
+      cellPhoneUseScore: avaliacao.usoCelular,
+    })
+
+    if (result) {
+      setSuccessMsg(
+        `Avaliação registrada! (ID: ${result.id}) • Média: ${result.averageScore.toFixed(
+          1
+        )} • Data: ${formatDatePtBR(result.date)}`
+      )
+      refreshPerformance()
+      resetAvaliacao()
+    }
   }
 
   const Rating = ({ label, campo }: RatingProps) => (
@@ -171,6 +232,43 @@ export default function Classifications() {
       </div>
     </div>
   )
+
+  const [newComment, setNewComment] = useState<string>("")
+  const [commentMsg, setCommentMsg] = useState<string>("")
+
+  const {
+    submit: submitComment,
+    loading: creatingComment,
+    error: createCommentError,
+  } = useCreateClassComment({
+    onSuccess: () => {
+      setNewComment("")
+      setCommentMsg("Comentário enviado!")
+      refreshComments()
+      setTimeout(() => setCommentMsg(""), 2500)
+    },
+  })
+
+  const isCommentValid = useMemo(() => {
+    return newComment.trim().length >= 2
+  }, [newComment])
+
+  const handlePostComment = async () => {
+    setCommentMsg("")
+
+    if (!Number.isFinite(classId)) {
+      setCommentMsg("Turma inválida.")
+      return
+    }
+
+    const text = newComment.trim()
+    if (!text) {
+      setCommentMsg("Digite um comentário antes de postar.")
+      return
+    }
+
+    await submitComment(classId, { comment: text })
+  }
 
   return (
     <div>
@@ -270,6 +368,18 @@ export default function Classifications() {
           <div className={styles.evaluateContainer}>
             <h3 className={styles.h3_evaluation_class}>Avalie a turma</h3>
 
+            {createEvaluationError && (
+              <div style={{ marginTop: 10, marginBottom: 10 }}>
+                <p>{createEvaluationError}</p>
+              </div>
+            )}
+
+            {successMsg && (
+              <div style={{ marginTop: 10, marginBottom: 10 }}>
+                <p>{successMsg}</p>
+              </div>
+            )}
+
             <div className={styles.grid}>
               <Rating label="Frequência" campo="frequencia" />
               <Rating label="Fardamento" campo="fardamento" />
@@ -280,11 +390,27 @@ export default function Classifications() {
             </div>
 
             <div className={styles.actions}>
-              <button className={styles.cancel} type="button">
+              <button
+                className={styles.cancel}
+                type="button"
+                onClick={resetAvaliacao}
+                disabled={creatingEvaluation}
+              >
                 Cancelar
               </button>
-              <button className={styles.confirm} type="button">
-                Confirmar
+
+              <button
+                className={styles.confirm}
+                type="button"
+                onClick={handleConfirmEvaluation}
+                disabled={creatingEvaluation || !isAvaliacaoValida}
+                title={
+                  !isAvaliacaoValida
+                    ? "Preencha todas as notas (1 a 5) antes de confirmar."
+                    : undefined
+                }
+              >
+                {creatingEvaluation ? "Enviando..." : "Confirmar"}
               </button>
             </div>
           </div>
@@ -322,10 +448,29 @@ export default function Classifications() {
             )}
           </div>
 
+          {(createCommentError || commentMsg) && (
+            <div style={{ marginTop: 10, marginBottom: 10 }}>
+              {createCommentError && <p>{createCommentError}</p>}
+              {commentMsg && <p>{commentMsg}</p>}
+            </div>
+          )}
+
           <div className={styles.newComment}>
-            <input type="text" placeholder="Adicionar comentário..." />
-            <button className={styles.postButton} type="button">
-              Postar
+            <input
+              type="text"
+              placeholder="Adicionar comentário..."
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              disabled={creatingComment}
+            />
+            <button
+              className={styles.postButton}
+              type="button"
+              onClick={handlePostComment}
+              disabled={creatingComment || !isCommentValid}
+              title={!isCommentValid ? "Digite pelo menos 2 caracteres." : undefined}
+            >
+              {creatingComment ? "Postando..." : "Postar"}
             </button>
           </div>
         </div>
