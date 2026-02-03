@@ -16,7 +16,6 @@ export function useCreateClassComment(options?: { onSuccess?: (created?: ClassCo
       options?.onSuccess?.(created);
       return created;
     } catch (err: unknown) {
-      // ✅ pega mensagem real do backend
       if (axios.isAxiosError(err)) {
         const status = err.response?.status;
         const data = err.response?.data as any;

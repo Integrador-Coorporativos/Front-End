@@ -1,20 +1,28 @@
 import Header from "../../components/Header"
 import BreadCrumb from "../../components/BreadCrumb"
 import styles from "./RankingDetail.module.css"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useParams } from "react-router-dom"
+
 import Phone from "../../assets/logo-phone.png"
 import Participation from "../../assets/participation-icon.png"
 import Performance from "../../assets/perfomance-icon.png"
 import Frequency from "../../assets/frequency-icon.png"
 import Uniform from "../../assets/uniform-icon.png"
 import Behavior from "../../assets/behavior-icon.png"
+
 import Footer from "../../components/Footer"
 import RadarPerformanceChart from "../../components/RadarPerformanceChart"
+
 import { useClassPerformanceByYear } from "../../hooks/performance/useClassPerformanceByYear"
 import { useClassComments } from "../../hooks/comments/useClassComments"
 import { useCreateEvaluation } from "../../hooks/evaluation/useCreateEvaluation"
 import { useCreateClassComment } from "../../hooks/comments/useCreateClassComment"
+import { useDeleteClassComment } from "../../hooks/comments/useDeleteClassComment"
+import { useUpdateClassComment } from "../../hooks/comments/useUpdateClassComment"
+
+import type { Bimestre } from "@/api/types/performance"
 
 type Avaliacao = {
   frequencia: number
@@ -46,6 +54,20 @@ function formatDatePtBR(dateStr: string) {
   })
 }
 
+function getCurrentBimestre(): Bimestre {
+  const m = new Date().getMonth() + 1
+  if (m <= 3) return 1
+  if (m <= 6) return 2
+  if (m <= 9) return 3
+  return 4
+}
+
+const fmt = (n: unknown) =>
+  typeof n === "number" && Number.isFinite(n) ? n.toFixed(1) : "-"
+
+const fmtRank = (n: unknown) =>
+  typeof n === "number" && Number.isFinite(n) ? `#${n}` : "#-"
+
 export default function Classifications() {
   const { id } = useParams()
   const classId = Number(id)
@@ -61,45 +83,48 @@ export default function Classifications() {
 
   const [activeTab, setActiveTab] = useState<"avaliar" | "grafico">("grafico")
   const [selectedYear, setSelectedYear] = useState<string>("2026")
+  const [selectedBimestre, setSelectedBimestre] = useState<Bimestre>(
+    getCurrentBimestre()
+  )
 
   const years = ["2026", "2027", "2028", "2029"]
+  const bimestres: { value: Bimestre; label: string }[] = [
+    { value: 1, label: "1º Bim." },
+    { value: 2, label: "2º Bim." },
+    { value: 3, label: "3º Bim." },
+    { value: 4, label: "4º Bim." },
+  ]
 
   const {
     data: performanceData,
     loading: performanceLoading,
-    error: performanceError,
     refresh: refreshPerformance,
   } = useClassPerformanceByYear(
     Number.isFinite(classId) ? classId : undefined,
-    Number(selectedYear)
+    Number(selectedYear),
+    selectedBimestre
   )
 
   const {
     data: comments,
     loading: commentsLoading,
-    error: commentsError,
     refresh: refreshComments,
   } = useClassComments(Number.isFinite(classId) ? classId : undefined)
 
-  const {
-    loading: creatingEvaluation,
-    error: createEvaluationError,
-    submitEvaluation,
-  } = useCreateEvaluation()
+  const commentsArray = useMemo(() => {
+    return Array.isArray(comments) ? comments : []
+  }, [comments])
 
-  const [successMsg, setSuccessMsg] = useState<string>("")
+  const { loading: creatingEvaluation, submitEvaluation } = useCreateEvaluation()
 
   const titleText = performanceData
     ? `${performanceData.courseName} ${performanceData.gradleLevel} ${performanceData.shift}`
     : "Turma"
 
-  const averageRankText = performanceData
-    ? `#${performanceData.rank.averageRank}`
-    : "#-"
+  const averageRankText = fmtRank(performanceData?.rank?.averageRank)
 
   const radarData: ChartData[] = useMemo(() => {
     if (!performanceData) return []
-
     return [
       { label: "Frequência", value: performanceData.frequencyScore },
       { label: "Participação", value: performanceData.participationScore },
@@ -111,41 +136,41 @@ export default function Classifications() {
   }, [performanceData])
 
   const getCardScoreAndRank = (key: (typeof cards)[number]["key"]) => {
-    if (!performanceData) return { score: "-", rank: "-" }
+    if (!performanceData) return { score: "-", rank: "#-" }
 
     switch (key) {
       case "frequency":
         return {
-          score: performanceData.frequencyScore.toFixed(1),
-          rank: `#${performanceData.rank.frequencyRank}`,
+          score: fmt(performanceData.frequencyScore),
+          rank: fmtRank(performanceData.rank?.frequencyRank),
         }
       case "unifirm":
         return {
-          score: performanceData.unifirmScore.toFixed(1),
-          rank: `#${performanceData.rank.unifirmRank}`,
+          score: fmt(performanceData.unifirmScore),
+          rank: fmtRank(performanceData.rank?.unifirmRank),
         }
       case "behavior":
         return {
-          score: performanceData.behaviorScore.toFixed(1),
-          rank: `#${performanceData.rank.behaviorRank}`,
+          score: fmt(performanceData.behaviorScore),
+          rank: fmtRank(performanceData.rank?.behaviorRank),
         }
       case "participation":
         return {
-          score: performanceData.participationScore.toFixed(1),
-          rank: `#${performanceData.rank.participationRank}`,
+          score: fmt(performanceData.participationScore),
+          rank: fmtRank(performanceData.rank?.participationRank),
         }
       case "performance":
         return {
-          score: performanceData.performanceScore.toFixed(1),
-          rank: `#${performanceData.rank.performanceRank}`,
+          score: fmt(performanceData.performanceScore),
+          rank: fmtRank(performanceData.rank?.performanceRank),
         }
       case "cellPhoneUse":
         return {
-          score: performanceData.cellPhoneUseScore.toFixed(1),
-          rank: `#${performanceData.rank.cellPhoneUseRank}`,
+          score: fmt(performanceData.cellPhoneUseScore),
+          rank: fmtRank(performanceData.rank?.cellPhoneUseRank),
         }
       default:
-        return { score: "-", rank: "-" }
+        return { score: "-", rank: "#-" }
     }
   }
 
@@ -160,7 +185,6 @@ export default function Classifications() {
 
   const handleSelect = (campo: keyof Avaliacao, valor: number) => {
     setAvaliacao((prev) => ({ ...prev, [campo]: valor }))
-    setSuccessMsg("")
   }
 
   const resetAvaliacao = () => {
@@ -172,7 +196,6 @@ export default function Classifications() {
       comportamento: 0,
       usoCelular: 0,
     })
-    setSuccessMsg("")
   }
 
   const isAvaliacaoValida = useMemo(() => {
@@ -181,17 +204,8 @@ export default function Classifications() {
   }, [avaliacao])
 
   const handleConfirmEvaluation = async () => {
-    setSuccessMsg("")
-
-    if (!Number.isFinite(classId)) {
-      setSuccessMsg("Turma inválida.")
-      return
-    }
-
-    if (!isAvaliacaoValida) {
-      setSuccessMsg("Preencha todas as notas (1 a 5) antes de confirmar.")
-      return
-    }
+    if (!Number.isFinite(classId)) return
+    if (!isAvaliacaoValida) return
 
     const result = await submitEvaluation(classId, {
       frequencyScore: avaliacao.frequencia,
@@ -203,11 +217,6 @@ export default function Classifications() {
     })
 
     if (result) {
-      setSuccessMsg(
-        `Avaliação registrada! (ID: ${result.id}) • Média: ${result.averageScore.toFixed(
-          1
-        )} • Data: ${formatDatePtBR(result.date)}`
-      )
       refreshPerformance()
       resetAvaliacao()
     }
@@ -234,41 +243,130 @@ export default function Classifications() {
   )
 
   const [newComment, setNewComment] = useState<string>("")
-  const [commentMsg, setCommentMsg] = useState<string>("")
 
-  const {
-    submit: submitComment,
-    loading: creatingComment,
-    error: createCommentError,
-  } = useCreateClassComment({
-    onSuccess: () => {
-      setNewComment("")
-      setCommentMsg("Comentário enviado!")
-      refreshComments()
-      setTimeout(() => setCommentMsg(""), 2500)
-    },
-  })
+  const { submit: submitComment, loading: creatingComment } =
+    useCreateClassComment({
+      onSuccess: () => {
+        setNewComment("")
+        refreshComments()
+      },
+    })
 
-  const isCommentValid = useMemo(() => {
-    return newComment.trim().length >= 2
-  }, [newComment])
+  const isCommentValid = useMemo(
+    () => newComment.trim().length >= 2,
+    [newComment]
+  )
 
   const handlePostComment = async () => {
-    setCommentMsg("")
-
-    if (!Number.isFinite(classId)) {
-      setCommentMsg("Turma inválida.")
-      return
-    }
-
+    if (!Number.isFinite(classId)) return
     const text = newComment.trim()
-    if (!text) {
-      setCommentMsg("Digite um comentário antes de postar.")
-      return
-    }
-
+    if (!text) return
     await submitComment(classId, { comment: text })
   }
+
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
+    null
+  )
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({})
+
+  const { submit: deleteComment, loading: deletingComment } = useDeleteClassComment(
+    {
+      onSuccess: () => refreshComments(),
+    }
+  )
+
+  const { submit: updateComment, loading: updatingComment } = useUpdateClassComment(
+    {
+      onSuccess: () => refreshComments(),
+    }
+  )
+
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
+  const [editingText, setEditingText] = useState<string>("")
+
+  const openMenu = (commentId: number) => {
+    const btn = buttonRefs.current[commentId]
+    if (!btn) return
+
+    const rect = btn.getBoundingClientRect()
+
+    const MENU_HEIGHT = 92
+    const MENU_WIDTH = 160
+    const GAP = 8
+
+    const spaceBelow = window.innerHeight - rect.bottom
+    const openUp = spaceBelow < MENU_HEIGHT + GAP
+
+    const top = openUp ? rect.top - MENU_HEIGHT - GAP : rect.bottom + GAP
+
+    const idealLeft = rect.right - MENU_WIDTH
+    const left = Math.max(8, Math.min(idealLeft, window.innerWidth - MENU_WIDTH - 8))
+
+    setMenuPos({ top, left })
+    setOpenMenuId(commentId)
+  }
+
+  const closeMenu = () => {
+    setOpenMenuId(null)
+    setMenuPos(null)
+  }
+
+  const handleOpenEdit = (commentId: number, currentText: string) => {
+    setEditingCommentId(commentId)
+    setEditingText(currentText)
+    closeMenu()
+  }
+
+  const handleSaveEdit = async (commentId: number) => {
+    if (!Number.isFinite(classId)) return
+    const text = editingText.trim()
+    if (text.length < 2) return
+
+    await updateComment(classId, commentId, { comment: text })
+
+    setEditingCommentId(null)
+    setEditingText("")
+  }
+
+  const handleDelete = async (commentId: number) => {
+    if (!Number.isFinite(classId)) return
+    await deleteComment(classId, commentId)
+
+    closeMenu()
+    if (editingCommentId === commentId) {
+      setEditingCommentId(null)
+      setEditingText("")
+    }
+  }
+
+  useEffect(() => {
+    if (openMenuId === null) return
+
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node
+
+      if (menuRef.current?.contains(target)) return
+
+      const btn = buttonRefs.current[openMenuId]
+      if (btn?.contains(target)) return
+
+      closeMenu()
+    }
+
+    const onScrollOrResize = () => closeMenu()
+
+    window.addEventListener("pointerdown", onPointerDown)
+    window.addEventListener("resize", onScrollOrResize)
+    window.addEventListener("scroll", onScrollOrResize, true)
+
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown)
+      window.removeEventListener("resize", onScrollOrResize)
+      window.removeEventListener("scroll", onScrollOrResize, true)
+    }
+  }, [openMenuId])
 
   return (
     <div>
@@ -287,17 +385,6 @@ export default function Classifications() {
           {titleText} <b>{averageRankText}</b>
         </p>
 
-        <p className={styles.subtitledc}></p>
-
-        {performanceError && (
-          <div style={{ marginTop: 8 }}>
-            <p style={{ marginBottom: 6 }}>{performanceError}</p>
-            <button onClick={refreshPerformance} type="button">
-              Tentar novamente
-            </button>
-          </div>
-        )}
-
         <div className={styles.cardsGrid}>
           {cards.map((card, index) => {
             const { score, rank } = getCardScoreAndRank(card.key)
@@ -308,11 +395,11 @@ export default function Classifications() {
                 <div className={styles.cardInfo}>
                   <span className={styles.cardTitle}>{card.title}</span>
                   <strong className={styles.cardScore}>
-                    {performanceLoading ? "..." : score}
+                    {performanceLoading ? "-" : score}
                   </strong>
                 </div>
                 <span className={styles.rank}>
-                  {performanceLoading ? "#..." : rank}
+                  {performanceLoading ? "#-" : rank}
                 </span>
               </div>
             )
@@ -341,25 +428,44 @@ export default function Classifications() {
 
         {activeTab === "grafico" && (
           <div className={styles.graphContainer}>
-            <div className={styles.filters}>
-              {years.map((year) => (
-                <button
-                  key={year}
-                  className={selectedYear === year ? styles.filterActive : ""}
-                  onClick={() => setSelectedYear(year)}
-                  type="button"
-                >
-                  {year}
-                </button>
-              ))}
+            <div className={styles.filtersPanel}>
+              <div className={styles.filterBlock}>
+                <p className={styles.filterTitle}>Ano</p>
+                <div className={styles.bimestreFilters}>
+                  {years.map((year) => (
+                    <button
+                      key={year}
+                      className={selectedYear === year ? styles.filterActive : ""}
+                      onClick={() => setSelectedYear(year)}
+                      type="button"
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.filterBlock}>
+                <p className={styles.filterTitle}>Bimestre</p>
+                <div className={styles.bimestreFilters}>
+                  {bimestres.map((b) => (
+                    <button
+                      key={b.value}
+                      className={
+                        selectedBimestre === b.value ? styles.filterActive : ""
+                      }
+                      onClick={() => setSelectedBimestre(b.value)}
+                      type="button"
+                    >
+                      {b.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             <div className={styles.graphPlaceholder}>
-              {performanceLoading ? (
-                <p>Carregando gráfico...</p>
-              ) : (
-                <RadarPerformanceChart data={radarData} />
-              )}
+              <RadarPerformanceChart data={radarData} />
             </div>
           </div>
         )}
@@ -367,18 +473,6 @@ export default function Classifications() {
         {activeTab === "avaliar" && (
           <div className={styles.evaluateContainer}>
             <h3 className={styles.h3_evaluation_class}>Avalie a turma</h3>
-
-            {createEvaluationError && (
-              <div style={{ marginTop: 10, marginBottom: 10 }}>
-                <p>{createEvaluationError}</p>
-              </div>
-            )}
-
-            {successMsg && (
-              <div style={{ marginTop: 10, marginBottom: 10 }}>
-                <p>{successMsg}</p>
-              </div>
-            )}
 
             <div className={styles.grid}>
               <Rating label="Frequência" campo="frequencia" />
@@ -404,11 +498,6 @@ export default function Classifications() {
                 type="button"
                 onClick={handleConfirmEvaluation}
                 disabled={creatingEvaluation || !isAvaliacaoValida}
-                title={
-                  !isAvaliacaoValida
-                    ? "Preencha todas as notas (1 a 5) antes de confirmar."
-                    : undefined
-                }
               >
                 {creatingEvaluation ? "Enviando..." : "Confirmar"}
               </button>
@@ -423,37 +512,67 @@ export default function Classifications() {
 
           <p className={styles.commentsClass}>{titleText}</p>
 
-          {commentsError && (
-            <div style={{ marginTop: 8, marginBottom: 8 }}>
-              <p style={{ marginBottom: 6 }}>{commentsError}</p>
-              <button onClick={refreshComments} type="button">
-                Tentar novamente
-              </button>
-            </div>
-          )}
-
           <div className={styles.commentsList}>
-            {commentsLoading ? (
-              <p>Carregando comentários...</p>
-            ) : comments.length === 0 ? (
-              <p>Nenhum comentário ainda.</p>
-            ) : (
-              comments.map((c) => (
+            {!commentsLoading &&
+              commentsArray.map((c) => (
                 <div key={c.id} className={styles.commentItem}>
-                  <strong>{c.professorName}</strong>
-                  <span>{formatDatePtBR(c.createdAt)}</span>
-                  <p>{c.comment}</p>
-                </div>
-              ))
-            )}
-          </div>
+                  <div className={styles.commentHeader}>
+                    <div className={styles.commentHeaderLeft}>
+                      <strong>{c.professorName}</strong>
+                      <span>{formatDatePtBR(c.createdAt)}</span>
+                    </div>
 
-          {(createCommentError || commentMsg) && (
-            <div style={{ marginTop: 10, marginBottom: 10 }}>
-              {createCommentError && <p>{createCommentError}</p>}
-              {commentMsg && <p>{commentMsg}</p>}
-            </div>
-          )}
+                    <button
+                      className={styles.moreButton}
+                      type="button"
+                      ref={(el) => {
+                        buttonRefs.current[c.id] = el
+                      }}
+                      onClick={() => {
+                        if (openMenuId === c.id) closeMenu()
+                        else openMenu(c.id)
+                      }}
+                      aria-label="Abrir menu do comentário"
+                    >
+                      ⋯
+                    </button>
+                  </div>
+
+                  {editingCommentId === c.id ? (
+                    <div className={styles.editBox}>
+                      <input
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        disabled={updatingComment}
+                      />
+
+                      <button
+                        type="button"
+                        className={styles.saveBtn}
+                        onClick={() => handleSaveEdit(c.id)}
+                        disabled={updatingComment || editingText.trim().length < 2}
+                      >
+                        {updatingComment ? "Salvando..." : "Salvar"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className={styles.cancelEditBtn}
+                        onClick={() => {
+                          setEditingCommentId(null)
+                          setEditingText("")
+                        }}
+                        disabled={updatingComment}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : (
+                    <p>{c.comment}</p>
+                  )}
+                </div>
+              ))}
+          </div>
 
           <div className={styles.newComment}>
             <input
@@ -468,13 +587,43 @@ export default function Classifications() {
               type="button"
               onClick={handlePostComment}
               disabled={creatingComment || !isCommentValid}
-              title={!isCommentValid ? "Digite pelo menos 2 caracteres." : undefined}
             >
               {creatingComment ? "Postando..." : "Postar"}
             </button>
           </div>
         </div>
       )}
+
+      {openMenuId !== null &&
+        menuPos &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className={styles.portalMenu}
+            style={{ top: menuPos.top, left: menuPos.left }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                const current = commentsArray.find((x) => x.id === openMenuId)
+                if (!current) return
+                handleOpenEdit(openMenuId, current.comment)
+              }}
+            >
+              Editar
+            </button>
+
+            <button
+              type="button"
+              className={styles.delete}
+              onClick={() => handleDelete(openMenuId)}
+              disabled={deletingComment}
+            >
+              {deletingComment ? "Excluindo..." : "Excluir"}
+            </button>
+          </div>,
+          document.body
+        )}
 
       <Footer />
     </div>
