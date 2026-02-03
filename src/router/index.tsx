@@ -6,6 +6,7 @@ import Classifications from "../pages/Classifications";
 import Classificacoes from "../pages/RankingDetail"
 import ControlPanel from "../pages/ControlPanel";
 import ClassesDetail from "../pages/ClassesDetail";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 
 export const router = createBrowserRouter([
   {
@@ -13,14 +14,19 @@ export const router = createBrowserRouter([
     element: <Classifications />,
   },
   {
-    path: "/selecionar-turmas",
-    element: < SelecionarTurmas />,
-  },
-  {
-    path: "/minhas-turmas",
+    element: <ProtectedRoute allowedRoles={['ROLE_PROFESSOR', 'ROLE_ADMIN']} />,
     children: [
-      { index: true, element: <MinhasTurmas /> },
-      { path: ":id", element: <ClassesDetail /> },
+      {
+        path: "/selecionar-turmas",
+        element: <SelecionarTurmas />,
+      },
+      {
+        path: "/minhas-turmas",
+        children: [
+          { index: true, element: <MinhasTurmas /> },
+          { path: ":id", element: <ClassesDetail /> },
+        ],
+      },
     ],
   },
   {
@@ -28,8 +34,13 @@ export const router = createBrowserRouter([
     element: <Classificacoes />
   },
   {
-    path: "/painel_controle",
-    element: <ControlPanel />
+    element: <ProtectedRoute allowedRoles={['ROLE_ADMIN']} />,
+    children: [
+      {
+        path: "/painel_controle",
+        element: <ControlPanel />
+      },
+    ],
   },
 ]);
 export const rotas = withFaroRouterInstrumentation(router);

@@ -5,52 +5,25 @@ import styles from "./Header.module.css";
 import { Link } from "react-router-dom";
 import { Users, BarChart3, LayoutDashboard, Settings, LogOut } from "lucide-react";
 import keycloak from "@/api/config/keycloak";
-import { envConfig } from "@/api/config/env";
 import { useUploadImage } from "@/hooks/processing/useUploadImage";
-
-interface UserToken {
-  name: string;
-  email: string;
-  type_user: string;
-  picture?: string;
-}
+import { useAuthUser } from "@/hooks/useAuthUser";
+import { type AuthUser } from "@/api/types/auth";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<UserToken | null>(null);
+  const [userData, setUserData] = useState<AuthUser | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const { upload, isLoading } = useUploadImage();
+  const auth = useAuthUser();
 
   useEffect(() => {
-    if (keycloak.authenticated) {
+  if (auth) {
+    setUserData(auth);
+  }
+}, [auth]);
 
-      const token = keycloak.tokenParsed;
 
-      if (token) {
-        const roles = token.realm_access?.roles || [];
-        
-        // Definindo a hierarquia: Admin > Professor > Aluno
-        const userRole = roles.includes('ROLE_ADMIN') 
-          ? 'Administrador'
-          : roles.includes('ROLE_PROFESSOR') 
-            ? 'Professor' 
-            : roles.includes('ROLE_ALUNO') 
-              ? 'Aluno' 
-              : 'Usuário';
 
-        const profileImg = token.picture 
-        ? `${envConfig.minio.minioBaseUrl}/${envConfig.minio.minioImageBucket}/${token.picture}` 
-        : Perfil;
-        setUserData({
-          name: token.name || '',
-          email: token.email || '',
-          type_user: userRole,
-          picture: profileImg
-        });
-      }
-    }
-  }, [keycloak.authenticated, keycloak.tokenParsed]);
-  
   // Referência para o input de arquivo escondido
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -78,10 +51,15 @@ const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
   const result = await upload(file);
 
   if (result.success) {
-    setUserData(prev => prev ? { ...prev, picture: result.newUrl } : null);
-    // Opcional: toast de sucesso
-  } else {
-    // Opcional: toast de erro
+    setUserData(prev => {
+      if (!prev) return null;
+      
+      return { 
+        ...prev, 
+        picture: `${result.newUrl}?t=${new Date().getTime()}` 
+      };
+    });
+  
   }
 };
 
@@ -153,12 +131,12 @@ const handleUpdateProfile = (e: React.MouseEvent) => {
                     <li>
                       <Link to="/"><BarChart3 size={18} /> Classificações</Link>
                     </li>
-                    {userData?.type_user === 'Professor' && (
+                    {userData?.roleLabel === 'Professor' && (
                       <li>
                         <Link to="/minhas-turmas"><Users size={18} /> Minhas Turmas</Link>
                       </li>
                     )}
-                    {userData?.type_user === 'Administrador' && (
+                    {userData?.roleLabel === 'Administrador' && (
                       <li>
                         <Link to="/painel_controle"><LayoutDashboard size={18} /> Painel de Controle</Link>
                       </li>
