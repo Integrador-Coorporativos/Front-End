@@ -4,35 +4,57 @@ import Perfil from "../../assets/perfil.png";
 import styles from "./Header.module.css";
 import { Link } from "react-router-dom";
 import { Users, BarChart3, LayoutDashboard, Settings, LogOut } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
+import keycloak from "@/api/config/keycloak";
+import { envConfig } from "@/api/config/env";
+import { useUploadImage } from "@/hooks/processing/useUploadImage";
 
 interface UserToken {
   name: string;
   email: string;
+  type_user: string;
+  picture?: string;
 }
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState<UserToken | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { upload, isLoading } = useUploadImage();
+
+  useEffect(() => {
+    if (keycloak.authenticated) {
+
+      const token = keycloak.tokenParsed;
+
+      if (token) {
+        const roles = token.realm_access?.roles || [];
+        
+        // Definindo a hierarquia: Admin > Professor > Aluno
+        const userRole = roles.includes('ROLE_ADMIN') 
+          ? 'Administrador'
+          : roles.includes('ROLE_PROFESSOR') 
+            ? 'Professor' 
+            : roles.includes('ROLE_ALUNO') 
+              ? 'Aluno' 
+              : 'Usuário';
+
+        const profileImg = token.picture 
+        ? `${envConfig.minio.minioBaseUrl}/${envConfig.minio.minioImageBucket}/${token.picture}` 
+        : Perfil;
+        setUserData({
+          name: token.name || '',
+          email: token.email || '',
+          type_user: userRole,
+          picture: profileImg
+        });
+      }
+    }
+  }, [keycloak.authenticated, keycloak.tokenParsed]);
   
   // Referência para o input de arquivo escondido
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded: UserToken = jwtDecode(token);
-        setUserData(decoded);
-      } catch (e) {
-        console.error("Erro ao decodificar token:", e);
-        setUserData({ name: "Usuário IF", email: "usuario@ifrn.edu.br" });
-      }
-    } else {
-      setUserData({ name: "Usuário IF", email: "usuario@ifrn.edu.br" });
-    }
-  }, []);
+  
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -49,13 +71,30 @@ export default function Header() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      console.log("Arquivo selecionado:", file.name);
-      // Aqui você implementaria o upload para o servidor futuramente
-    }
-  };
+const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const result = await upload(file);
+
+  if (result.success) {
+    setUserData(prev => prev ? { ...prev, picture: result.newUrl } : null);
+    // Opcional: toast de sucesso
+  } else {
+    // Opcional: toast de erro
+  }
+};
+
+const handleLogout = (e: React.MouseEvent) => {
+  e.preventDefault();
+  console.log(userData);
+  keycloak.logout({ redirectUri: window.location.origin });
+};
+
+const handleUpdateProfile = (e: React.MouseEvent) => {
+  e.preventDefault();
+  keycloak.accountManagement();
+};
 
   return (
     <header className={styles.header}>
@@ -75,7 +114,11 @@ export default function Header() {
 
           <div className={styles.profileContainer} ref={menuRef}>
             <div className={styles.profile} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              <img className={styles.avatar} src={Perfil} alt="User" />
+              <img 
+                className={styles.avatar} 
+                src={userData?.picture || Perfil} 
+                alt="User" 
+              />
             </div>
 
             {isMenuOpen && (
@@ -83,7 +126,11 @@ export default function Header() {
                 <div className={styles.userHeader}>
                   {/* Container da foto com overlay para trocar */}
                   <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
-                    <img src={Perfil} alt="User" className={styles.menuAvatar} />
+                    <img 
+                      className={styles.avatar} 
+                      src={userData?.picture || Perfil} 
+                      alt="User" 
+                    />
                     <div className={styles.avatarOverlay}>Trocar</div>
                     <input 
                       type="file" 
@@ -102,13 +149,31 @@ export default function Header() {
                 
                 <div className={styles.divider} />
 
-                <ul className={styles.menuList}>
-                  <li><Link to="/"><BarChart3 size={18} /> Classificações</Link></li>
-                  <li><Link to="/minhas-turmas"><Users size={18} /> Minhas Turmas</Link></li>
-                  <li><Link to="/painel_controle"><LayoutDashboard size={18} /> Painel de Controle</Link></li>
-                  <li><Link to="/alterar-dados"><Settings size={18} /> Alterar dados</Link></li>
-                  <li className={styles.logout}><Link to="/sair"><LogOut size={18} /> Sair</Link></li>
-                </ul>
+                  <ul className={styles.menuList}>
+                    <li>
+                      <Link to="/"><BarChart3 size={18} /> Classificações</Link>
+                    </li>
+                    {userData?.type_user === 'Professor' && (
+                      <li>
+                        <Link to="/minhas-turmas"><Users size={18} /> Minhas Turmas</Link>
+                      </li>
+                    )}
+                    {userData?.type_user === 'Administrador' && (
+                      <li>
+                        <Link to="/painel_controle"><LayoutDashboard size={18} /> Painel de Controle</Link>
+                      </li>
+                    )}
+                    <li>
+                      <Link to="#" onClick={handleUpdateProfile}>
+                        <Settings size={18} /> Alterar dados
+                      </Link>
+                    </li>
+                    <li className={styles.logout}>
+                      <Link to="#" onClick={handleLogout}>
+                        <LogOut size={18} /> Sair
+                      </Link>
+                    </li>
+                  </ul>
               </div>
             )}
           </div>

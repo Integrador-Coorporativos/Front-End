@@ -1,7 +1,5 @@
 import { createBrowserRouter, type DataRouter } from "react-router-dom";
 import { withFaroRouterInstrumentation } from "@grafana/faro-react";
-import Cadastro from "../pages/SignUp";
-import Login from "../pages/Login";
 import SelecionarTurmas from "../pages/SelectClasses";
 import MinhasTurmas from "../pages/MyClasses";
 import Classifications from "../pages/Classifications";
@@ -13,14 +11,6 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <Classifications />,
-  },
-  {
-    path: "/cadastro",
-    element: <Cadastro />,
-  },
-  {
-    path: "/login",
-    element: < Login />,
   },
   {
     path: "/selecionar-turmas",
