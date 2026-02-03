@@ -11,12 +11,16 @@ import Dashboard from "../pages/Dashboard";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/classificacoes",
     element: <Classifications />,
   },
   {
     element: <ProtectedRoute allowedRoles={['ROLE_PROFESSOR', 'ROLE_ADMIN']} />,
     children: [
+      {
+        path: "/",
+        element: <Dashboard />
+      },
       {
         path: "/selecionar-turmas",
         element: <SelecionarTurmas />,
@@ -43,9 +47,5 @@ export const router = createBrowserRouter([
       },
     ],
   },
-  {
-    path: "/dashboard",
-    element: <Dashboard />
-  }
 ]);
 export const rotas = withFaroRouterInstrumentation(router);

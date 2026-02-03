@@ -3,7 +3,7 @@ import Logo from "../../assets/logo-if.png";
 import Perfil from "../../assets/perfil.png";
 import styles from "./Header.module.css";
 import { Link } from "react-router-dom";
-import { Users, BarChart3, LayoutDashboard, Settings, LogOut } from "lucide-react";
+import { Users, BarChart3, LayoutDashboard, Settings, LogOut, Shuffle } from "lucide-react";
 import keycloak from "@/api/config/keycloak";
 import { useUploadImage } from "@/hooks/processing/useUploadImage";
 import { useAuthUser } from "@/hooks/useAuthUser";
@@ -129,11 +129,16 @@ const handleUpdateProfile = (e: React.MouseEvent) => {
 
                   <ul className={styles.menuList}>
                     <li>
-                      <Link to="/"><BarChart3 size={18} /> Classificações</Link>
+                      <Link to="/classificacoes"><BarChart3 size={18} /> Classificações</Link>
                     </li>
-                    {userData?.roleLabel === 'Professor' && (
+                    {userData?.roleLabel === 'Professor' || userData?.roleLabel === 'Administrador' && (
                       <li>
                         <Link to="/minhas-turmas"><Users size={18} /> Minhas Turmas</Link>
+                      </li>
+                    )}
+                    {userData?.roleLabel === 'Professor' || userData?.roleLabel === 'Administrador' && (
+                      <li>
+                        <Link to="/selecionar-turmas"><Shuffle size={18} /> Alterar Turmas</Link>
                       </li>
                     )}
                     {userData?.roleLabel === 'Administrador' && (

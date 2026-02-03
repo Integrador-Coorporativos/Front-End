@@ -26,10 +26,10 @@ export const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
   if (!hasPermission) {
   // Se for Aluno, manda para 'minhas-notas' ou outra página permitida
   if (user.isStudent) {
-    return <Navigate to="/minhas-turmas" replace />;
+    return <Navigate to="/" replace />;
   }
   // Fallback padrão para outros casos
-  return <Navigate to="/" replace />;
+  return <Navigate to="/dashboard" replace />;
 }
   return <Outlet />;
 };

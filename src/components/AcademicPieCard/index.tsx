@@ -9,35 +9,37 @@ import {
 import InfoCard from "../InfoCard";
 import styles from "./AcademicPieCard.module.css";
 
-type Slice = {
-  name: "Verde" | "Amarelo" | "Vermelho";
-  value: number;
-  color: string;
-  description: string;
-};
+// Definimos o que o componente precisa receber
+interface AcademicPieCardProps {
+  greenValue: number;  // Qtd ou % de alunos OK
+  yellowValue: number; // Qtd ou % de alunos Alerta
+  redValue: number;    // Qtd ou % de alunos Críticos
+}
 
-const data: Slice[] = [
-  {
-    name: "Verde",
-    value: 50,
-    color: "#22c55e",
-    description: "Estão em ótima situação.",
-  },
-  {
-    name: "Amarelo",
-    value: 33,
-    color: "#f59e0b",
-    description: "Precisa de atenção em relação aos critérios.",
-  },
-  {
-    name: "Vermelho",
-    value: 17,
-    color: "#ef4444",
-    description: "Situação crítica, alvo de mudanças.",
-  },
-];
+export default function AcademicPieCard({ greenValue, yellowValue, redValue }: AcademicPieCardProps) {
+  
+  // Montamos o array do Recharts dinamicamente com as props
+  const chartData = [
+    {
+      name: "Verde",
+      value: greenValue || 0,
+      color: "#22c55e",
+      description: "Estão em ótima situação.",
+    },
+    {
+      name: "Amarelo",
+      value: yellowValue || 0,
+      color: "#f59e0b",
+      description: "Precisa de atenção em relação aos critérios.",
+    },
+    {
+      name: "Vermelho",
+      value: redValue || 0,
+      color: "#ef4444",
+      description: "Situação crítica, alvo de mudanças.",
+    },
+  ];
 
-export default function AcademicPieCard() {
   return (
     <InfoCard title="Situação Acadêmica">
       <div className={styles.layout}>
@@ -45,7 +47,7 @@ export default function AcademicPieCard() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 dataKey="value"
                 nameKey="name"
                 innerRadius={55}
@@ -53,21 +55,17 @@ export default function AcademicPieCard() {
                 startAngle={90}
                 endAngle={-270}
               >
-                {data.map((entry) => (
+                {chartData.map((entry) => (
                   <Cell key={entry.name} fill={entry.color} />
                 ))}
               </Pie>
-
-              <Tooltip
-                
-              />
+              <Tooltip />
             </PieChart>
           </ResponsiveContainer>
-
         </div>
 
         <div className={styles.legend}>
-          {data.map((item) => (
+          {chartData.map((item) => (
             <div key={item.name} className={styles.legendRow}>
               <div
                 className={styles.badge}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { studentService } from "@/api/services/adminPanelService";
 import type { StudentPerformance } from "@/types/StudentPerformance";
 
 export function useStudentManager() {
@@ -8,11 +8,11 @@ export function useStudentManager() {
   const [selectedAluno, setSelectedAluno] = useState<StudentPerformance | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Busca a lista de alunos
+  // Busca a lista de alunos usando o Service
   const fetchAlunos = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8085/api/admin-panel/students");
+      const response = await studentService.getAll();
       setAlunos(response.data);
     } catch (error) {
       console.error("Erro ao carregar alunos:", error);
@@ -21,7 +21,7 @@ export function useStudentManager() {
     }
   };
 
-  // Salva as alterações
+  // Salva as alterações usando o Service
   const handleSave = async (dados: StudentPerformance) => {
     try {
       if (!dados.id) {
@@ -31,34 +31,27 @@ export function useStudentManager() {
 
       /**
        * LIMPEZA DE PAYLOAD (Para evitar Erro 500 no Java)
-       * Enviamos apenas o que o banco precisa atualizar. 
-       * Campos como 'status' ou 'studentId' (UUID) costumam travar o JPA/Hibernate no PUT.
+       * Enviamos apenas o que o contrato do Service espera (Partial)
        */
-      const payload = {
+      const payload: Partial<StudentPerformance> = {
         id: dados.id,
         name: dados.name,
         ira: dados.ira,
         classId: dados.classId,
         attendenceRate: dados.attendenceRate,
         averageScore: dados.averageScore,
-        registration: dados.registration // Apenas se o Java permitir
+        registration: dados.registration
       };
 
-      console.log("Enviando atualização para ID:", dados.id, payload);
-
-      await axios.put(
-        `http://localhost:8085/api/performance/student/${dados.id}`, 
-        payload
-      );
+      await studentService.update(dados.id, payload);
       
       setIsModalOpen(false);
-      await fetchAlunos(); // Atualiza a tabela/cards
+      await fetchAlunos(); // Atualiza a lista
       alert("Aluno atualizado com sucesso!");
 
     } catch (error: any) {
       console.error("Erro ao salvar:");
       if (error.response) {
-        // O servidor respondeu com um erro (500, 400, etc)
         console.error("Dados do erro Java:", error.response.data);
         alert(`Erro no Servidor: ${error.response.data.message || "Erro Interno"}`);
       } else {

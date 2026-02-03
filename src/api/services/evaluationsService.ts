@@ -3,6 +3,7 @@ import type {
   CreateEvaluationRequest,
   CreateEvaluationResponse,
 } from "../types/evaluation"
+import { type DashboardMetrics } from "../types/dashboard"
 
 export const createEvaluation = async (
   classId: number,
@@ -20,3 +21,8 @@ export const createEvaluation = async (
 
   return response.data
 }
+
+export const getDashboardMetrics = async (): Promise<DashboardMetrics> => {
+  const response = await api.get<DashboardMetrics>("api/evaluations/dashboard/metrics");
+  return response.data;
+};

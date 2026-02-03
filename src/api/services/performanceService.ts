@@ -10,7 +10,6 @@ export const getAllClassPerformance = async (): Promise<ClassPerformanceResponse
   const response = await api.get<ClassPerformanceResponse[]>("/api/performance/class/all");
   return response.data;
 };
-
 export const getClassPerformanceByYear = async (
   classId: number,
   year: number
