@@ -1,0 +1,42 @@
+.page {
+  min-height: 100vh;
+  background: #f3f5f7;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  width: min(1200px, 95%);
+  margin: 0 auto;
+  padding: 18px 0 28px;
+  flex: 1;
+}
+
+.topGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  margin-top: 14px;
+}
+
+.tilesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.bottomPanel {
+  margin-top: 18px;
+}
+
+@media (max-width: 980px) {
+  .topGrid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 520px) {
+  .tilesGrid {
+    grid-template-columns: 1fr;
+  }
+}
