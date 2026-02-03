@@ -87,6 +87,7 @@ body {
 .cardInfo {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .cardTitle {
@@ -269,6 +270,7 @@ body {
   border-radius: 6px;
   background: #fff;
   color: var(--text);
+  cursor: pointer;
 }
 
 .button:hover {
@@ -326,7 +328,15 @@ body {
 }
 
 .commentItem {
-  margin-bottom: 18px;
+  margin-bottom: 10px;
+  position: relative;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.commentItem:hover {
+  background: #f3f7f3;
 }
 
 .commentItem strong {
@@ -341,14 +351,85 @@ body {
 }
 
 .commentItem p {
-  margin-top: 4px;
+  margin-top: 6px;
   color: var(--text);
+}
+
+.commentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.commentHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.moreButton {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: var(--muted);
+  padding: 0 6px;
+}
+
+.commentItem:hover .moreButton {
+  opacity: 1;
+}
+
+.editBox {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.editBox input {
+  flex: 1;
+  min-width: 220px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  color: var(--text);
+  background: #fff;
+}
+
+.saveBtn {
+  background: var(--green);
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.cancelEditBtn {
+  background: #999;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.saveBtn:disabled,
+.cancelEditBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .newComment {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  margin-top: 14px;
 }
 
 .newComment input {
@@ -368,3 +449,43 @@ body {
   border: none;
   cursor: pointer;
 }
+
+.postButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.portalMenu {
+  position: fixed;
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 160px;
+  overflow: hidden;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.18);
+}
+
+.portalMenu button {
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.portalMenu button:hover {
+  background: #f5f5f5;
+}
+
+.portalMenu button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.portalMenu .delete {
+  color: #e74c3c;
+}
+

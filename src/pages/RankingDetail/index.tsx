@@ -1,7 +1,8 @@
 import Header from "../../components/Header"
 import BreadCrumb from "../../components/BreadCrumb"
 import styles from "./RankingDetail.module.css"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useParams } from "react-router-dom"
 
 import Phone from "../../assets/logo-phone.png"
@@ -18,6 +19,8 @@ import { useClassPerformanceByYear } from "../../hooks/performance/useClassPerfo
 import { useClassComments } from "../../hooks/comments/useClassComments"
 import { useCreateEvaluation } from "../../hooks/evaluation/useCreateEvaluation"
 import { useCreateClassComment } from "../../hooks/comments/useCreateClassComment"
+import { useDeleteClassComment } from "../../hooks/comments/useDeleteClassComment"
+import { useUpdateClassComment } from "../../hooks/comments/useUpdateClassComment"
 
 import type { Bimestre } from "@/api/types/performance"
 
@@ -107,6 +110,10 @@ export default function Classifications() {
     loading: commentsLoading,
     refresh: refreshComments,
   } = useClassComments(Number.isFinite(classId) ? classId : undefined)
+
+  const commentsArray = useMemo(() => {
+    return Array.isArray(comments) ? comments : []
+  }, [comments])
 
   const { loading: creatingEvaluation, submitEvaluation } = useCreateEvaluation()
 
@@ -222,7 +229,9 @@ export default function Classifications() {
         {[1, 2, 3, 4, 5].map((num) => (
           <button
             key={num}
-            className={`${styles.button} ${avaliacao[campo] === num ? styles.active : ""}`}
+            className={`${styles.button} ${
+              avaliacao[campo] === num ? styles.active : ""
+            }`}
             onClick={() => handleSelect(campo, num)}
             type="button"
           >
@@ -243,15 +252,121 @@ export default function Classifications() {
       },
     })
 
-  const isCommentValid = useMemo(() => newComment.trim().length >= 2, [newComment])
+  const isCommentValid = useMemo(
+    () => newComment.trim().length >= 2,
+    [newComment]
+  )
 
   const handlePostComment = async () => {
     if (!Number.isFinite(classId)) return
     const text = newComment.trim()
     if (!text) return
-
     await submitComment(classId, { comment: text })
   }
+
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
+    null
+  )
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({})
+
+  const { submit: deleteComment, loading: deletingComment } = useDeleteClassComment(
+    {
+      onSuccess: () => refreshComments(),
+    }
+  )
+
+  const { submit: updateComment, loading: updatingComment } = useUpdateClassComment(
+    {
+      onSuccess: () => refreshComments(),
+    }
+  )
+
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
+  const [editingText, setEditingText] = useState<string>("")
+
+  const openMenu = (commentId: number) => {
+    const btn = buttonRefs.current[commentId]
+    if (!btn) return
+
+    const rect = btn.getBoundingClientRect()
+
+    const MENU_HEIGHT = 92
+    const MENU_WIDTH = 160
+    const GAP = 8
+
+    const spaceBelow = window.innerHeight - rect.bottom
+    const openUp = spaceBelow < MENU_HEIGHT + GAP
+
+    const top = openUp ? rect.top - MENU_HEIGHT - GAP : rect.bottom + GAP
+
+    const idealLeft = rect.right - MENU_WIDTH
+    const left = Math.max(8, Math.min(idealLeft, window.innerWidth - MENU_WIDTH - 8))
+
+    setMenuPos({ top, left })
+    setOpenMenuId(commentId)
+  }
+
+  const closeMenu = () => {
+    setOpenMenuId(null)
+    setMenuPos(null)
+  }
+
+  const handleOpenEdit = (commentId: number, currentText: string) => {
+    setEditingCommentId(commentId)
+    setEditingText(currentText)
+    closeMenu()
+  }
+
+  const handleSaveEdit = async (commentId: number) => {
+    if (!Number.isFinite(classId)) return
+    const text = editingText.trim()
+    if (text.length < 2) return
+
+    await updateComment(classId, commentId, { comment: text })
+
+    setEditingCommentId(null)
+    setEditingText("")
+  }
+
+  const handleDelete = async (commentId: number) => {
+    if (!Number.isFinite(classId)) return
+    await deleteComment(classId, commentId)
+
+    closeMenu()
+    if (editingCommentId === commentId) {
+      setEditingCommentId(null)
+      setEditingText("")
+    }
+  }
+
+  useEffect(() => {
+    if (openMenuId === null) return
+
+    const onPointerDown = (e: PointerEvent) => {
+      const target = e.target as Node
+
+      if (menuRef.current?.contains(target)) return
+
+      const btn = buttonRefs.current[openMenuId]
+      if (btn?.contains(target)) return
+
+      closeMenu()
+    }
+
+    const onScrollOrResize = () => closeMenu()
+
+    window.addEventListener("pointerdown", onPointerDown)
+    window.addEventListener("resize", onScrollOrResize)
+    window.addEventListener("scroll", onScrollOrResize, true)
+
+    return () => {
+      window.removeEventListener("pointerdown", onPointerDown)
+      window.removeEventListener("resize", onScrollOrResize)
+      window.removeEventListener("scroll", onScrollOrResize, true)
+    }
+  }, [openMenuId])
 
   return (
     <div>
@@ -399,11 +514,62 @@ export default function Classifications() {
 
           <div className={styles.commentsList}>
             {!commentsLoading &&
-              comments.map((c) => (
+              commentsArray.map((c) => (
                 <div key={c.id} className={styles.commentItem}>
-                  <strong>{c.professorName}</strong>
-                  <span>{formatDatePtBR(c.createdAt)}</span>
-                  <p>{c.comment}</p>
+                  <div className={styles.commentHeader}>
+                    <div className={styles.commentHeaderLeft}>
+                      <strong>{c.professorName}</strong>
+                      <span>{formatDatePtBR(c.createdAt)}</span>
+                    </div>
+
+                    <button
+                      className={styles.moreButton}
+                      type="button"
+                      ref={(el) => {
+                        buttonRefs.current[c.id] = el
+                      }}
+                      onClick={() => {
+                        if (openMenuId === c.id) closeMenu()
+                        else openMenu(c.id)
+                      }}
+                      aria-label="Abrir menu do comentário"
+                    >
+                      ⋯
+                    </button>
+                  </div>
+
+                  {editingCommentId === c.id ? (
+                    <div className={styles.editBox}>
+                      <input
+                        value={editingText}
+                        onChange={(e) => setEditingText(e.target.value)}
+                        disabled={updatingComment}
+                      />
+
+                      <button
+                        type="button"
+                        className={styles.saveBtn}
+                        onClick={() => handleSaveEdit(c.id)}
+                        disabled={updatingComment || editingText.trim().length < 2}
+                      >
+                        {updatingComment ? "Salvando..." : "Salvar"}
+                      </button>
+
+                      <button
+                        type="button"
+                        className={styles.cancelEditBtn}
+                        onClick={() => {
+                          setEditingCommentId(null)
+                          setEditingText("")
+                        }}
+                        disabled={updatingComment}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  ) : (
+                    <p>{c.comment}</p>
+                  )}
                 </div>
               ))}
           </div>
@@ -427,6 +593,37 @@ export default function Classifications() {
           </div>
         </div>
       )}
+
+      {openMenuId !== null &&
+        menuPos &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className={styles.portalMenu}
+            style={{ top: menuPos.top, left: menuPos.left }}
+          >
+            <button
+              type="button"
+              onClick={() => {
+                const current = commentsArray.find((x) => x.id === openMenuId)
+                if (!current) return
+                handleOpenEdit(openMenuId, current.comment)
+              }}
+            >
+              Editar
+            </button>
+
+            <button
+              type="button"
+              className={styles.delete}
+              onClick={() => handleDelete(openMenuId)}
+              disabled={deletingComment}
+            >
+              {deletingComment ? "Excluindo..." : "Excluir"}
+            </button>
+          </div>,
+          document.body
+        )}
 
       <Footer />
     </div>

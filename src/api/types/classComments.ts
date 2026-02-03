@@ -9,3 +9,9 @@ export interface ClassComment {
 export interface CreateClassCommentRequest {
   comment: string;
 }
+
+export interface UpdateClassCommentRequest {
+  comment: string;
+}
+
+export type DeleteClassCommentResponse = void;
