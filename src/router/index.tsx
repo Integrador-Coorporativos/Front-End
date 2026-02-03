@@ -6,6 +6,7 @@ import Classifications from "../pages/Classifications";
 import Classificacoes from "../pages/RankingDetail"
 import ControlPanel from "../pages/ControlPanel";
 import ClassesDetail from "../pages/ClassesDetail";
+import Dashboard from "../pages/Dashboard";
 
 export const router = createBrowserRouter([
   {
@@ -31,5 +32,9 @@ export const router = createBrowserRouter([
     path: "/painel_controle",
     element: <ControlPanel />
   },
+  {
+    path: "/dashboard",
+    element: <Dashboard />
+  }
 ]);
 export const rotas = withFaroRouterInstrumentation(router);
