@@ -15,8 +15,6 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [userData, setUserData] = useState<UserToken | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  
-  // Referência para o input de arquivo escondido
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -44,7 +42,6 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Função para abrir o seletor de arquivos
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
@@ -53,8 +50,12 @@ export default function Header() {
     const file = event.target.files?.[0];
     if (file) {
       console.log("Arquivo selecionado:", file.name);
-      // Aqui você implementaria o upload para o servidor futuramente
     }
+  };
+
+  const getFirstName = (fullName: string | undefined) => {
+    if (!fullName) return "Usuário";
+    return fullName.split(" ")[0];
   };
 
   return (
@@ -68,10 +69,9 @@ export default function Header() {
         </div>
 
         <div className={styles.right}>
-          <nav className={styles.nav}>
-            <Link to="/minhas-turmas">Minhas Turmas</Link>
-            <Link to="/">Classificações</Link>
-          </nav>
+          <span className={styles.welcomeText}>
+            Olá, <strong>{getFirstName(userData?.name)}</strong>
+          </span>
 
           <div className={styles.profileContainer} ref={menuRef}>
             <div className={styles.profile} onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -81,7 +81,6 @@ export default function Header() {
             {isMenuOpen && (
               <div className={styles.dropdown}>
                 <div className={styles.userHeader}>
-                  {/* Container da foto com overlay para trocar */}
                   <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
                     <img src={Perfil} alt="User" className={styles.menuAvatar} />
                     <div className={styles.avatarOverlay}>Trocar</div>

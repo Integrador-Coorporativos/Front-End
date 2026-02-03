@@ -1,33 +1,72 @@
 .card {
-    width: 300px;
+    width: 100%; 
+    min-height: 180px; 
     background: white;
     border-radius: 12px;
-    padding: 18px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 24px;
     cursor: pointer;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f0f0f0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
-    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.12);
-    border: 1px solid transparent;
-
-    transition: all 0.2s ease-in-out;
+.card:hover {
+    transform: translateY(-6px);
+    border-color: #359830;
+    box-shadow: 0px 12px 24px rgba(53, 152, 48, 0.12);
 }
 
 .info {
     display: grid;
-    grid-template-columns: repeat(2, auto);
-    gap: 10px 30px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.itemFull {
+    grid-column: span 2;
+    border-bottom: 2px solid #f8f8f8; 
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+}
+
+.item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .label {
-    font-size: 12px;
-    color: #555;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #aaa;
+    font-weight: 800;
 }
 
 .value {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
-    color: black;
+    color: #2c3e50; 
+}
+
+.curso {
+    color: #359830;
+    font-size: 20px; 
+    line-height: 1.2;
+}
+
+.semestreTag {
+    margin: 0;
+    background: #f0f7f0;
+    color: #359830;
+    padding: 4px 12px;
+    border-radius: 20px; 
+    font-size: 13px;
+    font-weight: 700;
+    width: fit-content;
+    border: 1px solid #e1eee1;
 }
