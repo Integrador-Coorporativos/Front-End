@@ -44,7 +44,7 @@ export default function StudentTab({ alunos, onEdit }: StudentTabProps) {
             </div>
           </div>
           <button
-            className={styles.editButton}
+            className={styles.editButton_student}
             onClick={() => onEdit(aluno)}
           >
             Editar

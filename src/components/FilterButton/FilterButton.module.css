@@ -1,41 +1,27 @@
 .buttonFilter {
-    /* background-color: #FFFFFF;
-    border: solid 1px #CCCCCC;
-    border-radius: 6px;
-    cursor: pointer;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: fit-content;
-    max-width: max-content;
-
-    padding: 6px 10px;
-    box-sizing: border-box;
-
-    transition: all 0.2s ease-in-out; */
-    /* .filterButton { */
   background: #fff;
   border: 1px solid #ccc;
-  padding: 10px 14px 12px 50px;
-
-  background-image: url('../../assets/filter-icon.png'); 
-  background-repeat: no-repeat;
-  background-position: 10px center;
-  background-size: 20px 20px;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
-  color: black;
-}
-/* } */
+  padding: 8px 16px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px; 
 
+  transition: all 0.2s ease-in-out;
+}
+
+.buttonFilter:hover {
+  background-color: #f9f9f9;
+  border-color: #359830; 
+}
 
 .text {
-    color: #000000;
-    font-size: 16px;
-    font-family: "Inter", sans-serif;
-    margin-left: 6px;
-    white-space: nowrap;
+  color: #000000;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
 }

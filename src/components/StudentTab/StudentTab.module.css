@@ -19,20 +19,19 @@
 .cardInfo {
   display: flex;
   align-items: center;
-  gap: 20px; /* Gap reduzido para evitar vazamento */
+  gap: 20px; 
   flex: 1;
-  min-width: 0; /* Essencial para o ellipsis funcionar */
+  min-width: 0; 
   margin-right: 12px;
 }
 
 .infoItem {
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Permite que o item encolha */
+  min-width: 0; 
   flex: 1;
 }
 
-/* Proporções para dar mais espaço a dados longos */
 .flexDouble { flex: 2; }
 .flexMedium { flex: 1.5; }
 
@@ -49,7 +48,7 @@
   color: #000000; 
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Corta o texto com ... */
+  text-overflow: ellipsis; 
   display: block;
 }
 
@@ -58,39 +57,39 @@
   font-size: 13px;
 }
 
-.editButton {
+.editButton_student {
   background: #e5e5e5;
   border: none;
   cursor: pointer;
-  padding: 10px 14px 10px 42px; /* Ajuste fino no padding */
-  flex-shrink: 0; /* Impede o botão de esmagar */
+  padding: 10px 14px 10px 45px; 
 
-  background-image: url('../../assets/edited-logo-icon.png'); 
+  background-image: url('/src/assets/edited-logo-icon.png');
   background-repeat: no-repeat;
   background-position: 12px center;
   background-size: 18px 18px;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 400;
+  font-weight: 500;
   color: black;
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
-.editButton:hover {
+.editButton_student:hover {
   background-color: #d4d4d4;
+  transform: scale(1.02); 
 }
 
 .registrationValue {
-  color: #4b5563; /* Um cinza levemente mais escuro */
-  cursor: help; /* Cursor de ajuda para indicar o tooltip */
-  font-variant-numeric: tabular-nums; /* Mantém os números alinhados */
+  color: #4b5563; 
+  cursor: help; 
+  font-variant-numeric: tabular-nums; 
   transition: color 0.2s;
 }
 
 .registrationValue:hover {
-  color: #008236; /* Muda para o verde do IF ao interagir */
+  color: #008236; 
 }
-
 
 
 .iraValue {
@@ -101,7 +100,6 @@
   border-radius: 4px;
 }
 
-/* Responsividade para telas menores */
 @media (max-width: 1200px) {
   .cardsGrid {
     grid-template-columns: 1fr;

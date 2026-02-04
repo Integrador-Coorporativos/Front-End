@@ -10,7 +10,7 @@
 }
 
 .contentHeader {
-  width: 86%;
+  width: 82%;
   display: flex;
   margin: 0 auto;
   justify-content: space-between;
@@ -38,12 +38,24 @@
 .right {
   display: flex;
   align-items: center;
-  gap: 32px;
+  gap: 16px;
+}
+
+.welcomeText {
+  font-size: 16px;
+  color: #555;
+  cursor: default;
+  white-space: nowrap; 
+}
+
+.welcomeText strong {
+  color: #359830;
+  font-weight: 600;
+  margin-left: 4px;
 }
 
 .nav {
-  display: flex;
-  gap: 32px;
+  display: none;
 }
 
 .nav a {
@@ -58,8 +70,8 @@
 }
 
 .profile {
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
   border: 2px solid transparent;

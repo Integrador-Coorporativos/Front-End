@@ -38,33 +38,38 @@ export default function ClassesTab({ classes, onEdit }: ClassesTabProps) {
       {classes.map((turma, index) => (
         <div key={index} className={styles.card_classes}>
           <div className={styles.cardInfo_classes}>
-            <div className={styles.infoItem_classes}>
+
+            <div className={`${styles.infoItem_classes} ${styles.colCourse}`}>
               <span className={styles.label_classes}>Curso</span>
-              <span className={styles.value_classes}>
+              <span
+                className={styles.value_classes}
+                title={turma.course?.name || "-"} 
+              >
                 {turma.course?.name || "-"}
               </span>
             </div>
 
-            <div className={styles.infoItem_classes}>
-              <span className={styles.label_classes}>Ano de Ingresso</span>
+            <div className={`${styles.infoItem_classes} ${styles.colSmall}`}>
+              <span className={styles.label_classes}>Ingresso</span>
               <span className={styles.value_classes}>
-                {/* {turma.name ? turma.name.split('.')[0] : "-"} */}
+                {/* {turma.name ? turma.name.split('.')[0] : "-"} */}2022
               </span>
             </div>
 
-            <div className={styles.infoItem_classes}>
+            <div className={`${styles.infoItem_classes} ${styles.colMedium}`}>
               <span className={styles.label_classes}>Turno</span>
-              <span className={styles.value_classes}>
+              <span className={styles.value_classes} title={turma.shift || "-"}>
                 {turma.shift || "-"}
               </span>
             </div>
 
-            <div className={styles.infoItem_classes}>
+            <div className={`${styles.infoItem_classes} ${styles.colSmall}`}>
               <span className={styles.label_classes}>Alunos</span>
               <span className={styles.value_classes}>
                 {turma.totalStudents}
               </span>
             </div>
+
           </div>
 
           <button
