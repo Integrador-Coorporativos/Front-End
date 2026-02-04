@@ -1,11 +1,13 @@
+export type Bimestre = 1 | 2 | 3 | 4;
+
 export interface ClassPerformanceResponse {
-  classId: number; 
+  classId: number;
   courseName: string;
-  gradleLevel: string;     
+  gradleLevel: string;
   shift: string;
 
   frequencyScore: number;
-  unifirmScore: number;     //Ajustar no backend depois, uniformScore
+  unifirmScore: number; // Ajustar no backend depois, uniformScore
   behaviorScore: number;
   participationScore: number;
   performanceScore: number;

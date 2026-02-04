@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import { studentService } from "@/api/services/adminPanelService";
 import type { StudentPerformance } from "@/types/StudentPerformance";
+import axios from "axios";
 
 export function useStudentManager() {
   const [alunos, setAlunos] = useState<StudentPerformance[]>([]);
@@ -11,7 +12,7 @@ export function useStudentManager() {
   const fetchAlunos = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:8085/api/admin-panel/students");
+      const response = await studentService.getAll();
       setAlunos(response.data);
     } catch (error) {
       console.error("Erro ao carregar alunos:", error);

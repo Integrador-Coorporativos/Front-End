@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { LoadingState, ErrorState } from "@/components/FeedbackStates/FeedbackStates";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import styles from "./SelectClasses.module.css";
@@ -11,19 +12,17 @@ import { useLinkClass } from "@/hooks/classes/useLinkClass";
 const ITEMS_PER_PAGE = 9;
 
 export default function SelecionarTurmas() {
-const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const { classes, loading, error } = useClasses();
   const { link } = useLinkClass();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
-  // AJUSTE 1: Sincronizar o estado inicial quando as classes carregarem
+  // Sincronizar o estado inicial quando as classes carregarem
   useEffect(() => {
     if (classes) {
-      console.log(classes);
       const idsJaVinculados = classes
-      
-        .filter(t => t.teacherLinked) // Use o nome exato do campo do seu JSON
-        .map(t => t.id);
+        .filter((t) => t.teacherLinked)
+        .map((t) => t.id);
       setSelectedIds(idsJaVinculados);
     }
   }, [classes]);
@@ -47,65 +46,61 @@ const [currentPage, setCurrentPage] = useState(1);
       setSelectedIds((prev) =>
         isAlreadySelected ? [...prev, id] : prev.filter((item) => item !== id)
       );
-      alert("Erro ao sincronizar.");
+      alert("Erro ao sincronizar com o servidor.");
     }
   };
-
-  if (loading) return (
-    <div className={styles.container}>
-      <Header />
-      <div className={styles.loading}>Carregando turmas...</div>
-      <Footer />
-    </div>
-  );
-
-  if (error) return (
-    <div className={styles.container}>
-      <Header />
-      <div className={styles.error}>{error}</div>
-      <Footer />
-    </div>
-  );
 
   return (
     <div className={styles.container}>
       <Header />
 
       <main className={styles.containerSelect}>
-        <section className={styles.containerText}>
-          <h2 className={styles.title}>Selecione suas turmas desse período</h2>
-          <h3 className={styles.subtitle}>Semestre: 2026.1</h3>
-        </section>
-
-        <section className={styles.containerTurno}>
-          <FilterButton text="Turno" />
-          <FilterButton text="Curso" />
-          
-        </section>
-
-        <div className={styles.containerCards}>
-          {currentItems.map((turma) => (
-            <ClassCard
-              key={turma.id}
-              anoReferencia={turma.classId.match(/^\d{4}/)?.[0] || "N/A"}
-              ano={turma.semester}
-              curso={turma.course.name}
-              turno={turma.shift}
-          
-              isSelected={selectedIds.includes(turma.id)} 
-              
-              onSelect={() => toggleSelection(turma.id)}
-            />
-          ))}
-        </div>
-
-        <footer className={styles.paginationWrapper}>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
+        {loading ? ( //inicio 
+          <LoadingState message="Buscando turmas disponíveis..." />
+        ) : error ? (
+          <ErrorState 
+            message={error || "Não foi possível carregar as turmas."} 
+            onRetry={() => window.location.reload()} 
           />
-        </footer>
+        ) : (
+          <>
+            <section className={styles.containerText}>
+              <h2 className={styles.title}>Selecione suas turmas desse período</h2>
+              <h3 className={styles.subtitle}>Semestre: 2026.1</h3>
+            </section>
+
+            <section className={styles.containerTurno}>
+              <FilterButton text="Turno" />
+              <FilterButton text="Curso" />
+            </section>
+
+            <div className={styles.containerCards}>
+              {currentItems.length > 0 ? (
+                currentItems.map((turma) => (
+                  <ClassCard
+                    key={turma.id}
+                    anoReferencia={turma.classId.match(/^\d{4}/)?.[0] || "N/A"}
+                    ano={turma.semester}
+                    curso={turma.course.name}
+                    turno={turma.shift}
+                    isSelected={selectedIds.includes(turma.id)}
+                    onSelect={() => toggleSelection(turma.id)}
+                  />
+                ))
+              ) : (
+                <p className={styles.noData}>Nenhuma turma encontrada para os filtros selecionados.</p>
+              )}
+            </div>
+
+            <footer className={styles.paginationWrapper}>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </footer>
+          </>
+        )}
       </main>
 
       <Footer />

@@ -13,7 +13,7 @@ import Frequency from "../../assets/frequency-icon.png";
 import Uniform from "../../assets/uniform-icon.png";
 import Behavior from "../../assets/behavior-icon.png";
 import { useAllClassPerformance } from "@/hooks/performance/useAllClassPerformance";
-
+import { LoadingState, ErrorState } from "@/components/FeedbackStates/FeedbackStates";
 const ITEMS_PER_PAGE = 10;
 
 const CRITERIA = [
@@ -106,150 +106,151 @@ export default function Classifications() {
   }, [normalized]);
 
   const showEmpty = !loading && !error && normalized.length === 0;
-
   return (
     <div className={styles.page}>
       <Header />
-
-      <div style={{ width: "100%", padding: "3px 0" }}>
-        <BreadCrumb items={[{ label: "Página Inicial", to: "/" }]} />
-      </div>
-
-      <div className={styles.sectionWrapper}>
-        <h2 className={styles.title}>Destaques</h2>
-
-        {loading && <p>Carregando destaques...</p>}
-
-        {error && (
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <p style={{ margin: 0 }}>{error}</p>
-            <button onClick={refresh}>Tentar novamente</button>
-          </div>
-        )}
-
-        {showEmpty && <p>Sem dados de performance para exibir.</p>}
-
-        {!loading && !error && highlights && (
-          <div className={styles.grid}>
-            {CRITERIA.map(({ title, icon, key }) => {
-              const best = highlights[key];
-              return (
-                <div
-                  key={key}
-                  className={styles.card}
-                  onClick={() => navigate(`/classificacao/${best.classId}`)}
-                  style={{ cursor: "pointer" }}
-                  title="Clique para ver detalhes"
-                >
-                  <div className={styles.cardHeader}>
-                    <img src={icon} alt={`${title}-icon`} className={styles.cardIcon} />
-                    <strong className={styles.cardTitle}>{title}</strong>
-                  </div>
-
-                  <div className={styles.infoRow}>
-                    <span className={styles.cardSubtitle}>
-                      {best.courseName ?? "-"} {best.gradleLevel ?? "-"} {best.shift ?? "-"}
-                    </span>
-                    <span className={styles.cardNota}>{formatScore((best as any)[key])}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      <div className={`${styles.sectionWrapper} ${styles.classificationBox}`}>
-        <h2 className={styles.title}>Classificações</h2>
-
-        <div className={styles.topBar}>
-          <input
-            type="text"
-            className={styles.searchInput}
-            placeholder="Buscar por turmas..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-
-          <div className={styles.filters}>
-            <span className={styles.filterLabel}>Filtrar por:</span>
-            <FilterButton text="Curso" />
-            <FilterButton text="Período" />
-          </div>
+      <main className={styles.container}>
+        
+        <div style={{ width: "100%", padding: "3px 0" }}>
+          <BreadCrumb items={[{ label: "Página Inicial", to: "/" }]} />
         </div>
 
-        {loading && <p>Carregando ranking...</p>}
+        <div className={styles.sectionWrapper}>
+          <h2 className={styles.title}>Destaques</h2>
 
-        {error && (
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <p style={{ margin: 0 }}>{error}</p>
-            <button onClick={refresh}>Tentar novamente</button>
+          {loading && <LoadingState message="Carregando destaques..." />}
+
+          {error && (
+            <ErrorState 
+              message={error} 
+              onRetry={refresh} 
+            />
+          )}
+
+          {showEmpty && <p>Sem dados de performance para exibir.</p>}
+
+          {!loading && !error && highlights && (
+            <div className={styles.grid}>
+              {CRITERIA.map(({ title, icon, key }) => {
+                const best = highlights[key];
+                return (
+                  <div
+                    key={key}
+                    className={styles.card}
+                    onClick={() => navigate(`/classificacao/${best.classId}`)}
+                    style={{ cursor: "pointer" }}
+                    title="Clique para ver detalhes"
+                  >
+                    <div className={styles.cardHeader}>
+                      <img src={icon} alt={`${title}-icon`} className={styles.cardIcon} />
+                      <strong className={styles.cardTitle}>{title}</strong>
+                    </div>
+
+                    <div className={styles.infoRow}>
+                      <span className={styles.cardSubtitle}>
+                        {best.courseName ?? "-"} {best.gradleLevel ?? "-"} {best.shift ?? "-"}
+                      </span>
+                      <span className={styles.cardNota}>{formatScore((best as any)[key])}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className={`${styles.sectionWrapper} ${styles.classificationBox}`}>
+          <h2 className={styles.title}>Classificações</h2>
+
+          <div className={styles.topBar}>
+            <input
+              type="text"
+              className={styles.searchInput}
+              placeholder="Buscar por turmas..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+
+            <div className={styles.filters}>
+              <span className={styles.filterLabel}>Filtrar por:</span>
+              <FilterButton text="Curso" />
+              <FilterButton text="Período" />
+            </div>
           </div>
-        )}
 
-        {!loading && !error && (
-          <>
-            <div className={styles.tableShell}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Curso</th>
-                    <th>Turno</th>
-                    <th>Período</th>
-                    <th>Frequência</th>
-                    <th>Fardamento</th>
-                    <th>Participação</th>
-                    <th>Desempenho</th>
-                    <th>Celular</th>
-                    <th>Comportamento</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
+          {loading && <LoadingState message="Carregando ranking..." />}
 
-                <tbody>
-                  {rowsToRender.map((row, idx) => {
-                    const empty = row.__empty;
-                    const to = empty ? undefined : `/classificacao/${row.classId}`;
+          {error && (
+            <ErrorState 
+              message={error} 
+              onRetry={refresh} 
+            />
+          )}
 
-                    return (
-                      <tr
-                        key={String(row.classId)}
-                        className={!empty ? styles.clickableRow : styles.emptyRow}
-                        onClick={() => {
-                          if (to) navigate(to);
-                        }}
-                        title={!empty ? "Clique para ver detalhes" : ""}
-                      >
-                        <td>{!empty ? startIndex + idx + 1 : ""}</td>
-                        <td>{!empty ? row.courseName ?? "-" : "-"}</td>
-                        <td>{!empty ? row.shift ?? "-" : "-"}</td>
-                        <td>{!empty ? row.gradleLevel ?? "-" : "-"}</td>
-                        <td>{!empty ? formatScore(row.frequencyScore) : "-"}</td>
-                        <td>{!empty ? formatScore(row.unifirmScore) : "-"}</td>
-                        <td>{!empty ? formatScore(row.participationScore) : "-"}</td>
-                        <td>{!empty ? formatScore(row.performanceScore) : "-"}</td>
-                        <td>{!empty ? formatScore(row.cellPhoneUseScore) : "-"}</td>
-                        <td>{!empty ? formatScore(row.behaviorScore) : "-"}</td>
-                        <td>{!empty ? formatScore(row.averageScore) : "-"}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+          {!loading && !error && (
+            <>
+              <div className={styles.tableShell}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Curso</th>
+                      <th>Turno</th>
+                      <th>Período</th>
+                      <th>Frequência</th>
+                      <th>Fardamento</th>
+                      <th>Participação</th>
+                      <th>Desempenho</th>
+                      <th>Celular</th>
+                      <th>Comportamento</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
 
-            <div className={styles.pagination}>
-              <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
-            </div>
-          </>
-        )}
-      </div>
+                  <tbody>
+                    {rowsToRender.map((row, idx) => {
+                      const empty = row.__empty;
+                      const to = empty ? undefined : `/classificacao/${row.classId}`;
+
+                      return (
+                        <tr
+                          key={String(row.classId)}
+                          className={!empty ? styles.clickableRow : styles.emptyRow}
+                          onClick={() => {
+                            if (to) navigate(to);
+                          }}
+                          title={!empty ? "Clique para ver detalhes" : ""}
+                        >
+                          <td>{!empty ? startIndex + idx + 1 : ""}</td>
+                          <td>{!empty ? row.courseName ?? "-" : "-"}</td>
+                          <td>{!empty ? row.shift ?? "-" : "-"}</td>
+                          <td>{!empty ? row.gradleLevel ?? "-" : "-"}</td>
+                          <td>{!empty ? formatScore(row.frequencyScore) : "-"}</td>
+                          <td>{!empty ? formatScore(row.unifirmScore) : "-"}</td>
+                          <td>{!empty ? formatScore(row.participationScore) : "-"}</td>
+                          <td>{!empty ? formatScore(row.performanceScore) : "-"}</td>
+                          <td>{!empty ? formatScore(row.cellPhoneUseScore) : "-"}</td>
+                          <td>{!empty ? formatScore(row.behaviorScore) : "-"}</td>
+                          <td>{!empty ? formatScore(row.averageScore) : "-"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={styles.pagination}>
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+              </div>
+            </>
+          )}
+        </div>
+      </main>
 
       <Footer />
     </div>
-  );
+  )
 }
