@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import styles from "./InfoCard.module.css";
+import styles from "./Infocard.module.css";
 
 type Props = {
   title: string;

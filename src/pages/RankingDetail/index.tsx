@@ -11,7 +11,7 @@ import Performance from "../../assets/perfomance-icon.png"
 import Frequency from "../../assets/frequency-icon.png"
 import Uniform from "../../assets/uniform-icon.png"
 import Behavior from "../../assets/behavior-icon.png"
-
+import { LoadingState, ErrorState } from "@/components/FeedbackStates/FeedbackStates"
 import Footer from "../../components/Footer"
 import RadarPerformanceChart from "../../components/RadarPerformanceChart"
 
@@ -87,7 +87,7 @@ export default function Classifications() {
     getCurrentBimestre()
   )
 
-  const years = ["2026", "2027", "2028", "2029"]
+  const years = ["2026", "2025", "2024", "2023"]
   const bimestres: { value: Bimestre; label: string }[] = [
     { value: 1, label: "1º Bim." },
     { value: 2, label: "2º Bim." },
@@ -99,6 +99,7 @@ export default function Classifications() {
     data: performanceData,
     loading: performanceLoading,
     refresh: refreshPerformance,
+    error
   } = useClassPerformanceByYear(
     Number.isFinite(classId) ? classId : undefined,
     Number(selectedYear),
@@ -372,6 +373,16 @@ export default function Classifications() {
     <div>
       <Header />
 
+        {performanceLoading ? ( //inicio 
+          <LoadingState message="Carregando Dados da turma..." />
+        ) : error ? (
+          <ErrorState 
+            message={error || "Erro ao carregar dados da turma."} 
+            onRetry={() => window.location.reload()} 
+          />
+        ) : (//fim
+          <>
+
       <BreadCrumb
         items={[
           { label: "Página Inicial", to: "/" },
@@ -623,6 +634,9 @@ export default function Classifications() {
             </button>
           </div>,
           document.body
+        )}
+
+         </>
         )}
 
       <Footer />

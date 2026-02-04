@@ -176,8 +176,8 @@ export default function Classifications() {
 
             <div className={styles.filters}>
               <span className={styles.filterLabel}>Filtrar por:</span>
-              <FilterButton text="Curso" />
-              <FilterButton text="Período" />
+              <FilterButton />
+              <FilterButton />
             </div>
           </div>
 

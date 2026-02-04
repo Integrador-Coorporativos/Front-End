@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getMyClasses  } from '../../api/services/classesService'; 
 import type { ClassResponse } from '@/api/types/classes';
 
-export function useClasses() {
+export function useMyClasses() {
   const [classes, setClasses] = useState<ClassResponse[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
