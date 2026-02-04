@@ -3,34 +3,31 @@ import Logo from "../../assets/logo-if.png";
 import Perfil from "../../assets/perfil.png";
 import styles from "./Header.module.css";
 import { Link } from "react-router-dom";
-import { Users, BarChart3, LayoutDashboard, Settings, LogOut } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
-
-interface UserToken {
-  name: string;
-  email: string;
-}
+import { Users, BarChart3, LayoutDashboard, Settings, LogOut, Shuffle } from "lucide-react";
+import keycloak from "@/api/config/keycloak";
+import { useUploadImage } from "@/hooks/processing/useUploadImage";
+import { useAuthUser } from "@/hooks/useAuthUser";
+import { type AuthUser } from "@/api/types/auth";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userData, setUserData] = useState<UserToken | null>(null);
+  const [userData, setUserData] = useState<AuthUser | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { upload, isLoading } = useUploadImage();
+  const auth = useAuthUser();
 
   useEffect(() => {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    if (token) {
-      try {
-        const decoded: UserToken = jwtDecode(token);
-        setUserData(decoded);
-      } catch (e) {
-        console.error("Erro ao decodificar token:", e);
-        setUserData({ name: "Usuário IF", email: "usuario@ifrn.edu.br" });
-      }
-    } else {
-      setUserData({ name: "Usuário IF", email: "usuario@ifrn.edu.br" });
-    }
-  }, []);
+  if (auth) {
+    setUserData(auth);
+  }
+}, [auth]);
+
+
+
+  // Referência para o input de arquivo escondido
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -45,13 +42,35 @@ export default function Header() {
   const handleAvatarClick = () => {
     fileInputRef.current?.click();
   };
+const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      console.log("Arquivo selecionado:", file.name);
-    }
-  };
+  const result = await upload(file);
+
+  if (result.success) {
+    setUserData(prev => {
+      if (!prev) return null;
+      
+      return { 
+        ...prev, 
+        picture: `${result.newUrl}?t=${new Date().getTime()}` 
+      };
+    });
+  
+  }
+};
+
+const handleLogout = (e: React.MouseEvent) => {
+  e.preventDefault();
+  console.log(userData);
+  keycloak.logout({ redirectUri: window.location.origin });
+};
+
+const handleUpdateProfile = (e: React.MouseEvent) => {
+  e.preventDefault();
+  keycloak.accountManagement();
+};
 
   const getFirstName = (fullName: string | undefined) => {
     if (!fullName) return "Usuário";
@@ -75,14 +94,22 @@ export default function Header() {
 
           <div className={styles.profileContainer} ref={menuRef}>
             <div className={styles.profile} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-              <img className={styles.avatar} src={Perfil} alt="User" />
+              <img 
+                className={styles.avatar} 
+                src={userData?.picture || Perfil} 
+                alt="User" 
+              />
             </div>
 
             {isMenuOpen && (
               <div className={styles.dropdown}>
                 <div className={styles.userHeader}>
                   <div className={styles.avatarWrapper} onClick={handleAvatarClick}>
-                    <img src={Perfil} alt="User" className={styles.menuAvatar} />
+                    <img 
+                      className={styles.avatar} 
+                      src={userData?.picture || Perfil} 
+                      alt="User" 
+                    />
                     <div className={styles.avatarOverlay}>Trocar</div>
                     <input 
                       type="file" 
@@ -101,13 +128,36 @@ export default function Header() {
                 
                 <div className={styles.divider} />
 
-                <ul className={styles.menuList}>
-                  <li><Link to="/"><BarChart3 size={18} /> Classificações</Link></li>
-                  <li><Link to="/minhas-turmas"><Users size={18} /> Minhas Turmas</Link></li>
-                  <li><Link to="/painel_controle"><LayoutDashboard size={18} /> Painel de Controle</Link></li>
-                  <li><Link to="/alterar-dados"><Settings size={18} /> Alterar dados</Link></li>
-                  <li className={styles.logout}><Link to="/sair"><LogOut size={18} /> Sair</Link></li>
-                </ul>
+                  <ul className={styles.menuList}>
+                    <li>
+                      <Link to="/classificacoes"><BarChart3 size={18} /> Classificações</Link>
+                    </li>
+                    {userData?.roleLabel === 'Professor' || userData?.roleLabel === 'Administrador' && (
+                      <li>
+                        <Link to="/minhas-turmas"><Users size={18} /> Minhas Turmas</Link>
+                      </li>
+                    )}
+                    {userData?.roleLabel === 'Professor' || userData?.roleLabel === 'Administrador' && (
+                      <li>
+                        <Link to="/selecionar-turmas"><Shuffle size={18} /> Alterar Turmas</Link>
+                      </li>
+                    )}
+                    {userData?.roleLabel === 'Administrador' && (
+                      <li>
+                        <Link to="/painel_controle"><LayoutDashboard size={18} /> Painel de Controle</Link>
+                      </li>
+                    )}
+                    <li>
+                      <Link to="#" onClick={handleUpdateProfile}>
+                        <Settings size={18} /> Alterar dados
+                      </Link>
+                    </li>
+                    <li className={styles.logout}>
+                      <Link to="#" onClick={handleLogout}>
+                        <LogOut size={18} /> Sair
+                      </Link>
+                    </li>
+                  </ul>
               </div>
             )}
           </div>

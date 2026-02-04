@@ -7,4 +7,9 @@ export const envConfig = {
     clientId: import.meta.env.VITE_KEYCLOAK_CLIENT_ID,
   },
   appScheme: import.meta.env.VITE_APP_SCHEME,
+  minio: {
+    minioBaseUrl: import.meta.env.VITE_MINIO_BASE_URL,
+    minioImageBucket: import.meta.env.VITE_MINIO_BUCKET_IMAGES
+  }
+  
 };
