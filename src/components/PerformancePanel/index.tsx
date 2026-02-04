@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import styles from "./PerformancePanel.module.css";
 
 import InfoCard from "../InfoCard";
-import FilterButtons, { type FilterItem } from "../FilterButtons";
 import PerformanceBarChart, { type BarItem } from "../PerformanceBarChart";
 
 import PhoneIcon from "../../assets/logo-phone.png";
@@ -12,20 +11,8 @@ import FrequencyIcon from "../../assets/frequency-icon.png";
 import UniformIcon from "../../assets/uniform-icon.png";
 import BehaviorIcon from "../../assets/behavior-icon.png";
 
-type MetricKey = "cell" | "part" | "perf" | "freq" | "uni" | "beh";
-
 export default function PerformancePanel() {
-  const [selectedKey, setSelectedKey] = useState<MetricKey>("perf");
   const [order, setOrder] = useState<"maior" | "menor">("maior");
-
-  const filterItems: FilterItem[] = [
-    { key: "cell", label: "Uso de Celular", icon: PhoneIcon },
-    { key: "part", label: "Participação", icon: ParticipationIcon },
-    { key: "perf", label: "Desempenho", icon: PerformanceIcon },
-    { key: "freq", label: "Frequência", icon: FrequencyIcon },
-    { key: "uni", label: "Fardamento", icon: UniformIcon },
-    { key: "beh", label: "Comportamento", icon: BehaviorIcon },
-  ];
 
   const baseBars: BarItem[] = [
     { label: "Uso Celular", value: 32, tone: "red" },
@@ -42,32 +29,13 @@ export default function PerformancePanel() {
   }, [order]);
 
   return (
-    <InfoCard title="Visão geral do desempenho dos alunos e distribuição de resultados">
-      <div className={styles.panel}>
-        <div className={styles.left}>
-          <div className={styles.breadcrumb}>
-            <span className={styles.crumbMuted}>Dashboard</span>
-            <span className={styles.sep}>›</span>
-            <span className={styles.crumbMuted}>Turmas</span>
-            <span className={styles.sep}>›</span>
-            <span className={styles.crumbActive}>3º Ano B</span>
-          </div>
-
-          <FilterButtons
-            items={filterItems}
-            selectedKey={selectedKey}
-            onSelect={(key) => setSelectedKey(key as MetricKey)}
-          />
-        </div>
+    <InfoCard title="Visão geral do desempenho das turmas ">
+      <div className={styles.panelSingle}>
 
         <div className={styles.right}>
           <div className={styles.chartHeader}>
             <div className={styles.chartTitleWrap}>
-              <h4 className={styles.chartTitle}>Gráfico de Desempenho</h4>
-              <span className={styles.chartSubtitle}>
-                Filtro selecionado:{" "}
-                <strong>{filterItems.find((f) => f.key === selectedKey)?.label}</strong>
-              </span>
+              <h4 className={styles.chartTitle}>Gráfico de Desempenho de critérios das turmas</h4>
             </div>
 
             <select
