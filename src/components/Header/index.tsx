@@ -63,7 +63,6 @@ const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
 
 const handleLogout = (e: React.MouseEvent) => {
   e.preventDefault();
-  console.log(userData);
   keycloak.logout({ redirectUri: window.location.origin });
 };
 
@@ -132,17 +131,17 @@ const handleUpdateProfile = (e: React.MouseEvent) => {
                     <li>
                       <Link to="/classificacoes"><BarChart3 size={18} /> Classificações</Link>
                     </li>
-                    {userData?.roleLabel === 'Professor' || userData?.roleLabel === 'Administrador' && (
+                    {(userData?.isProfessor === true || userData?.isAdmin === true) && (
                       <li>
                         <Link to="/minhas-turmas"><Users size={18} /> Minhas Turmas</Link>
                       </li>
                     )}
-                    {userData?.roleLabel === 'Professor' || userData?.roleLabel === 'Administrador' && (
+                    { (userData?.isProfessor === true || userData?.isAdmin === true) && (
                       <li>
                         <Link to="/selecionar-turmas"><Shuffle size={18} /> Alterar Turmas</Link>
                       </li>
                     )}
-                    {userData?.roleLabel === 'Administrador' && (
+                    {(userData?.isAdmin === true) && (
                       <li>
                         <Link to="/painel_controle"><LayoutDashboard size={18} /> Painel de Controle</Link>
                       </li>
