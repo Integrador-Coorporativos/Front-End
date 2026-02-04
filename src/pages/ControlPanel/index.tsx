@@ -14,10 +14,12 @@ import EditModal from "../../components/EditModalStudent";
 import EditModalProfessor from "../../components/EditModalProfessor";
 import EditModalCourses from "@/components/EditModalCourses";
 import EditModalClasses from "@/components/EditModalClasses";
+import NewPeriodModal from "@/components/PeriodModal"
 
 import FiltersCourse from "../../components/FiltersCourse";
 import FiltersClasse from "../../components/FiltersClasse";
 import FiltersProfessor from "@/components/FiltersProfessor";
+import axios from "axios";
 
 import type { Student } from "@/types/Student";
 import type { Professor } from "@/types/Professor";
@@ -39,6 +41,7 @@ import { useClassesPanel } from "@/hooks/classes/useClassesPanel";
 import { useUpdateClass } from "@/hooks/classes/useUpdateClass";
 import { useStudentManager } from "@/hooks/student/useStudentManager";
 import { useProfessorManager } from "@/hooks/professor/useProfessorManager";
+import { useAcademicCycle } from "@/hooks/processing/useAcademicCycle";
 
 const ITEMS_PER_PAGE = 8;
 
@@ -63,14 +66,15 @@ export default function ControlPanel() {
   const [toastMessage, setToastMessage] = useState("");
   const { professores, loading: professorsLoading } = useProfessorManager();
   const [studentsLoading, setStudentsLoading] = useState(true);
+  const [showActions, setShowActions] = useState(false);
+  const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
+  const [selectedBimestre, setSelectedBimestre] = useState("1");
 
   const [activeTab, setActiveTab] = useState<
     "alunos" | "professores" | "turmas" | "cursos"
   >("alunos");
 
-  const { alunos, handleEdit, isModalOpen, setIsModalOpen, selectedAluno,
-    handleSave
-  } = useStudentManager();
+  const { alunos, handleEdit, isModalOpen, setIsModalOpen, selectedAluno, handleSave, handleStartNewPeriod: executeStartPeriod, refreshAlunos } = useStudentManager();
 
   useEffect(() => {
     if (alunos && alunos.length > 0) {
@@ -106,7 +110,6 @@ export default function ControlPanel() {
 
       setToastMessage("Curso alterado com sucesso!");
       setShowSuccessToast(true);
-
       setTimeout(() => {
         setShowSuccessToast(false);
       }, 5500);
@@ -128,15 +131,6 @@ export default function ControlPanel() {
       return b.attendenceRate - a.attendenceRate;
     });
   }, [alunos, search, appliedAlunoSituacao]);
-
-  const cursosDisponiveisTeste = [
-    "Informática",
-    "Apicultura",
-    "Alimentos",
-    "Analise e Desenvolvimento de Sistemas",
-    "Química",
-    "Agroindustria",
-  ];
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isProfessorModalOpen, setIsProfessorModalOpen] = useState(false);
@@ -203,7 +197,6 @@ export default function ControlPanel() {
     if (!turma.course) {
       throw new Error("Curso inválido!");
     }
-
     return {
       id: turma.id,
       name: turma.name,
@@ -228,7 +221,6 @@ export default function ControlPanel() {
         semester: String(turmaAtualizada.semester || (selectedTurma as any)?.semester || "2024.1"),
         classId: String(turmaAtualizada.classId || (selectedTurma as any)?.classId || "ID-GERADO")
       };
-
       await executeUpdateClasses(idParaUrl, updatePayload as any);
 
       setIsTurmaModalOpen(false);
@@ -390,6 +382,37 @@ export default function ControlPanel() {
     setCurrentPage(1);
   };
 
+  const handleConfirmNewPeriod = async () => {
+    try {
+      const result = await executeStartPeriod();
+
+      setToastMessage(result.message);
+      setShowSuccessToast(true);
+
+      if (result && result.success) {
+        setIsPeriodModalOpen(false);
+        refreshAlunos();
+      }
+    } catch (err) {
+      setToastMessage("Falha na comunicação com o servidor.");
+      setShowSuccessToast(true);
+    } finally {
+      setTimeout(() => setShowSuccessToast(false), 3000);
+    }
+  };
+
+  const onSaveStudent = async (dados: any) => {
+    const result = await handleSave(dados);
+
+    setToastMessage(result.message);
+    setShowSuccessToast(true);
+
+    if (result.success) {
+      setIsModalOpen(false);
+    }
+    setTimeout(() => setShowSuccessToast(false), 4000);
+  };
+
   return (
     <div>
       <Header />
@@ -434,144 +457,185 @@ export default function ControlPanel() {
               </span>
             </div>
             <div className={styles.right_cont_cp}>
-              <button className={styles.importButton} onClick={handleButtonClick}>
-                {isUploading ? "Processando..." : "Importar dados"}
-              </button>
-              <input type="file" ref={fileInputRef} style={{ display: "none" }} accept=".xlsx" onChange={handleFileChange} />
-              <input type="text" placeholder="Buscar..." className={styles.searchInput} value={search} onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
+              <div className={styles.actionContainer}>
+                <button
+                  className={styles.actionsMainButton}
+                  onClick={() => setShowActions(!showActions)}
+                >
+                  Ações <span className={styles.arrow}>{showActions ? '▲' : '▼'}</span>
+                </button>
+
+                {showActions && (
+                  <div className={styles.actionMenu}>
+                    <button
+                      className={styles.menuItem}
+                      onClick={() => {
+                        handleButtonClick();
+                        setShowActions(false);
+                      }}
+                    >
+                      📊 Importar Dados (.xlsx)
+                    </button>
+
+                    <button
+                      className={styles.menuItem}
+                      onClick={() => {
+                        setIsPeriodModalOpen(true);
+                        setShowActions(false);
+                      }}
+                    >
+                      🗓️ Iniciar Novo Período
+                    </button>
+                  </div>
+                )}
+              </div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: "none" }}
+                accept=".xlsx"
+                onChange={handleFileChange}
+              />
+              <input
+                type="text"
+                placeholder="Buscar..."
+                className={styles.searchInput}
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
               />
               <div className={styles.filterWrapper} ref={filterRef}>
                 <button
                   className={styles.filterButton}
-                  onClick={() => setIsFilterOpen((prev) => !prev)}>
+                  onClick={() => setIsFilterOpen((prev) => !prev)}
+                >
                   Personalizar
                 </button>
-                {isFilterOpen && activeTab === "cursos" && (
-                  <div className={styles.filterDropdown}>
-                    <FiltersCourse
-                      filterTurmas={filterTurmas}
-                      setFilterTurmas={setFilterTurmas}
-                      filterAlunos={filterAlunos}
-                      setFilterAlunos={setFilterAlunos}
-                      onApply={() => {
-                        setAppliedFilterTurmas(filterTurmas);
-                        setAppliedFilterAlunos(filterAlunos);
-                        setCurrentPage(1);
-                        setIsFilterOpen(false);
-                        setFiltersApplied(true);
-                      }}
-                      onClear={() => {
-                        setFilterTurmas("");
-                        setFilterTurno("");
-                        setFilterAlunos("");
-                        setAppliedFilterTurmas("");
-                        setAppliedFilterTurno("");
-                        setAppliedFilterAlunos("");
-                        setCurrentPage(1);
-                        setFiltersApplied(false);
-                        setIsFilterOpen(false);
-                      }}
-                    />
-                  </div>
-                )}
-                {isFilterOpen && activeTab === "professores" && (
-                  <div className={styles.filterDropdown}>
-                    <FiltersProfessor
-                      filterNome={filterProfNome}
-                      setFilterNome={setFilterProfNome}
-                      filterTurmas={filterProfTurmas}
-                      setFilterTurmas={setFilterProfTurmas}
-                      onApply={() => {
-                        setAppliedProfNome(filterProfNome);
-                        setAppliedProfTurmas(filterProfTurmas);
-                        setIsFilterOpen(false);
-                        setCurrentPage(1);
-                      }}
-                      onClear={() => {
-                        setFilterProfNome("");
-                        setFilterProfTurmas("");
-                        setAppliedProfNome("");
-                        setAppliedProfTurmas("");
-                        setIsFilterOpen(false);
-                      }}
-                    />
-                  </div>
-                )}
-                {isFilterOpen && activeTab === "alunos" && (
-                  <div className={styles.filterDropdown_student}>
-                    <div className={styles.filterContent_student}>
-                      <div className={styles.filterField}>
-                        <label className={styles.filterLabel_student}>SITUAÇÃO DO ALUNO</label>
-                        <select
-                          value={filterAlunoSituacao}
-                          onChange={(e) => setFilterAlunoSituacao(e.target.value)}
-                        >
-                          <option value="">Todos os Status</option>
-                          <option value="Ótimo">Ótimo</option>
-                          <option value="Bom">Bom</option>
-                          <option value="Ruim">Ruim</option>
-                        </select>
+                {isFilterOpen && (
+                  <div className={activeTab === "alunos" ? styles.filterDropdown_student : styles.filterDropdown}>
+                    {activeTab === "cursos" && (
+                      <FiltersCourse
+                        filterTurmas={filterTurmas}
+                        setFilterTurmas={setFilterTurmas}
+                        filterAlunos={filterAlunos}
+                        setFilterAlunos={setFilterAlunos}
+                        onApply={() => {
+                          setAppliedFilterTurmas(filterTurmas);
+                          setAppliedFilterAlunos(filterAlunos);
+                          setCurrentPage(1);
+                          setIsFilterOpen(false);
+                          setFiltersApplied(true);
+                        }}
+                        onClear={() => {
+                          setFilterTurmas("");
+                          setFilterAlunos("");
+                          setAppliedFilterTurmas("");
+                          setAppliedFilterAlunos("");
+                          setCurrentPage(1);
+                          setFiltersApplied(false);
+                          setIsFilterOpen(false);
+                        }}
+                      />
+                    )}
+                    {activeTab === "professores" && (
+                      <FiltersProfessor
+                        filterNome={filterProfNome}
+                        setFilterNome={setFilterProfNome}
+                        filterTurmas={filterProfTurmas}
+                        setFilterTurmas={setFilterProfTurmas}
+                        onApply={() => {
+                          setAppliedProfNome(filterProfNome);
+                          setAppliedProfTurmas(filterProfTurmas);
+                          setIsFilterOpen(false);
+                          setCurrentPage(1);
+                        }}
+                        onClear={() => {
+                          setFilterProfNome("");
+                          setFilterProfTurmas("");
+                          setAppliedProfNome("");
+                          setAppliedProfTurmas("");
+                          setIsFilterOpen(false);
+                        }}
+                      />
+                    )}
+                    {activeTab === "alunos" && (
+                      <div className={styles.filterContent_student}>
+                        <div className={styles.filterField}>
+                          <label className={styles.filterLabel_student}>SITUAÇÃO DO ALUNO</label>
+                          <select
+                            value={filterAlunoSituacao}
+                            onChange={(e) => setFilterAlunoSituacao(e.target.value)}
+                          >
+                            <option value="">Todos os Status</option>
+                            <option value="Ótimo">Ótimo</option>
+                            <option value="Bom">Bom</option>
+                            <option value="Ruim">Ruim</option>
+                          </select>
+                        </div>
+                        <div className={styles.buttonGroup}>
+                          <button
+                            className={styles.clearFilterButton_student}
+                            onClick={() => {
+                              setFilterAlunoSituacao("");
+                              setAppliedAlunoSituacao("");
+                              setIsFilterOpen(false);
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Limpar
+                          </button>
+                          <button
+                            className={styles.applyFilterButton_student}
+                            onClick={() => {
+                              setAppliedAlunoSituacao(filterAlunoSituacao);
+                              setIsFilterOpen(false);
+                              setCurrentPage(1);
+                            }}
+                          >
+                            Aplicar
+                          </button>
+                        </div>
                       </div>
-                      <div className={styles.buttonGroup}>
-                        <button
-                          className={styles.clearFilterButton_student}
-                          onClick={() => {
-                            setFilterAlunoSituacao("");
-                            setAppliedAlunoSituacao("");
-                            setIsFilterOpen(false);
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Limpar
-                        </button>
-                        <button
-                          className={styles.applyFilterButton_student}
-                          onClick={() => {
-                            setAppliedAlunoSituacao(filterAlunoSituacao);
-                            setIsFilterOpen(false);
-                            setCurrentPage(1);
-                          }}
-                        >
-                          Aplicar
-                        </button>
-                      </div>
-                    </div>
+                    )}
+                    {activeTab === "turmas" && (
+                      <FiltersClasse
+                        cursos={localCoursesPanel}
+                        filterCurso={filterCurso}
+                        setFilterCurso={setFilterCurso}
+                        filterAno={filterAno}
+                        setFilterAno={setFilterAno}
+                        filterTurno={filterTurno}
+                        setFilterTurno={setFilterTurno}
+                        filterAlunos={filterAlunos}
+                        setFilterAlunos={setFilterAlunos}
+                        onApply={handleApplyFilters}
+                        onClear={() => {
+                          setFilterCurso("");
+                          setFilterAno("");
+                          setFilterTurno("");
+                          setFilterAlunos("");
+                          setAppliedFilterCurso("");
+                          setAppliedFilterAno("");
+                          setAppliedFilterTurno("");
+                          setAppliedFilterAlunos("");
+                          setCurrentPage(1);
+                          setIsFilterOpen(false);
+                        }}
+                      />
+                    )}
                   </div>
                 )}
-                {isFilterOpen && activeTab === "turmas" && (
-                  <div className={styles.filterDropdown}>
-                    <FiltersClasse
-                      cursos={localCoursesPanel}
-                      filterCurso={filterCurso}
-                      setFilterCurso={setFilterCurso}
-                      filterAno={filterAno}
-                      setFilterAno={setFilterAno}
-                      filterTurno={filterTurno}
-                      setFilterTurno={setFilterTurno}
-                      filterAlunos={filterAlunos}
-                      setFilterAlunos={setFilterAlunos}
-                      onApply={handleApplyFilters}
-                      onClear={() => {
-                        setFilterCurso("");
-                        setFilterAno("");
-                        setFilterTurno("");
-                        setFilterAlunos("");
-                        setAppliedFilterCurso("");
-                        setAppliedFilterAno("");
-                        setAppliedFilterTurno("");
-                        setAppliedFilterAlunos("");
-                        setCurrentPage(1);
-                        setIsFilterOpen(false);
-                      }}
-                    />
-                  </div>
-                )}
-
               </div>
             </div>
+            {isPeriodModalOpen && (
+              <NewPeriodModal
+                isOpen={isPeriodModalOpen}
+                onClose={() => setIsPeriodModalOpen(false)}
+                onConfirm={handleConfirmNewPeriod}
+              />
+            )}
           </div>
           {activeTab === "alunos" && (
             <div className={styles.tabContent}>
@@ -753,10 +817,10 @@ export default function ControlPanel() {
       {selectedAluno && (
         <EditModal
           aluno={selectedAluno as any}
-          cursos={cursosDisponiveisTeste}
+          cursos={localCoursesPanel.map(c => c.courseName)}
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onSave={handleSave as any}
+          onSave={onSaveStudent}
         />
       )}
       {selectedProfessor && (
@@ -764,9 +828,11 @@ export default function ControlPanel() {
           professor={selectedProfessor}
           isOpen={isProfessorModalOpen}
           onClose={() => setIsProfessorModalOpen(false)}
-          onSave={(professorAtualizado) => {
-            console.log("Professor salvo:", professorAtualizado);
+          onSave={(_) => {
+            setToastMessage("Professor atualizado com sucesso!");
+            setShowSuccessToast(true);
             setIsProfessorModalOpen(false);
+            setTimeout(() => setShowSuccessToast(false), 4000);
           }}
         />
       )}
@@ -786,6 +852,11 @@ export default function ControlPanel() {
           onSave={handleSaveClasses}
         />
       )}
+      <NewPeriodModal
+        isOpen={isPeriodModalOpen}
+        onClose={() => setIsPeriodModalOpen(false)}
+        onConfirm={handleConfirmNewPeriod}
+      />
       <Toast message={toastMessage} isOpen={showSuccessToast} />
       <Footer />
     </div>
