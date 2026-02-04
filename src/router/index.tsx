@@ -11,10 +11,6 @@ import Dashboard from "../pages/Dashboard";
 
 export const router = createBrowserRouter([
   {
-    path: "/classificacoes",
-    element: <Classifications />,
-  },
-  {
     element: <ProtectedRoute allowedRoles={['ROLE_PROFESSOR', 'ROLE_ADMIN']} />,
     children: [
       {
@@ -35,9 +31,12 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: "/classificacao/:id",
-    element: <Classificacoes />
-  },
+      path: "/classificacoes",
+      children: [
+          { index: true, element: <Classifications /> },
+          { path: ":id", element: <Classificacoes /> },
+        ],
+      },
   {
     element: <ProtectedRoute allowedRoles={['ROLE_ADMIN']} />,
     children: [
