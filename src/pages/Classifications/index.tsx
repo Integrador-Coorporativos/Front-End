@@ -137,7 +137,7 @@ export default function Classifications() {
                   <div
                     key={key}
                     className={styles.card}
-                    onClick={() => navigate(`/classificacao/${best.classId}`)}
+                    onClick={() => navigate(`/classificacoes/${best.classId}`)}
                     style={{ cursor: "pointer" }}
                     title="Clique para ver detalhes"
                   >
@@ -213,7 +213,7 @@ export default function Classifications() {
                   <tbody>
                     {rowsToRender.map((row, idx) => {
                       const empty = row.__empty;
-                      const to = empty ? undefined : `/classificacao/${row.classId}`;
+                      const to = empty ? undefined : `/classificacoes/${row.classId}`;
 
                       return (
                         <tr
