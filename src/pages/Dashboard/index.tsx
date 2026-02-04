@@ -7,7 +7,6 @@ import AcademicPieCard from "@/components/AcademicPieCard";
 import InfoCard from "@/components/InfoCard";
 import StatTile from "@/components/StatTile";
 import PerformancePanel from "@/components/PerformancePanel";
-
 import { useDashboard } from "@/hooks/useDashboardStats";
 
 export default function Dashboard() {
@@ -68,7 +67,9 @@ export default function Dashboard() {
             </section>
 
             <section className={styles.bottomPanel}>
-              <PerformancePanel />
+              <PerformancePanel 
+              metrics={metrics}
+              />
             </section>
           </>
         )}

@@ -30,7 +30,7 @@ export interface ClassResponse {
   name: string;
   semester: string;
   shift: string;
-  gradleLevel: number;
+  gradleLevel: string;
   teacherLinked: boolean;
   course: Course;
   students: StudentPerformance[];

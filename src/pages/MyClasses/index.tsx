@@ -131,7 +131,7 @@ const [currentPage, setCurrentPage] = useState(1);
                         <Link to={`${turma.id}`} key={turma.id || index} className={styles.cardLink}>
                           <ListClassCard
                             anoReferencia={turma.classId.match(/^\d{4}/)?.[0] || "N/A"}
-                            ano={turma.semester}
+                            ano={turma.gradleLevel}
                             curso={turma.course.name}
                             turno={turma.shift}
                           />

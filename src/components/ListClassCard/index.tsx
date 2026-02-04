@@ -24,7 +24,7 @@ export default function ListClassCard({ anoReferencia, ano, curso, turno }: List
                 </div>
 
                 <div className={styles.item}>
-                    <span className={styles.label}>Semestre</span>
+                    <span className={styles.label}>Ano/Semestre</span>
                     <p className={styles.value}>{cleanValue(ano)}</p>
                 </div>
 

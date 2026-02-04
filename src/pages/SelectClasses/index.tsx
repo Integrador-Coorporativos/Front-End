@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { LoadingState, ErrorState } from "@/components/FeedbackStates/FeedbackStates";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -16,8 +16,7 @@ export default function SelecionarTurmas() {
   const { classes, loading, error } = useClasses();
   const { link } = useLinkClass();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
-  // Sincronizar o estado inicial quando as classes carregarem
+  
   useEffect(() => {
     if (classes) {
       const idsJaVinculados = classes
@@ -26,15 +25,33 @@ export default function SelecionarTurmas() {
       setSelectedIds(idsJaVinculados);
     }
   }, [classes]);
-
-  const totalPages = Math.ceil((classes?.length || 0) / ITEMS_PER_PAGE);
+  const [selectedTurno, setSelectedTurno] = useState("Todos");
+  const [selectedCurso, setSelectedCurso] = useState("Todos");
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = classes?.slice(startIndex, startIndex + ITEMS_PER_PAGE) || [];
+
+  const opcoesTurno = useMemo(() => {
+    const turnosUnicos = Array.from(new Set(classes?.map(t => t.shift) || []));
+    return ["Todos", ...turnosUnicos]; // O "Todos" entra aqui no começo
+  }, [classes]);
+
+  const opcoesCurso = useMemo(() => {
+    const cursosUnicos = Array.from(new Set(classes?.map(t => t.course.name) || []));
+    return ["Todos", ...cursosUnicos]; // O "Todos" entra aqui no começo
+  }, [classes]);
+
+  const filteredClasses = useMemo(() => {
+    return (classes || []).filter((turma) => {
+      const matchTurno = selectedTurno === "Todos" || turma.shift === selectedTurno;
+      const matchCurso = selectedCurso === "Todos" || turma.course.name === selectedCurso;
+      return matchTurno && matchCurso;
+    });
+  }, [classes, selectedTurno, selectedCurso]);
+
+  const totalPages = Math.ceil(filteredClasses.length / ITEMS_PER_PAGE);
+  const currentItems = filteredClasses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const toggleSelection = async (id: number) => {
     const isAlreadySelected = selectedIds.includes(id);
-
-    // Update UI Otimista
     setSelectedIds((prev) =>
       isAlreadySelected ? prev.filter((item) => item !== id) : [...prev, id]
     );
@@ -42,7 +59,6 @@ export default function SelecionarTurmas() {
     try {
       await link(id);
     } catch (err) {
-      // Rollback
       setSelectedIds((prev) =>
         isAlreadySelected ? [...prev, id] : prev.filter((item) => item !== id)
       );
@@ -70,8 +86,17 @@ export default function SelecionarTurmas() {
             </section>
 
             <section className={styles.containerTurno}>
-              <FilterButton text="Turno" />
-              <FilterButton text="Curso" />
+              <FilterButton 
+                text={selectedTurno === "Todos" ? "Turno" : selectedTurno} 
+                options={opcoesTurno}
+                onSelect={(val) => { setSelectedTurno(val); setCurrentPage(1); }}
+              />
+              
+              <FilterButton 
+                text={selectedCurso === "Todos" ? "Curso" : selectedCurso} 
+                options={opcoesCurso}
+                onSelect={(val) => { setSelectedCurso(val); setCurrentPage(1); }}
+              />
             </section>
 
             <div className={styles.containerCards}>
@@ -80,7 +105,7 @@ export default function SelecionarTurmas() {
                   <ClassCard
                     key={turma.id}
                     anoReferencia={turma.classId.match(/^\d{4}/)?.[0] || "N/A"}
-                    ano={turma.semester}
+                    ano={turma.gradleLevel}
                     curso={turma.course.name}
                     turno={turma.shift}
                     isSelected={selectedIds.includes(turma.id)}

@@ -369,6 +369,7 @@ export default function Classifications() {
     }
   }, [openMenuId])
 
+
   return (
     <div>
       <Header />
