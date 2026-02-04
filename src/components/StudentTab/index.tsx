@@ -22,14 +22,14 @@ export default function StudentTab({ alunos, onEdit }: StudentTabProps) {
             <div className={styles.infoItem}>
               <span className={styles.label}>I.R.A</span>
               <span className={styles.value}>
-                {Number(aluno.ira || 0).toFixed(2).replace('.', ',')}
+                {Number(aluno.ira || aluno.averageScore || 0).toFixed(2).replace('.', ',')}
               </span>
             </div>
             <div className={`${styles.infoItem} ${styles.flexMedium}`}>
               <span className={styles.label}>Matrícula</span>
               <span
                 className={`${styles.value} ${styles.registrationValue}`}
-                title={aluno.registration} 
+                title={aluno.registration}
               >
                 {aluno.registration && aluno.registration.length > 8
                   ? `${aluno.registration.substring(0, 8)}...`

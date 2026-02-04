@@ -8,7 +8,6 @@ export function useStudentManager() {
   const [selectedAluno, setSelectedAluno] = useState<StudentPerformance | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Busca a lista de alunos
   const fetchAlunos = async () => {
     setLoading(true);
     try {
@@ -21,49 +20,54 @@ export function useStudentManager() {
     }
   };
 
-  // Salva as alterações
-  const handleSave = async (dados: StudentPerformance) => {
+  const handleStartNewPeriod = async () => {
     try {
-      if (!dados.id) {
-        alert("Erro: ID do aluno não encontrado.");
-        return;
-      }
-
-      /**
-       * LIMPEZA DE PAYLOAD (Para evitar Erro 500 no Java)
-       * Enviamos apenas o que o banco precisa atualizar. 
-       * Campos como 'status' ou 'studentId' (UUID) costumam travar o JPA/Hibernate no PUT.
-       */
       const payload = {
-        id: dados.id,
-        name: dados.name,
-        ira: dados.ira,
-        classId: dados.classId,
-        attendenceRate: dados.attendenceRate,
-        averageScore: dados.averageScore,
-        registration: dados.registration // Apenas se o Java permitir
+        stepName: "PRIMEIRO", 
+        year: new Date().getFullYear()
       };
 
-      console.log("Enviando atualização para ID:", dados.id, payload);
-
-      await axios.put(
-        `http://localhost:8085/api/performance/student/${dados.id}`, 
+      await axios.post(
+        "http://localhost:8085/api/admin-panel/evaluation-periods/start",
         payload
       );
-      
-      setIsModalOpen(false);
-      await fetchAlunos(); // Atualiza a tabela/cards
-      alert("Aluno atualizado com sucesso!");
+
+      await fetchAlunos(); 
+      return { success: true, message: "Ciclo atualizado com sucesso!" };
 
     } catch (error: any) {
-      console.error("Erro ao salvar:");
-      if (error.response) {
-        // O servidor respondeu com um erro (500, 400, etc)
-        console.error("Dados do erro Java:", error.response.data);
-        alert(`Erro no Servidor: ${error.response.data.message || "Erro Interno"}`);
-      } else {
-        alert("Erro de conexão com o servidor.");
-      }
+      const backendMsg = error.response?.data?.message || error.response?.data;
+      const msg = typeof backendMsg === 'string'
+        ? backendMsg
+        : "Erro ao avançar bimestre. Verifique se o período já existe.";
+
+      return { success: false, message: msg };
+    }
+  };
+
+
+  const handleSave = async (dados: StudentPerformance) => {
+    try {
+      if (!dados.id) throw new Error("O objeto de dados não tem um ID!");
+
+      const payload = {
+        studentId: dados.studentId,
+        classId: dados.classId,
+        averageScore: Number(dados.ira),
+        attendenceRate: Number(dados.attendenceRate || 100),
+        failedSubjects: Number(dados.failedSubjects || 0),
+        status: dados.status
+      };
+
+      await axios.put(`http://localhost:8085/api/performance/student/${dados.id}`, payload);
+
+      setIsModalOpen(false);
+      await fetchAlunos();
+      return { success: true, message: "Dados do aluno atualizados!" };
+
+    } catch (error: any) {
+      const msgErro = error.response?.data?.message || error.message;
+      return { success: false, message: "Erro ao salvar: " + msgErro };
     }
   };
 
@@ -84,6 +88,7 @@ export function useStudentManager() {
     setIsModalOpen,
     handleEdit,
     handleSave,
+    handleStartNewPeriod,
     refreshAlunos: fetchAlunos
   };
 }
