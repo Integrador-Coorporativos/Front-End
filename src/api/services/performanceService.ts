@@ -6,18 +6,11 @@ import type {
 } from "../types/performance"
 
 export const getAllClassPerformance = async (): Promise<ClassPerformanceResponse[]> => {
-<<<<<<< feat/graphic_by_two_month
   console.log("BASE URL:", import.meta.env.VITE_API_BASE_URL)
   const response = await api.get<ClassPerformanceResponse[]>("/api/performance/class/all")
   return response.data
 }
 
-=======
-    console.log("BASE URL:", import.meta.env.VITE_API_BASE_URL);
-  const response = await api.get<ClassPerformanceResponse[]>("/api/performance/class/all");
-  return response.data;
-};
->>>>>>> feat/api-integration
 export const getClassPerformanceByYear = async (
   classId: number,
   year: number,

@@ -229,9 +229,8 @@ export default function Classifications() {
         {[1, 2, 3, 4, 5].map((num) => (
           <button
             key={num}
-            className={`${styles.button} ${
-              avaliacao[campo] === num ? styles.active : ""
-            }`}
+            className={`${styles.button} ${avaliacao[campo] === num ? styles.active : ""
+              }`}
             onClick={() => handleSelect(campo, num)}
             type="button"
           >
@@ -508,9 +507,15 @@ export default function Classifications() {
 
       {activeTab === "avaliar" && (
         <div className={styles.commentsContainer}>
-          <h3 className={styles.commentsTitle}>Comentários</h3>
+          <div className={styles.commentsHeaderMain}>
+            <h3 className={styles.commentsTitle}>
+              {commentsArray.length} {commentsArray.length === 1 ? "Comentário" : "Comentários"}
+            </h3>
 
-          <p className={styles.commentsClass}>{titleText}</p>
+            <p className={styles.commentsClass}>
+              Curso: <span>{titleText}</span>
+            </p>
+          </div>
 
           <div className={styles.commentsList}>
             {!commentsLoading &&

@@ -5,8 +5,8 @@ interface ClassCardProps {
     ano: string;
     curso: string;
     turno: string;
-    isSelected?: boolean; // Agora o pai decide se está selecionado
-    onSelect?: () => void; // Evento de clique passado pelo pai
+    isSelected?: boolean; 
+    onSelect?: () => void; 
 }
 
 export default function ClassCard({ 

@@ -6,30 +6,36 @@ import ListClassCard from "../../components/ListClassCard";
 import Pagination from "../../components/Pagination";
 import Footer from "../../components/Footer";
 import BreadCrumb from "@/components/BreadCrumb";
-import { X } from "lucide-react"; 
+import { X, Plus } from "lucide-react";
 import { useClasses } from "@/hooks/classes/useAllClasses";
+import FilterButton from "@/components/FilterButton";
 
 const ITEMS_PER_PAGE = 9;
 
 export default function SelecionarTurmas() {
   const [currentPage, setCurrentPage] = useState(1);
   const { classes, loading, error } = useClasses();
-  
+
+  const [showTurnoMenu, setShowTurnoMenu] = useState(false);
+  const [showCourseMenu, setShowCourseMenu] = useState(false);
+  const [tempTurno, setTempTurno] = useState<string>("");
+  const [tempCourse, setTempCourse] = useState<string>("");
+
   const [filterTurno, setFilterTurno] = useState<string>("");
   const [filterCurso, setFilterCurso] = useState<string>("");
 
   const turnosDisponiveis = useMemo(() => {
-    const turnos = classes.map(t => t.shift);
+    const turnos = classes?.map(t => t.shift) || [];
     return Array.from(new Set(turnos)).filter(Boolean).sort();
   }, [classes]);
 
   const cursosDisponiveis = useMemo(() => {
-    const nomes = classes.map(t => t.course.name);
+    const nomes = classes?.map(t => t.course.name) || [];
     return Array.from(new Set(nomes)).filter(Boolean).sort();
   }, [classes]);
 
   const filteredClasses = useMemo(() => {
-    return classes.filter((turma) => {
+    return (classes || []).filter((turma) => {
       const matchTurno = filterTurno ? turma.shift === filterTurno : true;
       const matchCurso = filterCurso ? turma.course.name === filterCurso : true;
       return matchTurno && matchCurso;
@@ -44,6 +50,8 @@ export default function SelecionarTurmas() {
   const clearFilters = () => {
     setFilterTurno("");
     setFilterCurso("");
+    setTempTurno("");
+    setTempCourse("");
     setCurrentPage(1);
   };
 
@@ -53,11 +61,12 @@ export default function SelecionarTurmas() {
       <BreadCrumb items={[{ label: "Página Inicial", to: "/" }, { label: "Minhas turmas", to: "/minhas-turmas" }]} />
 
       <main className={styles.mainContent}>
-        <div className={styles.pageHeader}>
-          <h2 className={styles.title}>Minhas Turmas</h2>
-          <h3 className={styles.subtitle}>Semestre: 2026.1</h3>
-        </div>
         <div className={styles.containerList}>
+          <div className={styles.pageHeader}>
+            <h2 className={styles.title}>Minhas Turmas</h2>
+            <h3 className={styles.subtitle}>Semestre: <span>2026.1</span></h3>
+          </div>
+
           <div className={styles.filterBar}>
             <div className={styles.activeFilters}>
               <span className={styles.filterLabel}>Filtrado por:</span>
@@ -77,29 +86,86 @@ export default function SelecionarTurmas() {
                 )}
               </div>
             </div>
+
             <div className={styles.containerFilters}>
-              <select 
-                className={styles.selectFilter}
-                value={filterTurno}
-                onChange={(e) => {setFilterTurno(e.target.value); setCurrentPage(1);}}
-              >
-                <option value="">Filtrar Turno</option>
-                {turnosDisponiveis.map(turno => (
-                  <option key={turno} value={turno}>{turno}</option>
-                ))}
-              </select>
-              <select 
-                className={styles.selectFilter}
-                value={filterCurso}
-                onChange={(e) => {setFilterCurso(e.target.value); setCurrentPage(1);}}
-              >
-                <option value="">Filtrar Curso</option>
-                {cursosDisponiveis.map(curso => (
-                  <option key={curso} value={curso}>{curso}</option>
-                ))}
-              </select>
+              <div className={styles.dropdownWrapper}>
+                <FilterButton
+                  text="Turno"
+                  onClick={() => {
+                    setTempTurno(filterTurno);
+                    setShowTurnoMenu(!showTurnoMenu);
+                    setShowCourseMenu(false);
+                  }}
+                />
+                {showTurnoMenu && (
+                  <div className={styles.dropdownMenu}>
+                    <span className={styles.filterTitle}>Filtrar por Turno</span>
+                    <select
+                      className={styles.filterSelect}
+                      value={tempTurno || ""}
+                      onChange={(e) => setTempTurno(e.target.value || "")}
+                    >
+                      <option value="">Todos os Turnos</option>
+                      {turnosDisponiveis.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <div className={styles.buttonGroup}>
+                      <button className={styles.clearFilterButton} onClick={() => {
+                        setFilterTurno("");
+                        setTempTurno("");
+                        setShowTurnoMenu(false);
+                      }}>Limpar</button>
+                      <button className={styles.applyFilterButton} onClick={() => {
+                        setFilterTurno(tempTurno);
+                        setShowTurnoMenu(false);
+                        setCurrentPage(1);
+                      }}>Aplicar</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.dropdownWrapper}>
+                <FilterButton
+                  text="Curso"
+                  onClick={() => {
+                    setTempCourse(filterCurso);
+                    setShowCourseMenu(!showCourseMenu);
+                    setShowTurnoMenu(false);
+                  }}
+                />
+                {showCourseMenu && (
+                  <div className={styles.dropdownMenu}>
+                    <span className={styles.filterTitle}>Filtrar por Curso</span>
+                    <select
+                      className={styles.filterSelect}
+                      value={tempCourse || ""}
+                      onChange={(e) => setTempCourse(e.target.value || "")}
+                    >
+                      <option value="">Todos os Cursos</option>
+                      {cursosDisponiveis.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                    <div className={styles.buttonGroup}>
+                      <button className={styles.clearFilterButton} onClick={() => {
+                        setFilterCurso("");
+                        setTempCourse("");
+                        setShowCourseMenu(false);
+                      }}>Limpar</button>
+                      <button className={styles.applyFilterButton} onClick={() => {
+                        setFilterCurso(tempCourse);
+                        setShowCourseMenu(false);
+                        setCurrentPage(1);
+                      }}>Aplicar</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <Link to="/selecionar-turmas" className={styles.addPageBtn}>
+                <Plus size={18} />
+                Adicionar Turmas
+              </Link>
             </div>
           </div>
+
           {hasClasses ? (
             <>
               <div className={styles.containerCards}>

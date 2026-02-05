@@ -10,19 +10,23 @@ export type ClassesTabProps = {
 export function ClassesPanelWrapper() {
   const { classes, loading, error } = useClassesPanel();
 
+  console.log("HOOK CLASSES:", classes);
+
   if (loading) return <p>Carregando turmas...</p>;
   if (error) return <p>{error}</p>;
 
-  const mappedClasses: ClassListItem[] = (classes || []).map((c) => ({
+  const mappedClasses: ClassListItem[] = (classes || []).map((c: any) => {
+  console.log("Transformando item:", c); // <--- Adicione isso aqui temporariamente
+  return {
     id: c.id,
     name: c.name,
     shift: c.shift,
-    totalStudents: c.totalStudents,
-    course:
-      c.courseId && c.courseName
-        ? { id: c.courseId, name: c.courseName }
-        : null,
-  }));
+    totalStudents: c.totalStudents ?? c.studentsCount ?? c.alunosCount ?? 0,
+    course: c.courseId && c.courseName
+      ? { id: c.courseId, name: c.courseName }
+      : c.course
+  };
+});
 
   return (
     <ClassesTab
@@ -38,35 +42,30 @@ export default function ClassesTab({ classes, onEdit }: ClassesTabProps) {
       {classes.map((turma, index) => (
         <div key={index} className={styles.card_classes}>
           <div className={styles.cardInfo_classes}>
-
+            
             <div className={`${styles.infoItem_classes} ${styles.colCourse}`}>
               <span className={styles.label_classes}>Curso</span>
-              <span
-                className={styles.value_classes}
-                title={turma.course?.name || "-"} 
-              >
+              <span className={styles.value_classes} title={turma.course?.name || "-"}>
                 {turma.course?.name || "-"}
               </span>
             </div>
 
             <div className={`${styles.infoItem_classes} ${styles.colSmall}`}>
               <span className={styles.label_classes}>Ingresso</span>
-              <span className={styles.value_classes}>
-                {/* {turma.name ? turma.name.split('.')[0] : "-"} */}2022
-              </span>
+              <span className={styles.value_classes}>2022</span>
             </div>
 
             <div className={`${styles.infoItem_classes} ${styles.colMedium}`}>
               <span className={styles.label_classes}>Turno</span>
-              <span className={styles.value_classes} title={turma.shift || "-"}>
+              <span className={styles.value_classes}>
                 {turma.shift || "-"}
               </span>
             </div>
 
-            <div className={`${styles.infoItem_classes} ${styles.colSmall}`}>
+            <div className={`${styles.infoItem_classes} ${styles.colStudents}`}>
               <span className={styles.label_classes}>Alunos</span>
-              <span className={styles.value_classes}>
-                {turma.totalStudents}
+              <span className={`${styles.value_classes} ${styles.studentCount}`}>
+                {turma.totalStudents ?? 0}
               </span>
             </div>
 
@@ -76,7 +75,7 @@ export default function ClassesTab({ classes, onEdit }: ClassesTabProps) {
             className={styles.editButton_classes}
             onClick={() => onEdit(turma)}
           >
-            Editar
+            <span className={styles.editIcon}></span> Editar
           </button>
         </div>
       ))}

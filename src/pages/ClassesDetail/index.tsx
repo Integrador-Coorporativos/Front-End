@@ -12,18 +12,16 @@ const ITEMS_PER_PAGE = 10;
 
 export default function ClassesDetail() {
 
-  const { id } = useParams<{ id: string }>(); // Pega o ID da URL (ex: /classes/1)
+  const { id } = useParams<{ id: string }>(); 
   const classId = id ? parseInt(id) : undefined;
   
   const { classData, loading, error } = useClassDetails(classId);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Se estiver carregando, mostra um feedback
   if (loading) return <div className={styles.container}>Carregando dados da turma...</div>;
   if (error) return <div className={styles.container}>Erro: {error}</div>;
   if (!classData) return <div className={styles.container}>Turma não encontrada.</div>;
 
-  // Lógica de Paginação baseada nos estudantes REAIS que vieram do backend
   const totalPages = Math.ceil(classData.students.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentItems = classData.students.slice(

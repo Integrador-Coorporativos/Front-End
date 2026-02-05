@@ -1,96 +1,238 @@
-.container {
-    display: flex;
-    flex-direction: column;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 .containerSelect {
     display: flex;
     flex-direction: column;
     align-self: center;
-
-    border: 2px solid #359830; 
-    border-radius: 8px;
-    width: 100%;
-    height: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    width: 95%;
     max-width: 1200px;
-    min-height: 730px;
-
-    margin-top: 40px;
+    min-height: 750px;
+    margin: 40px auto;
     background-color: #FFFFFF;
+    border: 1px solid #f0f0f0;
 }
 
 .containerText {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-left: 25px;
-    padding-right: 25px;
-    border-bottom: 1px solid #ddd;
+    padding: 30px 40px;
+    border-bottom: 1.5px solid #f5f5f5;
+    margin-bottom: 10px;
+    font-family: "Inter", sans-serif;
 }
 
 .title {
     color: #000000;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    font-family: "Inter", sans-serif;
 }
 
 .subtitle {
     color: #000000;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    font-family: "Inter", sans-serif;
+}
+
+.filterSection {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px 0;
+    font-family: "Inter", sans-serif;
+}
+
+.breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #666;
+    font-family: "Inter", sans-serif;
+}
+
+.filterTag {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    background: #f4f4f4;
+    padding: 4px 12px;
+    border-radius: 8px;
+    border: none;
+    font-family: "Inter", sans-serif;
+}
+
+.activeFilter {
+    color: #333;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
 }
 
 .containerTurno {
-    width: 100%;
     display: flex;
     justify-content: flex-end;
-    align-items: center;
     gap: 12px;
-    padding: 20px 32px 0;
-    box-sizing: border-box;
+    font-family: "Inter", sans-serif;
+}
+
+.dropdownWrapper {
+    position: relative;
+}
+
+.dropdownMenu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid #eee;
+    z-index: 1000;
+    min-width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    font-family: "Inter", sans-serif;
+}
+
+.filterTitle {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #000;
+    display: block;
+    font-family: "Inter", sans-serif;
+}
+
+.filterSelect {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    font-size: 1rem;
+    color: #333;
+    outline: none;
+    font-family: "Inter", sans-serif;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 5px;
+}
+
+.clearFilterButton {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: white;
+    font-weight: 600;
+    cursor: pointer;
+    color: #666;
+    font-family: "Inter", sans-serif;
+}
+
+.applyFilterButton {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #008236;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: "Inter", sans-serif;
+}
+
+.applyFilterButton:hover {
+    background: #006b2d;
 }
 
 .containerCards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 22px;
-    margin-top: 20px;
-    justify-items: center;
-
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
+    padding: 30px 40px;
     flex: 1;
     align-content: start;
-    padding: 0 16px;
+    overflow-y: auto;
+}
+
+.containerCards::-webkit-scrollbar {
+    width: 8px;
+}
+
+.containerCards::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.containerCards::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+.noDataWrapper {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+}
+
+.noData {
+    color: #999;
+    font-size: 18px;
 }
 
 .paginationWrapper {
     display: flex;
     justify-content: flex-end;
-    padding: 16px 32px;
+    padding: 20px 40px 40px;
     margin-top: auto;
-    box-sizing: border-box;
 }
 
-.loaderContainer, .errorContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 50vh;
-  gap: 1rem;
-  width: 100%;
+@media (max-width: 1100px) {
+    .containerCards {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
-.spinner {
-  animation: spin 1s linear infinite;
-  color: #359830;
-}
+@media (max-width: 768px) {
+    .containerCards {
+        grid-template-columns: 1fr;
+    }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+    .containerText {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
 
-.retryButton {
-  background: #359830;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  cursor: pointer;
+    .filterSection {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .containerTurno {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .dropdownMenu {
+        right: auto;
+        left: 0;
+        width: 100%;
+    }
 }

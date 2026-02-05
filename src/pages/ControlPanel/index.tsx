@@ -422,26 +422,27 @@ export default function ControlPanel() {
           { label: "Painel de Controle", to: "/painel_controle" },
         ]}
       />
-      <div className={styles.h1_content_controlpanel_nav}>
-        <h1 className={styles.h1_content_controlpanel}>Painel de controle</h1>
-        <div className={styles.tabs}>
-          {["alunos", "professores", "turmas", "cursos"].map((tab) => (
-            <button
-              key={tab}
-              className={`${styles.tab} ${activeTab === tab ? styles.active : ""
-                }`}
-              onClick={() => {
-                setActiveTab(tab as any);
-                setCurrentPage(1);
-              }}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-      </div>
       <main className={styles.page}>
         <div className={styles.container}>
+
+          <div className={styles.header_top_bar}>
+            <h1 className={styles.h1_content_controlpanel}>Painel de controle</h1>
+
+            <div className={styles.tabs}>
+              {["alunos", "professores", "turmas", "cursos"].map((tab) => (
+                <button
+                  key={tab}
+                  className={`${styles.tab} ${activeTab === tab ? styles.active : ""}`}
+                  onClick={() => {
+                    setActiveTab(tab as any);
+                    setCurrentPage(1);
+                  }}
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className={styles.headerContainer_content}>
             <div className={styles.left_cont_cp}>
               Filtrado por:{" "}
