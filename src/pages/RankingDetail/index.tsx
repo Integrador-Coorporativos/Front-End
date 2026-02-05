@@ -22,6 +22,8 @@ import { useCreateClassComment } from "../../hooks/comments/useCreateClassCommen
 import { useDeleteClassComment } from "../../hooks/comments/useDeleteClassComment"
 import { useUpdateClassComment } from "../../hooks/comments/useUpdateClassComment"
 
+import { useAuthUser } from "@/hooks/useAuthUser"
+import type { AuthUser } from "@/api/types/auth"
 import type { Bimestre } from "@/api/types/performance"
 
 type Avaliacao = {
@@ -72,6 +74,15 @@ export default function Classifications() {
   const { id } = useParams()
   const classId = Number(id)
 
+  const auth = useAuthUser()
+  const [userData, setUserData] = useState<AuthUser | null>(null)
+
+  useEffect(() => {
+    if (auth) setUserData(auth)
+  }, [auth])
+
+  const canEvaluate = userData?.isProfessor === true || userData?.isAdmin === true
+
   const cards = [
     { key: "cellPhoneUse", title: "Uso do Celular", icon: Phone },
     { key: "participation", title: "Participação", icon: Participation },
@@ -82,6 +93,11 @@ export default function Classifications() {
   ] as const
 
   const [activeTab, setActiveTab] = useState<"avaliar" | "grafico">("grafico")
+
+  useEffect(() => {
+    if (!canEvaluate && activeTab === "avaliar") setActiveTab("grafico")
+  }, [canEvaluate, activeTab])
+
   const [selectedYear, setSelectedYear] = useState<string>("2026")
   const [selectedBimestre, setSelectedBimestre] = useState<Bimestre>(
     getCurrentBimestre()
@@ -99,7 +115,7 @@ export default function Classifications() {
     data: performanceData,
     loading: performanceLoading,
     refresh: refreshPerformance,
-    error
+    error,
   } = useClassPerformanceByYear(
     Number.isFinite(classId) ? classId : undefined,
     Number(selectedYear),
@@ -205,6 +221,7 @@ export default function Classifications() {
   }, [avaliacao])
 
   const handleConfirmEvaluation = async () => {
+    if (!canEvaluate) return
     if (!Number.isFinite(classId)) return
     if (!isAvaliacaoValida) return
 
@@ -253,12 +270,10 @@ export default function Classifications() {
       },
     })
 
-  const isCommentValid = useMemo(
-    () => newComment.trim().length >= 2,
-    [newComment]
-  )
+  const isCommentValid = useMemo(() => newComment.trim().length >= 2, [newComment])
 
   const handlePostComment = async () => {
+    if (!canEvaluate) return
     if (!Number.isFinite(classId)) return
     const text = newComment.trim()
     if (!text) return
@@ -272,22 +287,20 @@ export default function Classifications() {
   const menuRef = useRef<HTMLDivElement | null>(null)
   const buttonRefs = useRef<Record<number, HTMLButtonElement | null>>({})
 
-  const { submit: deleteComment, loading: deletingComment } = useDeleteClassComment(
-    {
-      onSuccess: () => refreshComments(),
-    }
-  )
+  const { submit: deleteComment, loading: deletingComment } = useDeleteClassComment({
+    onSuccess: () => refreshComments(),
+  })
 
-  const { submit: updateComment, loading: updatingComment } = useUpdateClassComment(
-    {
-      onSuccess: () => refreshComments(),
-    }
-  )
+  const { submit: updateComment, loading: updatingComment } = useUpdateClassComment({
+    onSuccess: () => refreshComments(),
+  })
 
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null)
   const [editingText, setEditingText] = useState<string>("")
 
   const openMenu = (commentId: number) => {
+    if (!canEvaluate) return
+
     const btn = buttonRefs.current[commentId]
     if (!btn) return
 
@@ -315,12 +328,14 @@ export default function Classifications() {
   }
 
   const handleOpenEdit = (commentId: number, currentText: string) => {
+    if (!canEvaluate) return
     setEditingCommentId(commentId)
     setEditingText(currentText)
     closeMenu()
   }
 
   const handleSaveEdit = async (commentId: number) => {
+    if (!canEvaluate) return
     if (!Number.isFinite(classId)) return
     const text = editingText.trim()
     if (text.length < 2) return
@@ -332,7 +347,9 @@ export default function Classifications() {
   }
 
   const handleDelete = async (commentId: number) => {
+    if (!canEvaluate) return
     if (!Number.isFinite(classId)) return
+
     await deleteComment(classId, commentId)
 
     closeMenu()
@@ -343,6 +360,7 @@ export default function Classifications() {
   }
 
   useEffect(() => {
+    if (!canEvaluate) return
     if (openMenuId === null) return
 
     const onPointerDown = (e: PointerEvent) => {
@@ -367,278 +385,274 @@ export default function Classifications() {
       window.removeEventListener("resize", onScrollOrResize)
       window.removeEventListener("scroll", onScrollOrResize, true)
     }
-  }, [openMenuId])
-
+  }, [openMenuId, canEvaluate])
 
   return (
     <div>
       <Header />
 
-        {performanceLoading ? ( //inicio 
-          <LoadingState message="Carregando Dados da turma..." />
-        ) : error ? (
-          <ErrorState 
-            message={error || "Erro ao carregar dados da turma."} 
-            onRetry={() => window.location.reload()} 
+      {performanceLoading ? (
+        <LoadingState message="Carregando Dados da turma..." />
+      ) : error ? (
+        <ErrorState
+          message={error || "Erro ao carregar dados da turma."}
+          onRetry={() => window.location.reload()}
+        />
+      ) : (
+        <>
+          <BreadCrumb
+            items={[
+              { label: "Página Inicial", to: "/" },
+              { label: "Classificações", to: "/classificacao/:id" },
+              { label: "Turma", to: `/classificacao/${id}` },
+            ]}
           />
-        ) : (//fim
-          <>
 
-      <BreadCrumb
-        items={[
-          { label: "Página Inicial", to: "/" },
-          { label: "Classificações", to: "/classificacao/:id" },
-          { label: "Turma", to: `/classificacao/${id}` },
-        ]}
-      />
+          <div className={styles.container}>
+            <p className={styles.titledc}>
+              {titleText} <b>{averageRankText}</b>
+            </p>
 
-      <div className={styles.container}>
-        <p className={styles.titledc}>
-          {titleText} <b>{averageRankText}</b>
-        </p>
-
-        <div className={styles.cardsGrid}>
-          {cards.map((card, index) => {
-            const { score, rank } = getCardScoreAndRank(card.key)
-
-            return (
-              <div key={index} className={styles.card}>
-                <img src={card.icon} alt={card.title} />
-                <div className={styles.cardInfo}>
-                  <span className={styles.cardTitle}>{card.title}</span>
-                  <strong className={styles.cardScore}>
-                    {performanceLoading ? "-" : score}
-                  </strong>
-                </div>
-                <span className={styles.rank}>
-                  {performanceLoading ? "#-" : rank}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      <div className={styles.switchContainer}>
-        <div className={styles.switchButtons}>
-          <button
-            className={activeTab === "grafico" ? styles.active : ""}
-            onClick={() => setActiveTab("grafico")}
-            type="button"
-          >
-            Gráfico de Desempenho
-          </button>
-
-          <button
-            className={activeTab === "avaliar" ? styles.active : ""}
-            onClick={() => setActiveTab("avaliar")}
-            type="button"
-          >
-            Avaliar
-          </button>
-        </div>
-
-        {activeTab === "grafico" && (
-          <div className={styles.graphContainer}>
-            <div className={styles.filtersPanel}>
-              <div className={styles.filterBlock}>
-                <p className={styles.filterTitle}>Ano</p>
-                <div className={styles.bimestreFilters}>
-                  {years.map((year) => (
-                    <button
-                      key={year}
-                      className={selectedYear === year ? styles.filterActive : ""}
-                      onClick={() => setSelectedYear(year)}
-                      type="button"
-                    >
-                      {year}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.filterBlock}>
-                <p className={styles.filterTitle}>Bimestre</p>
-                <div className={styles.bimestreFilters}>
-                  {bimestres.map((b) => (
-                    <button
-                      key={b.value}
-                      className={
-                        selectedBimestre === b.value ? styles.filterActive : ""
-                      }
-                      onClick={() => setSelectedBimestre(b.value)}
-                      type="button"
-                    >
-                      {b.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.graphPlaceholder}>
-              <RadarPerformanceChart data={radarData} />
-            </div>
-          </div>
-        )}
-
-        {activeTab === "avaliar" && (
-          <div className={styles.evaluateContainer}>
-            <h3 className={styles.h3_evaluation_class}>Avalie a turma</h3>
-
-            <div className={styles.grid}>
-              <Rating label="Frequência" campo="frequencia" />
-              <Rating label="Fardamento" campo="fardamento" />
-              <Rating label="Participação" campo="participacao" />
-              <Rating label="Desempenho" campo="desempenho" />
-              <Rating label="Comportamento" campo="comportamento" />
-              <Rating label="Uso de Celular" campo="usoCelular" />
-            </div>
-
-            <div className={styles.actions}>
-              <button
-                className={styles.cancel}
-                type="button"
-                onClick={resetAvaliacao}
-                disabled={creatingEvaluation}
-              >
-                Cancelar
-              </button>
-
-              <button
-                className={styles.confirm}
-                type="button"
-                onClick={handleConfirmEvaluation}
-                disabled={creatingEvaluation || !isAvaliacaoValida}
-              >
-                {creatingEvaluation ? "Enviando..." : "Confirmar"}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {activeTab === "avaliar" && (
-        <div className={styles.commentsContainer}>
-          <h3 className={styles.commentsTitle}>Comentários</h3>
-
-          <p className={styles.commentsClass}>{titleText}</p>
-
-          <div className={styles.commentsList}>
-            {!commentsLoading &&
-              commentsArray.map((c) => (
-                <div key={c.id} className={styles.commentItem}>
-                  <div className={styles.commentHeader}>
-                    <div className={styles.commentHeaderLeft}>
-                      <strong>{c.professorName}</strong>
-                      <span>{formatDatePtBR(c.createdAt)}</span>
+            <div className={styles.cardsGrid}>
+              {cards.map((card, index) => {
+                const { score, rank } = getCardScoreAndRank(card.key)
+                return (
+                  <div key={index} className={styles.card}>
+                    <img src={card.icon} alt={card.title} />
+                    <div className={styles.cardInfo}>
+                      <span className={styles.cardTitle}>{card.title}</span>
+                      <strong className={styles.cardScore}>
+                        {performanceLoading ? "-" : score}
+                      </strong>
                     </div>
+                    <span className={styles.rank}>{performanceLoading ? "#-" : rank}</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
 
-                    <button
-                      className={styles.moreButton}
-                      type="button"
-                      ref={(el) => {
-                        buttonRefs.current[c.id] = el
-                      }}
-                      onClick={() => {
-                        if (openMenuId === c.id) closeMenu()
-                        else openMenu(c.id)
-                      }}
-                      aria-label="Abrir menu do comentário"
-                    >
-                      ⋯
-                    </button>
+          <div className={styles.switchContainer}>
+            <div className={styles.switchButtons}>
+              <button
+                className={activeTab === "grafico" ? styles.active : ""}
+                onClick={() => setActiveTab("grafico")}
+                type="button"
+              >
+                Gráfico de Desempenho
+              </button>
+
+              {canEvaluate && (
+                <button
+                  className={activeTab === "avaliar" ? styles.active : ""}
+                  onClick={() => setActiveTab("avaliar")}
+                  type="button"
+                >
+                  Avaliar
+                </button>
+              )}
+            </div>
+
+            {activeTab === "grafico" && (
+              <div className={styles.graphContainer}>
+                <div className={styles.filtersPanel}>
+                  <div className={styles.filterBlock}>
+                    <p className={styles.filterTitle}>Ano</p>
+                    <div className={styles.bimestreFilters}>
+                      {years.map((year) => (
+                        <button
+                          key={year}
+                          className={selectedYear === year ? styles.filterActive : ""}
+                          onClick={() => setSelectedYear(year)}
+                          type="button"
+                        >
+                          {year}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
-                  {editingCommentId === c.id ? (
-                    <div className={styles.editBox}>
-                      <input
-                        value={editingText}
-                        onChange={(e) => setEditingText(e.target.value)}
-                        disabled={updatingComment}
-                      />
-
-                      <button
-                        type="button"
-                        className={styles.saveBtn}
-                        onClick={() => handleSaveEdit(c.id)}
-                        disabled={updatingComment || editingText.trim().length < 2}
-                      >
-                        {updatingComment ? "Salvando..." : "Salvar"}
-                      </button>
-
-                      <button
-                        type="button"
-                        className={styles.cancelEditBtn}
-                        onClick={() => {
-                          setEditingCommentId(null)
-                          setEditingText("")
-                        }}
-                        disabled={updatingComment}
-                      >
-                        Cancelar
-                      </button>
+                  <div className={styles.filterBlock}>
+                    <p className={styles.filterTitle}>Bimestre</p>
+                    <div className={styles.bimestreFilters}>
+                      {bimestres.map((b) => (
+                        <button
+                          key={b.value}
+                          className={selectedBimestre === b.value ? styles.filterActive : ""}
+                          onClick={() => setSelectedBimestre(b.value)}
+                          type="button"
+                        >
+                          {b.label}
+                        </button>
+                      ))}
                     </div>
-                  ) : (
-                    <p>{c.comment}</p>
-                  )}
+                  </div>
                 </div>
-              ))}
+
+                <div className={styles.graphPlaceholder}>
+                  <RadarPerformanceChart data={radarData} />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "avaliar" && canEvaluate && (
+              <div className={styles.evaluateContainer}>
+                <h3 className={styles.h3_evaluation_class}>Avalie a turma</h3>
+
+                <div className={styles.grid}>
+                  <Rating label="Frequência" campo="frequencia" />
+                  <Rating label="Fardamento" campo="fardamento" />
+                  <Rating label="Participação" campo="participacao" />
+                  <Rating label="Desempenho" campo="desempenho" />
+                  <Rating label="Comportamento" campo="comportamento" />
+                  <Rating label="Uso de Celular" campo="usoCelular" />
+                </div>
+
+                <div className={styles.actions}>
+                  <button
+                    className={styles.cancel}
+                    type="button"
+                    onClick={resetAvaliacao}
+                    disabled={creatingEvaluation}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    className={styles.confirm}
+                    type="button"
+                    onClick={handleConfirmEvaluation}
+                    disabled={creatingEvaluation || !isAvaliacaoValida}
+                  >
+                    {creatingEvaluation ? "Enviando..." : "Confirmar"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          <div className={styles.newComment}>
-            <input
-              type="text"
-              placeholder="Adicionar comentário..."
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              disabled={creatingComment}
-            />
-            <button
-              className={styles.postButton}
-              type="button"
-              onClick={handlePostComment}
-              disabled={creatingComment || !isCommentValid}
-            >
-              {creatingComment ? "Postando..." : "Postar"}
-            </button>
-          </div>
-        </div>
+          {activeTab === "avaliar" && canEvaluate && (
+            <div className={styles.commentsContainer}>
+              <h3 className={styles.commentsTitle}>Comentários</h3>
+
+              <p className={styles.commentsClass}>{titleText}</p>
+
+              <div className={styles.commentsList}>
+                {!commentsLoading &&
+                  commentsArray.map((c) => (
+                    <div key={c.id} className={styles.commentItem}>
+                      <div className={styles.commentHeader}>
+                        <div className={styles.commentHeaderLeft}>
+                          <strong>{c.professorName}</strong>
+                          <span>{formatDatePtBR(c.createdAt)}</span>
+                        </div>
+
+                        <button
+                          className={styles.moreButton}
+                          type="button"
+                          ref={(el) => {
+                            buttonRefs.current[c.id] = el
+                          }}
+                          onClick={() => {
+                            if (openMenuId === c.id) closeMenu()
+                            else openMenu(c.id)
+                          }}
+                          aria-label="Abrir menu do comentário"
+                        >
+                          ⋯
+                        </button>
+                      </div>
+
+                      {editingCommentId === c.id ? (
+                        <div className={styles.editBox}>
+                          <input
+                            value={editingText}
+                            onChange={(e) => setEditingText(e.target.value)}
+                            disabled={updatingComment}
+                          />
+
+                          <button
+                            type="button"
+                            className={styles.saveBtn}
+                            onClick={() => handleSaveEdit(c.id)}
+                            disabled={updatingComment || editingText.trim().length < 2}
+                          >
+                            {updatingComment ? "Salvando..." : "Salvar"}
+                          </button>
+
+                          <button
+                            type="button"
+                            className={styles.cancelEditBtn}
+                            onClick={() => {
+                              setEditingCommentId(null)
+                              setEditingText("")
+                            }}
+                            disabled={updatingComment}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      ) : (
+                        <p>{c.comment}</p>
+                      )}
+                    </div>
+                  ))}
+              </div>
+
+              <div className={styles.newComment}>
+                <input
+                  type="text"
+                  placeholder="Adicionar comentário..."
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  disabled={creatingComment}
+                />
+                <button
+                  className={styles.postButton}
+                  type="button"
+                  onClick={handlePostComment}
+                  disabled={creatingComment || !isCommentValid}
+                >
+                  {creatingComment ? "Postando..." : "Postar"}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "avaliar" &&
+            canEvaluate &&
+            openMenuId !== null &&
+            menuPos &&
+            createPortal(
+              <div
+                ref={menuRef}
+                className={styles.portalMenu}
+                style={{ top: menuPos.top, left: menuPos.left }}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    const current = commentsArray.find((x) => x.id === openMenuId)
+                    if (!current) return
+                    handleOpenEdit(openMenuId, current.comment)
+                  }}
+                >
+                  Editar
+                </button>
+
+                <button
+                  type="button"
+                  className={styles.delete}
+                  onClick={() => handleDelete(openMenuId)}
+                  disabled={deletingComment}
+                >
+                  {deletingComment ? "Excluindo..." : "Excluir"}
+                </button>
+              </div>,
+              document.body
+            )}
+        </>
       )}
-
-      {openMenuId !== null &&
-        menuPos &&
-        createPortal(
-          <div
-            ref={menuRef}
-            className={styles.portalMenu}
-            style={{ top: menuPos.top, left: menuPos.left }}
-          >
-            <button
-              type="button"
-              onClick={() => {
-                const current = commentsArray.find((x) => x.id === openMenuId)
-                if (!current) return
-                handleOpenEdit(openMenuId, current.comment)
-              }}
-            >
-              Editar
-            </button>
-
-            <button
-              type="button"
-              className={styles.delete}
-              onClick={() => handleDelete(openMenuId)}
-              disabled={deletingComment}
-            >
-              {deletingComment ? "Excluindo..." : "Excluir"}
-            </button>
-          </div>,
-          document.body
-        )}
-
-         </>
-        )}
 
       <Footer />
     </div>
