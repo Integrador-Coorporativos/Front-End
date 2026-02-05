@@ -31,8 +31,8 @@ export default function ClassesDetail() {
     const students = classData.students;
     const total = students.length;
 
-    const good = students.filter(s => s.status === "Ótimo" || s.status === "Bom").length;
-    const alert = students.filter(s => (s.status as string) === "Regular").length;
+    const good = students.filter(s => s.status === "Ótimo").length;
+    const alert = students.filter(s => s.status === "Bom").length;
     const critical = students.filter(s => s.status === "Ruim").length;
 
     const sumIra = students.reduce((acc, s) => acc + (s.ira || 0), 0);
@@ -40,8 +40,10 @@ export default function ClassesDetail() {
     return {
       totalStudents: total,
       generalAverage: Number((sumIra / total).toFixed(1)),
+
       approvalRate: Number((((good + alert) / total) * 100).toFixed(1)),
       failureRate: Number(((critical / total) * 100).toFixed(1)),
+      
       studentsGoodStatusPercentage: Number(((good / total) * 100).toFixed(1)),
       studentsAlertStatusPercentage: Number(((alert / total) * 100).toFixed(1)),
       studentsCriticalStatusPercentage: Number(((critical / total) * 100).toFixed(1)),
