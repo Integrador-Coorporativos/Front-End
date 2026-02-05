@@ -1,6 +1,9 @@
 import styles from "./FiltersClasse.module.css";
+import type { CoursePanel } from "@/types/coursesPanel";
 
 type Props = {
+  cursos: CoursePanel[]; 
+  
   filterCurso: string;
   setFilterCurso: (value: string) => void;
 
@@ -14,62 +17,63 @@ type Props = {
   setFilterAlunos: (value: "maior" | "menor" | "") => void;
 
   onApply: () => void;
+  onClear: () => void; 
 };
 
 export default function FiltersClasses({
-  filterCurso,
-  setFilterCurso,
-  filterAno,
-  setFilterAno,
-  filterTurno,
-  setFilterTurno,
-  filterAlunos,
-  setFilterAlunos,
+  cursos, // Recebemos a prop aqui
+  filterCurso, setFilterCurso,
+  filterAno, setFilterAno,
+  filterTurno, setFilterTurno,
+  filterAlunos, setFilterAlunos,
   onApply,
+  onClear, 
 }: Props) {
   return (
     <div className={styles.filterContent_course}>
-      <select
-        value={filterCurso}
-        onChange={(e) => setFilterCurso(e.target.value)}
-      >
-        <option value="">Curso</option>
-        <option value="Informática">Informática</option>
-        <option value="Apicultura">Apicultura</option>
-        <option value="Alimentos">Alimentos</option>
-        <option value="Química">Química</option>
-        <option value="Agroindústria">Agroindústria</option>
-      </select>
+      <div className={styles.filterField}>
+        <label className={styles.filterLabel}>Curso</label>
+        <select 
+          value={filterCurso} 
+          onChange={(e) => setFilterCurso(e.target.value)}
+        >
+          <option value="">Todos os Cursos</option>
+          {/* Agora usamos 'cursos' que vem das props */}
+          {cursos.map((course: CoursePanel) => (
+            <option key={course.courseId} value={course.courseName}>
+              {course.courseName}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      <input
-        type="number"
-        value={filterAno}
-        placeholder="Ano de ingresso"
-        onChange={(e) => setFilterAno(e.target.value)}
-      />
+      <div className={styles.filterField}>
+        <label className={styles.filterLabel}>Turno</label>
+        <select value={filterTurno} onChange={(e) => setFilterTurno(e.target.value as any)}>
+          <option value="">Todos</option>
+          <option value="Matutino">Matutino</option>
+          <option value="Vespertino">Vespertino</option>
+          <option value="Noturno">Noturno</option>
+        </select>
+      </div>
 
-      <select
-        value={filterTurno}
-        onChange={(e) => setFilterTurno(e.target.value as any)}
-      >
-        <option value="">Turno</option>
-        <option value="Matutino">Matutino</option>
-        <option value="Vespertino">Vespertino</option>
-        <option value="Noturno">Noturno</option>
-      </select>
+      <div className={styles.filterField}>
+        <label className={styles.filterLabel}>Ordenar por Alunos</label>
+        <select value={filterAlunos} onChange={(e) => setFilterAlunos(e.target.value as any)}>
+          <option value="">Selecionar</option>
+          <option value="maior">Maior quantidade</option>
+          <option value="menor">Menor quantidade</option>
+        </select>
+      </div>
 
-      <select
-        value={filterAlunos}
-        onChange={(e) => setFilterAlunos(e.target.value as any)}
-      >
-        <option value="">Alunos</option>
-        <option value="maior">Maior quantidade</option>
-        <option value="menor">Menor quantidade</option>
-      </select>
-
-      <button className={styles.applyFilterButton_course} onClick={onApply}>
-        Aplicar
-      </button>
+      <div className={styles.buttonGroup}>
+        <button className={styles.clearFilterButton_classes} onClick={onClear}>
+          Limpar
+        </button>
+        <button className={styles.applyFilterButton_course} onClick={onApply}>
+          Aplicar Filtros
+        </button>
+      </div>
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import type { Classes } from "@/types/Classes";
 import styles from "./EditModalClasses.module.css";
+import type { EditableClass } from "@/types/EditableClass";
 
 type EditModalClassesProps = {
   turma: Classes;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (turmaAtualizada: Classes) => void;
+  onSave: (turmaAtualizada: EditableClass) => void;
 };
 
 export default function EditModalTurma({
@@ -25,14 +26,17 @@ export default function EditModalTurma({
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(localTurma);
-  };
+    const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  onSave(localTurma as any); 
+};
 
   return (
     <div className={styles.modalOverlay_classes} onClick={onClose}>
-      <div className={styles.modal_classes} onClick={(e) => e.stopPropagation()}>
+      <div
+        className={styles.modal_classes}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className={styles.h2_edit_modal_classes}>Editar Turma</h2>
 
         {isDirty && (
@@ -67,25 +71,24 @@ export default function EditModalTurma({
           </label>
 
           <label>
-            Curso (nome)
-            <input
-              type="text"
-              value={localTurma.course?.name ?? ""}
-              onChange={(e) =>
-                setLocalTurma({
-                  ...localTurma,
-                  course: localTurma.course
-                    ? { ...localTurma.course, name: e.target.value }
-                    : { id: 0, name: e.target.value }, 
-                })
-              }
-            />
-          </label>
+  Curso (nome)
+  <input
+    type="text"
+    readOnly // Evita que o usuário tente editar algo que o backend não vai salvar por aqui
+    className={styles.inputReadOnly} // Opcional: um estilo cinza
+    value={localTurma.course?.name ?? ""}
+  />
+</label>
 
           <div className={styles.modalActions_classes}>
-            <button type="button" className={styles.cancelButton_classes} onClick={onClose}>
+            <button
+              type="button"
+              className={styles.cancelButton_classes}
+              onClick={onClose}
+            >
               Cancelar
             </button>
+
             <button type="submit" className={styles.saveButton_classes}>
               Salvar
             </button>

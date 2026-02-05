@@ -6,40 +6,45 @@ type ProfessorTabProps = {
   onEdit: (professor: Professor) => void;
 };
 
-export default function ProfessorTab({
-  professores,
-  onEdit,
-}: ProfessorTabProps) {
+export default function ProfessorTab({ professores, onEdit }: ProfessorTabProps) {
   return (
     <div className={styles.cardsGrid}>
       {professores.map((professor, index) => (
-        <div key={index} className={styles.card}>
+        <div key={professor.registration || index} className={styles.card}>
           <div className={styles.cardInfo}>
-            <div className={styles.infoItem}>
-              <span className={styles.label}>Nome</span>
-              <span className={styles.value}>{professor.nome}</span>
-            </div>
 
-            <div className={styles.infoItem}>
-              <span className={styles.label}>Ano de Ingresso</span>
-              <span className={styles.value}>
-                {professor.anoIngresso}
+            <div className={`${styles.infoItem} ${styles.colName}`}>
+              <span className={styles.label}>Nome</span>
+              <span className={styles.value} title={professor.name}>
+                {professor.name}
               </span>
             </div>
 
-            <div className={styles.infoItem}>
-              <span className={styles.label}>Turno</span>
-              <span className={styles.value}>{professor.turno}</span>
+            <div className={`${styles.infoItem} ${styles.colEmail}`}>
+              <span className={styles.label}>E-mail</span>
+              <span className={styles.value} title={professor.email}>
+                {professor.email}
+              </span>
             </div>
 
-            <div className={styles.infoItem}>
-              <span className={styles.label}>Alunos</span>
-              <span className={styles.value}>{professor.alunos}</span>
+            <div className={`${styles.infoItem} ${styles.colRegistration}`}>
+              <span className={styles.label}>Matrícula</span>
+              <span className={styles.value} title={professor.registration}>
+                {professor.registration}
+              </span>
             </div>
+
+            <div className={`${styles.infoItem} ${styles.colStats}`}>
+              <span className={styles.label}>Turmas</span>
+              <span className={styles.value}>
+                {professor.quantityClass}
+              </span>
+            </div>
+
           </div>
 
           <button
-            className={styles.editButton}
+            className={styles.editButton_student}
             onClick={() => onEdit(professor)}
           >
             Editar

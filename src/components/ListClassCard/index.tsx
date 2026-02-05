@@ -8,32 +8,31 @@ interface ListClassCardProps {
 }
 
 export default function ListClassCard({ anoReferencia, ano, curso, turno }: ListClassCardProps) {
+    const cleanValue = (val: string) => (val === "string" || !val ? "---" : val);
 
     return (
-        <div 
-            className={styles.card}>
+        <div className={styles.card}>
             <div className={styles.info}>
-                <div>
+                <div className={styles.item}>
                     <span className={styles.label}>Ano Referência</span>
-                    <p className={styles.value}>{anoReferencia}</p>
+                    <p className={styles.value}>{cleanValue(anoReferencia)}</p>
                 </div>
 
-                <div>
+                <div className={styles.item}>
                     <span className={styles.label}>Curso</span>
-                    <p className={styles.value}>{curso}</p>
+                    <p className={`${styles.value} ${styles.curso}`}>{cleanValue(curso)}</p>
                 </div>
 
-                <div>
-                    <span className={styles.label}>Ano</span>
-                    <p className={styles.value}>{ano}</p>
+                <div className={styles.item}>
+                    <span className={styles.label}>Ano/Semestre</span>
+                    <p className={styles.value}>{cleanValue(ano)}</p>
                 </div>
 
-                <div>
+                <div className={styles.item}>
                     <span className={styles.label}>Turno</span>
-                    <p className={styles.value}>{turno}</p>
+                    <p className={styles.value}>{cleanValue(turno)}</p>
                 </div>
             </div>
-
         </div>
     );
 }

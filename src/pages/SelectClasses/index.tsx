@@ -1,66 +1,133 @@
-import Footer from "../../components/Footer";
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { LoadingState, ErrorState } from "@/components/FeedbackStates/FeedbackStates";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 import styles from "./SelectClasses.module.css";
 import FilterButton from "../../components/FilterButton";
 import ClassCard from "../../components/ClassCard";
 import Pagination from "../../components/Pagination";
+import { useClasses } from "@/hooks/classes/useAllClasses";
+import { useLinkClass } from "@/hooks/classes/useLinkClass";
 
 const ITEMS_PER_PAGE = 9;
 
-const turmas = Array.from({ length: 201 }).map(() => ({
-  anoReferencia: "2022",
-  ano: "4º",
-  curso: "Informática",
-  turno: "Vespertino",
-}));
-
 export default function SelecionarTurmas() {
   const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(turmas.length / ITEMS_PER_PAGE);
-
+  const { classes, loading, error } = useClasses();
+  const { link } = useLinkClass();
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  
+  useEffect(() => {
+    if (classes) {
+      const idsJaVinculados = classes
+        .filter((t) => t.teacherLinked)
+        .map((t) => t.id);
+      setSelectedIds(idsJaVinculados);
+    }
+  }, [classes]);
+  const [selectedTurno, setSelectedTurno] = useState("Todos");
+  const [selectedCurso, setSelectedCurso] = useState("Todos");
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = turmas.slice(
-    startIndex,
-    startIndex + ITEMS_PER_PAGE
-  );
+
+  const opcoesTurno = useMemo(() => {
+    const turnosUnicos = Array.from(new Set(classes?.map(t => t.shift) || []));
+    return ["Todos", ...turnosUnicos]; // O "Todos" entra aqui no começo
+  }, [classes]);
+
+  const opcoesCurso = useMemo(() => {
+    const cursosUnicos = Array.from(new Set(classes?.map(t => t.course.name) || []));
+    return ["Todos", ...cursosUnicos]; // O "Todos" entra aqui no começo
+  }, [classes]);
+
+  const filteredClasses = useMemo(() => {
+    return (classes || []).filter((turma) => {
+      const matchTurno = selectedTurno === "Todos" || turma.shift === selectedTurno;
+      const matchCurso = selectedCurso === "Todos" || turma.course.name === selectedCurso;
+      return matchTurno && matchCurso;
+    });
+  }, [classes, selectedTurno, selectedCurso]);
+
+  const totalPages = Math.ceil(filteredClasses.length / ITEMS_PER_PAGE);
+  const currentItems = filteredClasses.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  const toggleSelection = async (id: number) => {
+    const isAlreadySelected = selectedIds.includes(id);
+    setSelectedIds((prev) =>
+      isAlreadySelected ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+
+    try {
+      await link(id);
+    } catch (err) {
+      setSelectedIds((prev) =>
+        isAlreadySelected ? [...prev, id] : prev.filter((item) => item !== id)
+      );
+      alert("Erro ao sincronizar com o servidor.");
+    }
+  };
 
   return (
     <div className={styles.container}>
       <Header />
 
-      <div className={styles.containerSelect}>
-        <div className={styles.containerText}>
-          <h2 className={styles.title}>Selecione suas turmas desse período</h2>
-          <h3 className={styles.subtitle}>Semestre: 2026.1</h3>
-        </div>
-
-        <div className={styles.containerTurno}>
-          <FilterButton text="Turno" />
-          <FilterButton text="Curso" />
-        </div>
-
-        <div className={styles.containerCards}>
-          {currentItems.map((turma, index) => (
-            <ClassCard
-              key={index}
-              anoReferencia={turma.anoReferencia}
-              ano={turma.ano}
-              curso={turma.curso}
-              turno={turma.turno}
-            />
-          ))}
-        </div>
-
-        <div className={styles.paginationWrapper}>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
+      <main className={styles.containerSelect}>
+        {loading ? ( //inicio 
+          <LoadingState message="Buscando turmas disponíveis..." />
+        ) : error ? (
+          <ErrorState 
+            message={error || "Não foi possível carregar as turmas."} 
+            onRetry={() => window.location.reload()} 
           />
-        </div>
-      </div>
+        ) : (
+          <>
+            <section className={styles.containerText}>
+              <h2 className={styles.title}>Selecione suas turmas desse período</h2>
+              <h3 className={styles.subtitle}>Semestre: 2026.1</h3>
+            </section>
+
+            <section className={styles.containerTurno}>
+              <FilterButton 
+                text={selectedTurno === "Todos" ? "Turno" : selectedTurno} 
+                options={opcoesTurno}
+                onSelect={(val) => { setSelectedTurno(val); setCurrentPage(1); }}
+              />
+              
+              <FilterButton 
+                text={selectedCurso === "Todos" ? "Curso" : selectedCurso} 
+                options={opcoesCurso}
+                onSelect={(val) => { setSelectedCurso(val); setCurrentPage(1); }}
+              />
+            </section>
+
+            <div className={styles.containerCards}>
+              {currentItems.length > 0 ? (
+                currentItems.map((turma) => (
+                  <ClassCard
+                    key={turma.id}
+                    anoReferencia={turma.classId.match(/^\d{4}/)?.[0] || "N/A"}
+                    ano={turma.gradleLevel}
+                    curso={turma.course.name}
+                    turno={turma.shift}
+                    isSelected={selectedIds.includes(turma.id)}
+                    onSelect={() => toggleSelection(turma.id)}
+                  />
+                ))
+              ) : (
+                <p className={styles.noData}>Nenhuma turma encontrada para os filtros selecionados.</p>
+              )}
+            </div>
+
+            <footer className={styles.paginationWrapper}>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </footer>
+          </>
+        )}
+      </main>
+
       <Footer />
     </div>
   );

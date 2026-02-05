@@ -1,44 +1,50 @@
-import { createBrowserRouter } from "react-router-dom";
-import Cadastro from "../pages/SignUp";
-import Login from "../pages/Login";
+import { createBrowserRouter, type DataRouter } from "react-router-dom";
+import { withFaroRouterInstrumentation } from "@grafana/faro-react";
 import SelecionarTurmas from "../pages/SelectClasses";
 import MinhasTurmas from "../pages/MyClasses";
 import Classifications from "../pages/Classifications";
 import Classificacoes from "../pages/RankingDetail"
 import ControlPanel from "../pages/ControlPanel";
 import ClassesDetail from "../pages/ClassesDetail";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import Dashboard from "../pages/Dashboard";
 
 export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <Classifications />,
+    element: <ProtectedRoute allowedRoles={['ROLE_PROFESSOR', 'ROLE_ADMIN']} />,
+    children: [
+      {
+        path: "/",
+        element: <Dashboard />
+      },
+      {
+        path: "/selecionar-turmas",
+        element: <SelecionarTurmas />,
+      },
+      {
+        path: "/minhas-turmas",
+        children: [
+          { index: true, element: <MinhasTurmas /> },
+          { path: ":id", element: <ClassesDetail /> },
+        ],
+      },
+    ],
   },
   {
-    path: "/cadastro",
-    element: <Cadastro />,
-  },
+      path: "/classificacoes",
+      children: [
+          { index: true, element: <Classifications /> },
+          { path: ":id", element: <Classificacoes /> },
+        ],
+      },
   {
-    path: "/login",
-    element: < Login />,
+    element: <ProtectedRoute allowedRoles={['ROLE_ADMIN']} />,
+    children: [
+      {
+        path: "/painel_controle",
+        element: <ControlPanel />
+      },
+    ],
   },
-  {
-    path: "/selecionar-turmas",
-    element: < SelecionarTurmas />,
-  },
-  {
-    path: "/minhas-turmas",
-    element: < MinhasTurmas />,
-  },
-  {
-    path: "/classificacao/:id",
-    element: <Classificacoes />
-  },
-  {
-    path: "/painel_controle",
-    element: <ControlPanel />
-  },
-  {
-    path: "/turma",
-    element: <ClassesDetail />
-  }
 ]);
+export const rotas = withFaroRouterInstrumentation(router);
