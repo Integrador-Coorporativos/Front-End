@@ -11,6 +11,7 @@ export function useProfessorManager() {
     setLoading(true);
     try {
       const data = await professorService.getAll();
+      console.log(data);
       setProfessores(data);
     } catch (error) {
       console.error("Erro ao buscar professores:", error);

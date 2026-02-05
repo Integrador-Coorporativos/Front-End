@@ -22,12 +22,7 @@ export default function Header() {
   }
 }, [auth]);
 
-
-
-  // Referência para o input de arquivo escondido
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

@@ -21,19 +21,19 @@ export default function AcademicPieCard({ greenValue, yellowValue, redValue }: A
   // Montamos o array do Recharts dinamicamente com as props
   const chartData = [
     {
-      name: "Verde",
+      name: "Ótimo",
       value: greenValue || 0,
       color: "#22c55e",
       description: "Estão em ótima situação.",
     },
     {
-      name: "Amarelo",
+      name: "Bom",
       value: yellowValue || 0,
       color: "#f59e0b",
       description: "Precisa de atenção em relação aos critérios.",
     },
     {
-      name: "Vermelho",
+      name: "Ruim",
       value: redValue || 0,
       color: "#ef4444",
       description: "Situação crítica, alvo de mudanças.",

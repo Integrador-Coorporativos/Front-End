@@ -1,5 +1,5 @@
 // @ts-ignore
-import api from "../http"; 
+import api from "../api";
 import type { Professor } from "../../types/Professor";
 
 export const professorService = {
