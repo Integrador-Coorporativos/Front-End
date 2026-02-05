@@ -1,0 +1,78 @@
+.filterContent_course {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; 
+  padding: 16px;
+  width: 240px; 
+  background: #fff;
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.filterLabel {
+  font-size: 12px; 
+  font-weight: 600;
+  color: #666;
+}
+
+.filterContent_course select {
+  width: 100%;
+  background-color: #ffffff;
+  padding: 6px 10px; 
+  border-radius: 8px;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  outline: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.filterContent_course select:focus {
+  border-color: #008236;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.applyFilterButton_course,
+.clearFilterButton_course {
+  flex: 1;
+  height: 36px; 
+  font-size: 13px; 
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.applyFilterButton_course {
+  border: none;
+  background-color: #008236;
+  color: #fff;
+}
+
+.applyFilterButton_course:hover {
+  background-color: #006a2c;
+}
+
+.clearFilterButton_course {
+  background-color: #fff;
+  border: 1px solid #d1d1d1;
+  color: #444;
+}
+
+.clearFilterButton_course:hover {
+  background-color: #f9f9f9;
+  border-color: #008236;
+  color: #008236;
+}

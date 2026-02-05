@@ -5,20 +5,28 @@
   border-bottom: 1px solid #ddd;
   display: flex;
   align-items: center;
+  position: relative; 
+  z-index: 100;
+}
+
+.contentHeader {
+  width: 82%;
+  display: flex;
+  margin: 0 auto;
   justify-content: space-between;
+  align-items: center;
 }
 
 .left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .logo {
-  width: 60px;
-  height: 60px;
+  width: 50px; 
+  height: 50px;
   object-fit: contain;
-  padding-left: 30px;
 }
 
 .title {
@@ -30,13 +38,24 @@
 .right {
   display: flex;
   align-items: center;
-  gap: 24px;
-  padding-right: 30px;
+  gap: 16px;
+}
+
+.welcomeText {
+  font-size: 16px;
+  color: #555;
+  cursor: default;
+  white-space: nowrap; 
+}
+
+.welcomeText strong {
+  color: #359830;
+  font-weight: 600;
+  margin-left: 4px;
 }
 
 .nav {
-  display: flex;
-  gap: 32px;
+  display: none;
 }
 
 .nav a {
@@ -46,20 +65,138 @@
   font-weight: 500;
 }
 
-.nav a:hover {
-  color: #359830;
+.profileContainer {
+  position: relative; 
 }
 
 .profile {
-  width: 44px;
-  height: 44px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   overflow: hidden;
+  border: 2px solid transparent;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.profile:hover {
+  border-color: #359830;
 }
 
 .avatar {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.dropdown {
+  position: absolute;
+  top: 55px; 
+  right: 0;
+  width: 250px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  border: 1px solid #eee;
+  padding: 15px 0;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.userHeader {
+  display: flex;
+  align-items: center;
+  padding: 0 20px 15px 20px;
+  gap: 12px;
+}
+
+.menuAvatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatarWrapper {
+  position: relative;
+  width: 48px;
+  height: 48px;
   cursor: pointer;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.menuAvatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  color: white;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.avatarWrapper:hover .avatarOverlay {
+  opacity: 1;
+}
+
+.userInfo .userName {
+  font-weight: 600;
+  margin: 0;
+  font-size: 14px;
+  color: #000;
+}
+
+.userInfo .userEmail {
+  font-size: 12px;
+  color: #777;
+  margin: 0;
+}
+
+.divider {
+  height: 1px;
+  background: #eee;
+  margin-bottom: 10px;
+}
+
+.menuList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.menuList li a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  font-size: 14px;
+  color: #444;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.menuList li a:hover {
+  background: #f8f8f8;
+  color: #359830;
+}
+
+.logout a {
+  color: #d32f2f !important;
 }

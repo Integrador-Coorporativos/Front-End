@@ -1,0 +1,104 @@
+.cardsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.card {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  min-height: 80px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.cardInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.colName {
+  flex: 1.5;
+  min-width: 80px;
+}
+
+.colEmail {
+  flex: 2;
+}
+
+.colRegistration {
+  flex: 1.2;
+}
+
+.colStats {
+  flex: 0.6;
+  text-align: left;
+}
+
+.value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.label {
+  font-size: 10px;
+  color: #6A7282;
+  margin-bottom: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.editButton_student {
+  flex-shrink: 0;
+  background: #e5e5e5;
+  border: none;
+  cursor: pointer;
+  padding: 10px 14px 10px 40px;
+
+  background-image: url('/src/assets/edited-logo-icon.png');
+  background-repeat: no-repeat;
+  background-position: 10px center;
+  background-size: 16px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: black;
+  transition: all 0.2s ease;
+  margin-left: 12px;
+}
+
+.editButton_student:hover {
+  background-color: #d4d4d4;
+  transform: scale(1.02);
+}
+
+@media (max-width: 1100px) {
+  .cardsGrid {
+    grid-template-columns: 1fr;
+  }
+}

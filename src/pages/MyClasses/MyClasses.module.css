@@ -1,68 +1,187 @@
 .container {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f9f9f9;
 }
 
-.containerList {
-    display: flex;
-    flex-direction: column;
-    align-self: center;
-
-    border: 2px solid #359830; 
-    border-radius: 8px;
-    width: 100%;
-    height: auto;
-    max-width: 1200px;
-    min-height: 730px;
-
-    margin-top: 40px;
-    background-color: #FFFFFF;
+.mainContent {
+  flex: 1;
+  width: 86%; 
+  margin: 0 auto;
+  padding-bottom: 30px;
 }
 
-.containerText {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 25px;
-    padding-right: 25px;
-    border-bottom: 1px solid #ddd;
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .title {
-    color: #000000;
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
 }
 
 .subtitle {
-    color: #000000;
+  color: #000000;
+  font-weight: 400;
+  font-size: 18px;
 }
 
-.containerTurno {
-    width: 100%;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 12px;
-    padding: 20px 32px 0;
-    box-sizing: border-box;
+.containerList {
+  width: 100%;
+  min-height: 550px;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid #eee;
+  overflow: hidden;
+  margin-top: 10px;
 }
 
+.filterBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 32px;
+  background-color: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.activeFilters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #666;
+}
+
+.filterTextGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filterValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  background: #f4f4f4; 
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.noFilter {
+  font-weight: 600;
+  color: #333;
+}
+
+.containerFilters {
+  display: flex;
+  gap: 12px;
+}
+
+.clearBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #d32f2f;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.clearBtn:hover {
+  background-color: #ffebee;
+}
 
 .containerCards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 22px;
-    margin-top: 20px;
-    justify-items: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 24px;
+  padding: 32px;
+  flex: 1;
+  align-content: start;
+}
 
-    flex: 1;
-    align-content: start;
-    padding: 0 16px;
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s;
 }
 
 .paginationWrapper {
-    display: flex;
-    justify-content: flex-end;
-    padding: 16px 32px;
-    margin-top: auto;
-    box-sizing: border-box;
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 32px;
+  border-top: 1px solid #f0f0f0;
+  background-color: #fff;
+}
+
+.emptyState {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.emptyState p {
+  font-size: 18px;
+  color: #777;
+  margin-bottom: 24px;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #359830;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.addBtn:hover {
+  background-color: #2d8028;
+  color: #f0f0f0;
+}
+
+.selectFilter {
+  appearance: none;
+  background-color: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 8px 35px 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  transition: all 0.2s;
+}
+
+.selectFilter:hover {
+  border-color: #359830;
+}
+
+.selectFilter:focus {
+  outline: none;
+  border-color: #359830;
+  box-shadow: 0 0 0 2px rgba(53, 152, 48, 0.1);
 }

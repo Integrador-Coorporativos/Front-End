@@ -1,4 +1,3 @@
-import { useState } from "react";
 import styles from "./ClassCard.module.css";
 
 interface ClassCardProps {
@@ -6,15 +5,23 @@ interface ClassCardProps {
     ano: string;
     curso: string;
     turno: string;
+    isSelected?: boolean; // Agora o pai decide se está selecionado
+    onSelect?: () => void; // Evento de clique passado pelo pai
 }
 
-export default function ClassCard({ anoReferencia, ano, curso, turno }: ClassCardProps) {
-    const [selected, setSelected] = useState(false);
+export default function ClassCard({ 
+    anoReferencia, 
+    ano, 
+    curso, 
+    turno, 
+    isSelected = false, 
+    onSelect 
+}: ClassCardProps) {
 
     return (
         <div 
-            className={`${styles.card} ${selected ? styles.selected : ""}`}
-            onClick={() => setSelected(!selected)}
+            className={`${styles.card} ${isSelected ? styles.selected : ""}`}
+            onClick={onSelect}
         >
             <div className={styles.info}>
                 <div>
@@ -38,7 +45,7 @@ export default function ClassCard({ anoReferencia, ano, curso, turno }: ClassCar
                 </div>
             </div>
 
-            <div className={`${styles.circle} ${selected ? styles.circleSelected : ""}`} />
+            <div className={`${styles.circle} ${isSelected ? styles.circleSelected : ""}`}/>
         </div>
     );
 }

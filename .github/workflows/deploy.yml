@@ -1,0 +1,22 @@
+name: Deploy para o Easypanel
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Instalando dependências e Testando
+        run: |
+          npm install
+          # npm test (descomente se tiver testes)
+
+      - name: Disparar Deploy no Easypanel
+        run: |
+          curl -X POST "${{ secrets.EASYPANEL_DEPLOY_URL }}"

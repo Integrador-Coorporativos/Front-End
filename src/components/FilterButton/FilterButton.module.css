@@ -1,27 +1,60 @@
-.buttonFilter {
-    background-color: #FFFFFF;
-    border: solid 1px #CCCCCC;
-    border-radius: 6px;
-    cursor: pointer;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: fit-content;
-    max-width: max-content;
-
-    padding: 6px 10px;
-    box-sizing: border-box;
-
-    transition: all 0.2s ease-in-out;
+.filterWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: fit-content;
 }
 
+/* O ícone do Material UI vai ser posicionado de forma absoluta para não atrapalhar o texto */
+.icon {
+  position: absolute;
+  left: 12px;
+  pointer-events: none; /* Garante que o clique passe para o select */
+  z-index: 1;
+}
 
-.text {
-    color: #000000;
-    font-size: 16px;
-    font-family: "Inter", sans-serif;
-    margin-left: 6px;
-    white-space: nowrap;
+.buttonFilter {
+  /* Reseta a aparência padrão do select */
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  
+  /* Herança do seu CSS original */
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 8px 16px 8px 40px; /* Padding extra na esquerda para o ícone */
+  
+  /* Tipografia do .text original aplicada direto no select */
+  color: #000000;
+  font-size: 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+
+  transition: all 0.2s ease-in-out;
+}
+
+.buttonFilter:hover {
+  background-color: #f9f9f9;
+  border-color: #359830; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.buttonFilter:focus {
+  border-color: #359830;
+  box-shadow: 0 0 0 2px rgba(53, 152, 48, 0.2);
+}
+
+/* Estilização das opções dentro do menu */
+.buttonFilter option {
+  background: white;
+  color: black;
+  padding: 10px;
 }
